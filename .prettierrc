@@ -1,0 +1,10 @@
+{
+    "plugins": ["prettier-plugin-organize-imports", "prettier-plugin-sort-json"],
+    "printWidth": 100,
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 4,
+    "trailingComma": "none",
+    "useTabs": false
+}
+

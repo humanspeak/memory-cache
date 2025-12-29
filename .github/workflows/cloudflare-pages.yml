@@ -1,0 +1,72 @@
+name: Cloudflare Pages - Deploy
+
+permissions:
+    contents: read
+
+on:
+    pull_request:
+        types: [closed]
+        paths:
+            - docs/**
+            - .github/workflows/cloudflare-pages.yml
+        branches:
+            - main
+    workflow_dispatch:
+        inputs: {}
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        name: Deploy
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
+            - name: Use Node.js - 22
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: pnpm
+
+            - name: Install Root Dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build Package
+              run: pnpm run build
+
+            - name: Deploy Docs
+              working-directory: docs
+              env:
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+              run: |
+                  set -euxo pipefail
+                  mkdir -p "${HOME}/.config/.wrangler/logs"
+                  set +e
+                  pnpm run deploy
+                  DEPLOY_EXIT=$?
+                  set -e
+                  echo "Wrangler logs at: ${HOME}/.config/.wrangler/logs"
+                  ls -lt "${HOME}/.config/.wrangler/logs" | head -n 5 || true
+                  LATEST_LOG=$(ls -1t "${HOME}/.config/.wrangler/logs"/*.log 2>/dev/null | head -n 1 || true)
+                  if [ -n "${LATEST_LOG}" ]; then
+                    echo "::group::Wrangler log (tail)"
+                    tail -n 200 "${LATEST_LOG}" || true
+                    echo "::endgroup::"
+                  fi
+                  exit ${DEPLOY_EXIT}
+
+            - name: Upload Wrangler logs
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: wrangler-logs
+                  path: ~/.config/.wrangler/logs/*.log
+                  retention-days: 7
+

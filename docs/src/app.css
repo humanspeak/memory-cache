@@ -1,0 +1,101 @@
+@import 'tailwindcss';
+
+@theme {
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    --color-primary-50: #eff6ff;
+    --color-primary-100: #dbeafe;
+    --color-primary-200: #bfdbfe;
+    --color-primary-300: #93c5fd;
+    --color-primary-400: #60a5fa;
+    --color-primary-500: #3b82f6;
+    --color-primary-600: #2563eb;
+    --color-primary-700: #1d4ed8;
+    --color-primary-800: #1e40af;
+    --color-primary-900: #1e3a8a;
+    --color-primary-950: #172554;
+}
+
+/* Shiki code block theme switching */
+.shiki-container {
+    @apply my-4 overflow-hidden rounded-lg;
+}
+
+.shiki-light,
+.shiki-dark {
+    @apply overflow-x-auto;
+}
+
+.shiki-light pre,
+.shiki-dark pre {
+    @apply p-4 text-sm leading-relaxed;
+}
+
+/* Light mode: show light theme, hide dark */
+:global(.shiki-light) {
+    @apply block;
+}
+
+:global(.shiki-dark) {
+    @apply hidden;
+}
+
+/* Dark mode: show dark theme, hide light */
+:global(.dark .shiki-light) {
+    @apply hidden;
+}
+
+:global(.dark .shiki-dark) {
+    @apply block;
+}
+
+/* Prose styling enhancements */
+.prose {
+    @apply max-w-none;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+    @apply scroll-mt-20;
+}
+
+.prose h1 {
+    @apply text-3xl font-bold tracking-tight;
+}
+
+.prose h2 {
+    @apply mt-12 text-2xl font-semibold tracking-tight border-b border-gray-200 pb-2 dark:border-gray-700;
+}
+
+.prose h3 {
+    @apply mt-8 text-xl font-semibold;
+}
+
+.prose a {
+    @apply text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 no-underline hover:underline;
+}
+
+.prose code:not(pre code) {
+    @apply bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono;
+}
+
+.prose table {
+    @apply w-full text-sm;
+}
+
+.prose th {
+    @apply bg-gray-50 dark:bg-gray-800 font-semibold text-left p-3;
+}
+
+.prose td {
+    @apply border-t border-gray-200 dark:border-gray-700 p-3;
+}
+
+/* Smooth transitions */
+* {
+    @apply transition-colors duration-150;
+}
+

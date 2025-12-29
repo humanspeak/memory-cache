@@ -1,0 +1,383 @@
+---
+title: Usage Examples
+description: Real-world examples of @humanspeak/memory-cache
+---
+
+# Usage Examples
+
+This page shows practical examples of how to use @humanspeak/memory-cache in real-world scenarios.
+
+## API Response Caching
+
+Cache API responses to reduce network requests:
+
+```typescript
+import { MemoryCache } from '@humanspeak/memory-cache'
+
+interface ApiResponse<T> {
+    data: T
+    cachedAt: number
+}
+
+const apiCache = new MemoryCache<ApiResponse<unknown>>({
+    maxSize: 500,
+    ttl: 5 * 60 * 1000  // 5 minutes
+})
+
+async function fetchWithCache<T>(url: string): Promise<T> {
+    // Check cache first
+    const cached = apiCache.get(url)
+    if (cached) {
+        console.log('Cache hit:', url)
+        return cached.data as T
+    }
+
+    // Fetch and cache
+    console.log('Cache miss:', url)
+    const response = await fetch(url)
+    const data = await response.json()
+
+    apiCache.set(url, {
+        data,
+        cachedAt: Date.now()
+    })
+
+    return data
+}
+
+// Usage
+const users = await fetchWithCache<User[]>('/api/users')
+const user = await fetchWithCache<User>('/api/users/123')
+```
+
+## Session Storage
+
+Store user sessions with automatic expiration:
+
+```typescript
+import { MemoryCache } from '@humanspeak/memory-cache'
+
+interface Session {
+    userId: string
+    permissions: string[]
+    createdAt: number
+}
+
+const sessionCache = new MemoryCache<Session>({
+    maxSize: 10000,
+    ttl: 30 * 60 * 1000  // 30 minutes
+})
+
+function createSession(userId: string, permissions: string[]): string {
+    const sessionId = crypto.randomUUID()
+
+    sessionCache.set(sessionId, {
+        userId,
+        permissions,
+        createdAt: Date.now()
+    })
+
+    return sessionId
+}
+
+function getSession(sessionId: string): Session | undefined {
+    return sessionCache.get(sessionId)
+}
+
+function destroySession(sessionId: string): void {
+    sessionCache.delete(sessionId)
+}
+
+// Invalidate all sessions for a user
+function invalidateUserSessions(userId: string): void {
+    // Use pattern matching to find and delete user sessions
+    // Note: This requires iterating all sessions
+    // For production, consider a secondary index
+}
+```
+
+## Database Query Caching
+
+Cache expensive database queries:
+
+```typescript
+import { cached } from '@humanspeak/memory-cache'
+
+class UserRepository {
+    @cached<User | null>({ ttl: 60000 })  // 1 minute
+    async findById(id: string): Promise<User | null> {
+        return await prisma.user.findUnique({
+            where: { id },
+            include: { profile: true, posts: true }
+        })
+    }
+
+    @cached<User[]>({ ttl: 30000, maxSize: 50 })  // 30 seconds
+    async findByOrganization(orgId: string): Promise<User[]> {
+        return await prisma.user.findMany({
+            where: { organizationId: orgId },
+            orderBy: { createdAt: 'desc' }
+        })
+    }
+}
+
+const repo = new UserRepository()
+
+// First call hits database
+const user = await repo.findById('user-123')
+
+// Second call returns cached result
+const cachedUser = await repo.findById('user-123')
+```
+
+## Computed Value Caching
+
+Cache expensive computations:
+
+```typescript
+import { MemoryCache } from '@humanspeak/memory-cache'
+
+interface ComputeResult {
+    value: number
+    computedAt: number
+    iterations: number
+}
+
+const computeCache = new MemoryCache<ComputeResult>({
+    maxSize: 1000,
+    ttl: 0  // No expiration - results are deterministic
+})
+
+function expensiveComputation(input: number): ComputeResult {
+    const cacheKey = `compute:${input}`
+
+    const cached = computeCache.get(cacheKey)
+    if (cached) {
+        return cached
+    }
+
+    // Expensive computation
+    let result = 0
+    let iterations = 0
+    for (let i = 0; i < input * 1000000; i++) {
+        result += Math.sqrt(i)
+        iterations++
+    }
+
+    const computed: ComputeResult = {
+        value: result,
+        computedAt: Date.now(),
+        iterations
+    }
+
+    computeCache.set(cacheKey, computed)
+    return computed
+}
+```
+
+## Multi-Tenant Cache Invalidation
+
+Use prefix and wildcard deletion for multi-tenant applications:
+
+```typescript
+import { MemoryCache } from '@humanspeak/memory-cache'
+
+const cache = new MemoryCache<unknown>({
+    maxSize: 10000,
+    ttl: 10 * 60 * 1000  // 10 minutes
+})
+
+// Cache keys follow pattern: tenant:{tenantId}:{resource}:{id}
+
+function cacheForTenant<T>(tenantId: string, resource: string, id: string, value: T) {
+    cache.set(`tenant:${tenantId}:${resource}:${id}`, value)
+}
+
+function getForTenant<T>(tenantId: string, resource: string, id: string): T | undefined {
+    return cache.get(`tenant:${tenantId}:${resource}:${id}`) as T | undefined
+}
+
+// Invalidate all cache for a specific tenant
+function invalidateTenantCache(tenantId: string): number {
+    return cache.deleteByPrefix(`tenant:${tenantId}:`)
+}
+
+// Invalidate specific resource type for a tenant
+function invalidateTenantResource(tenantId: string, resource: string): number {
+    return cache.deleteByPrefix(`tenant:${tenantId}:${resource}:`)
+}
+
+// Invalidate all caches for a resource across tenants
+function invalidateResourceGlobally(resource: string): number {
+    return cache.deleteByMagicString(`tenant:*:${resource}:*`)
+}
+
+// Usage
+cacheForTenant('acme', 'users', '123', { name: 'John' })
+cacheForTenant('acme', 'users', '456', { name: 'Jane' })
+cacheForTenant('acme', 'products', '789', { name: 'Widget' })
+cacheForTenant('globex', 'users', '123', { name: 'Homer' })
+
+// Invalidate all ACME user caches
+invalidateTenantResource('acme', 'users')
+
+// Invalidate all user caches globally
+invalidateResourceGlobally('users')
+```
+
+## Rate Limiting
+
+Simple rate limiting using cache:
+
+```typescript
+import { MemoryCache } from '@humanspeak/memory-cache'
+
+interface RateLimitEntry {
+    count: number
+    resetAt: number
+}
+
+const rateLimitCache = new MemoryCache<RateLimitEntry>({
+    maxSize: 100000,
+    ttl: 60 * 1000  // 1 minute window
+})
+
+function checkRateLimit(clientId: string, limit: number = 100): boolean {
+    const key = `ratelimit:${clientId}`
+    const entry = rateLimitCache.get(key)
+
+    if (!entry) {
+        // First request
+        rateLimitCache.set(key, {
+            count: 1,
+            resetAt: Date.now() + 60000
+        })
+        return true
+    }
+
+    if (entry.count >= limit) {
+        return false  // Rate limit exceeded
+    }
+
+    // Increment counter
+    rateLimitCache.set(key, {
+        count: entry.count + 1,
+        resetAt: entry.resetAt
+    })
+
+    return true
+}
+
+// Usage in middleware
+function rateLimitMiddleware(req: Request, limit: number = 100) {
+    const clientId = req.headers.get('x-client-id') || req.ip
+
+    if (!checkRateLimit(clientId, limit)) {
+        return new Response('Too Many Requests', { status: 429 })
+    }
+
+    // Continue to handler
+}
+```
+
+## Configuration Cache
+
+Cache configuration that rarely changes:
+
+```typescript
+import { MemoryCache } from '@humanspeak/memory-cache'
+
+interface Config {
+    features: Record<string, boolean>
+    settings: Record<string, string>
+    version: string
+}
+
+const configCache = new MemoryCache<Config>({
+    maxSize: 100,
+    ttl: 5 * 60 * 1000  // 5 minutes
+})
+
+async function getConfig(environment: string): Promise<Config> {
+    const cached = configCache.get(environment)
+    if (cached) {
+        return cached
+    }
+
+    // Fetch from remote config service
+    const config = await fetchConfigFromRemote(environment)
+    configCache.set(environment, config)
+
+    return config
+}
+
+// Force refresh config
+function refreshConfig(environment: string): void {
+    configCache.delete(environment)
+}
+
+// Refresh all environments
+function refreshAllConfigs(): void {
+    configCache.clear()
+}
+```
+
+## Decorator with Service Class
+
+Full service class example using the decorator:
+
+```typescript
+import { cached } from '@humanspeak/memory-cache'
+
+interface Product {
+    id: string
+    name: string
+    price: number
+    category: string
+}
+
+class ProductService {
+    private db: Database
+
+    constructor(db: Database) {
+        this.db = db
+    }
+
+    @cached<Product | null>({ ttl: 300000 })  // 5 minutes
+    async getProduct(id: string): Promise<Product | null> {
+        return await this.db.products.findUnique({ where: { id } })
+    }
+
+    @cached<Product[]>({ ttl: 60000, maxSize: 100 })  // 1 minute
+    async getProductsByCategory(category: string): Promise<Product[]> {
+        return await this.db.products.findMany({
+            where: { category },
+            orderBy: { name: 'asc' }
+        })
+    }
+
+    @cached<Product[]>({ ttl: 30000, maxSize: 50 })
+    async searchProducts(query: string, limit: number): Promise<Product[]> {
+        return await this.db.products.findMany({
+            where: {
+                name: { contains: query, mode: 'insensitive' }
+            },
+            take: limit
+        })
+    }
+
+    // No caching for write operations
+    async createProduct(data: Omit<Product, 'id'>): Promise<Product> {
+        return await this.db.products.create({ data })
+    }
+}
+
+// Usage
+const productService = new ProductService(db)
+
+// These are cached
+const product = await productService.getProduct('prod-123')
+const electronics = await productService.getProductsByCategory('electronics')
+const results = await productService.searchProducts('laptop', 10)
+```
+

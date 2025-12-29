@@ -1,0 +1,263 @@
+---
+title: MemoryCache API
+description: Complete API reference for the MemoryCache class
+---
+
+# MemoryCache API
+
+The `MemoryCache` class is a generic in-memory cache with TTL expiration and size-based eviction.
+
+## Constructor
+
+```typescript
+new MemoryCache<T>(options?: CacheOptions)
+```
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `maxSize` | `number` | `100` | Maximum entries before eviction (0 = unlimited) |
+| `ttl` | `number` | `300000` | Time-to-live in milliseconds (0 = no expiration) |
+
+### Example
+
+```typescript
+import { MemoryCache } from '@humanspeak/memory-cache'
+
+// Default options
+const cache = new MemoryCache<string>()
+
+// Custom options
+const customCache = new MemoryCache<User>({
+    maxSize: 1000,
+    ttl: 5 * 60 * 1000  // 5 minutes
+})
+
+// Unlimited cache (use with caution)
+const unlimitedCache = new MemoryCache<Data>({
+    maxSize: 0,  // No size limit
+    ttl: 0       // No expiration
+})
+```
+
+## Methods
+
+### get(key)
+
+Retrieves a value from the cache if it exists and hasn't expired.
+
+```typescript
+get(key: string): T | undefined
+```
+
+**Parameters:**
+- `key` - The key to look up
+
+**Returns:** The cached value if found and valid, `undefined` otherwise
+
+**Example:**
+
+```typescript
+cache.set('user:123', 'John Doe')
+const name = cache.get('user:123')  // 'John Doe'
+const missing = cache.get('unknown') // undefined
+```
+
+### set(key, value)
+
+Stores a value in the cache. If the cache is full, the oldest entry is evicted.
+
+```typescript
+set(key: string, value: T): void
+```
+
+**Parameters:**
+- `key` - The key under which to store the value
+- `value` - The value to cache
+
+**Example:**
+
+```typescript
+cache.set('greeting', 'Hello, World!')
+cache.set('count', 42)
+cache.set('user', { name: 'John', age: 30 })
+```
+
+### has(key)
+
+Checks if a key exists in the cache and hasn't expired. This is useful for distinguishing between cache misses and cached `undefined` values.
+
+```typescript
+has(key: string): boolean
+```
+
+**Parameters:**
+- `key` - The key to check
+
+**Returns:** `true` if the key exists and hasn't expired, `false` otherwise
+
+**Example:**
+
+```typescript
+cache.set('value', undefined)
+
+// get() returns undefined for both cases
+cache.get('value')     // undefined
+cache.get('missing')   // undefined
+
+// has() distinguishes them
+cache.has('value')     // true
+cache.has('missing')   // false
+```
+
+### delete(key)
+
+Removes a specific entry from the cache.
+
+```typescript
+delete(key: string): boolean
+```
+
+**Parameters:**
+- `key` - The key of the entry to remove
+
+**Returns:** `true` if an entry was removed, `false` if the key wasn't found
+
+**Example:**
+
+```typescript
+cache.set('key', 'value')
+cache.delete('key')        // true
+cache.delete('nonexistent') // false
+```
+
+### deleteAsync(key)
+
+Async version of `delete()`. Useful for consistent async/await patterns.
+
+```typescript
+deleteAsync(key: string): Promise<boolean>
+```
+
+**Example:**
+
+```typescript
+await cache.deleteAsync('key')
+```
+
+### clear()
+
+Removes all entries from the cache.
+
+```typescript
+clear(): void
+```
+
+**Example:**
+
+```typescript
+cache.set('key1', 'value1')
+cache.set('key2', 'value2')
+cache.clear()
+cache.get('key1')  // undefined
+```
+
+### deleteByPrefix(prefix)
+
+Removes all entries whose keys start with the given prefix.
+
+```typescript
+deleteByPrefix(prefix: string): number
+```
+
+**Parameters:**
+- `prefix` - The prefix to match against cache keys
+
+**Returns:** The number of entries removed
+
+**Example:**
+
+```typescript
+cache.set('user:123:name', 'John')
+cache.set('user:123:email', 'john@example.com')
+cache.set('user:456:name', 'Jane')
+cache.set('post:789', 'Hello World')
+
+const removed = cache.deleteByPrefix('user:123:')
+// removed = 2 (user:123:name and user:123:email)
+
+cache.get('user:123:name')  // undefined
+cache.get('user:456:name')  // 'Jane'
+```
+
+### deleteByMagicString(pattern)
+
+Removes all entries whose keys match the given wildcard pattern. Use `*` as a wildcard that matches any sequence of characters.
+
+```typescript
+deleteByMagicString(pattern: string): number
+```
+
+**Parameters:**
+- `pattern` - The wildcard pattern to match (use `*` for wildcards)
+
+**Returns:** The number of entries removed
+
+**Example:**
+
+```typescript
+cache.set('user:123:name', 'John')
+cache.set('user:456:name', 'Jane')
+cache.set('user:123:email', 'john@example.com')
+cache.set('post:789', 'Hello World')
+
+// Delete all entries matching user:*:name
+cache.deleteByMagicString('user:*:name')
+// Removes user:123:name and user:456:name
+
+// Delete all user:123 entries
+cache.deleteByMagicString('user:123:*')
+
+// Delete all entries containing :123:
+cache.deleteByMagicString('*:123:*')
+```
+
+## Type Safety
+
+The cache is fully generic and type-safe:
+
+```typescript
+// Typed cache for User objects
+const userCache = new MemoryCache<User>()
+userCache.set('user:1', { id: 1, name: 'John' })
+const user = userCache.get('user:1')  // User | undefined
+
+// Typed cache for API responses
+interface ApiResponse {
+    data: unknown
+    timestamp: number
+}
+const apiCache = new MemoryCache<ApiResponse>()
+```
+
+## Caching Null and Undefined
+
+The cache properly handles `null` and `undefined` values:
+
+```typescript
+const cache = new MemoryCache<string | null | undefined>()
+
+cache.set('null', null)
+cache.set('undefined', undefined)
+
+// Values are properly retrieved
+cache.get('null')       // null
+cache.get('undefined')  // undefined
+
+// Use has() to distinguish from cache misses
+cache.has('null')       // true
+cache.has('undefined')  // true
+cache.has('missing')    // false
+```
+
