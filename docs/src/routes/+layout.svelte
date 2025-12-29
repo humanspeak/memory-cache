@@ -2,39 +2,43 @@
     import '../app.css'
     import { ModeWatcher } from 'mode-watcher'
     import { page } from '$app/state'
+    import { MotionConfig } from '@humanspeak/svelte-motion'
+    import BreadcrumbContext from '$lib/components/contexts/Breadcrumb/BreadcrumbContext.svelte'
 
     const { children } = $props()
     const imageLocation = `${page.url.origin}/`
 </script>
 
 <svelte:head>
-    <title>Memory Cache - TypeScript In-Memory Caching Library</title>
+    <title>Memory Cache - High-Performance In-Memory Caching for TypeScript</title>
     <meta
         name="description"
-        content="A lightweight, zero-dependency in-memory cache for TypeScript with TTL expiration, LRU eviction, wildcard deletion, and method decorator support."
+        content="A lightweight, zero-dependency in-memory cache for TypeScript with TTL expiration, LRU eviction, and @cached decorator for method-level memoization."
     />
 
     <!-- Open Graph / Social Media -->
-    <meta property="og:title" content="Memory Cache - TypeScript In-Memory Caching Library" />
+    <meta property="og:title" content="Memory Cache - High-Performance In-Memory Caching for TypeScript" />
     <meta
         property="og:description"
-        content="A lightweight, zero-dependency in-memory cache for TypeScript with TTL expiration, LRU eviction, wildcard deletion, and method decorator support."
+        content="A lightweight, zero-dependency in-memory cache for TypeScript with TTL expiration, LRU eviction, and @cached decorator for method-level memoization."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://memory.svelte.page" />
+    <meta property="og:image" content="{imageLocation}memory-cache-opengraph.png" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Memory Cache - TypeScript In-Memory Caching Library" />
+    <meta name="twitter:title" content="Memory Cache - High-Performance In-Memory Caching for TypeScript" />
     <meta
         name="twitter:description"
-        content="A lightweight, zero-dependency in-memory cache for TypeScript with TTL expiration, LRU eviction, wildcard deletion, and method decorator support."
+        content="A lightweight, zero-dependency in-memory cache for TypeScript with TTL expiration, LRU eviction, and @cached decorator for method-level memoization."
     />
+    <meta name="twitter:image" content="{imageLocation}memory-cache-twitter.png" />
 
     <!-- Keywords -->
     <meta
         name="keywords"
-        content="typescript, cache, memory-cache, lru-cache, ttl-cache, memoization, decorator, javascript, node, caching, performance"
+        content="cache, memory-cache, lru-cache, ttl-cache, typescript, memoization, decorator, in-memory, caching, performance, node.js, javascript"
     />
 
     <!-- Additional Meta -->
@@ -53,9 +57,9 @@
                 "name": "Humanspeak, Inc.",
                 "url": "https://humanspeak.com"
             },
-            "description": "A lightweight, zero-dependency in-memory cache for TypeScript with TTL expiration, LRU eviction, wildcard deletion, and method decorator support.",
+            "description": "A high-performance, in-memory caching library for TypeScript with TTL expiration, LRU eviction, and a powerful @cached decorator for automatic method memoization.",
             "downloadUrl": "https://www.npmjs.com/package/@humanspeak/memory-cache",
-            "keywords": "typescript, cache, memory-cache, lru-cache, memoization",
+            "keywords": "cache, memory-cache, typescript, memoization, lru, ttl",
             "license": "MIT",
             "name": "Memory Cache",
             "offers": {
@@ -66,11 +70,15 @@
             "operatingSystem": "Any",
             "programmingLanguage": ["TypeScript", "JavaScript"],
             "releaseNotes": "https://github.com/humanspeak/memory-cache/releases",
+            "requirements": "Node.js 18+ or modern browser",
             "url": "https://memory.svelte.page"
         }
     </script>
 </svelte:head>
 
 <ModeWatcher />
-{@render children?.()}
-
+<BreadcrumbContext>
+    <MotionConfig transition={{ duration: 0.5 }}>
+        {@render children?.()}
+    </MotionConfig>
+</BreadcrumbContext>

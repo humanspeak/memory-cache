@@ -1,239 +1,390 @@
 <script lang="ts">
-    import { Database, Zap, Clock, Trash2, Code, Package } from 'lucide-svelte'
+    import Header from '$lib/components/general/Header.svelte'
+    import Footer from '$lib/components/general/Footer.svelte'
+    import { type BreadcrumbContext } from '$lib/components/contexts/Breadcrumb/type'
+    import { getBreadcrumbContext } from '$lib/components/contexts/Breadcrumb/Breadcrumb.context'
+
+    // mounted no longer needed for CSS enter
+    let headingContainer: HTMLDivElement | null = $state(null)
+    const breadcrumbContext = $state<BreadcrumbContext | undefined>(getBreadcrumbContext())
+
+    $effect(() => {
+        if (breadcrumbContext) {
+            breadcrumbContext.breadcrumbs = []
+        }
+    })
+
+    // Simple spring-like tap animation using the Web Animations API
+    function springTap(node: HTMLElement, options: { pressedScale?: number } = {}) {
+        const pressedScale = options.pressedScale ?? 0.96
+        let downAnim: Animation | null = null
+        let upAnim: Animation | null = null
+
+        const press = () => {
+            upAnim?.cancel()
+            downAnim?.cancel()
+            downAnim = node.animate(
+                [{ transform: 'scale(1)' }, { transform: `scale(${pressedScale})` }],
+                {
+                    duration: 120,
+                    easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+                    fill: 'forwards'
+                }
+            )
+        }
+
+        const release = () => {
+            downAnim?.cancel()
+            upAnim?.cancel()
+            upAnim = node.animate(
+                [
+                    { transform: `scale(${pressedScale})` },
+                    { transform: 'scale(1.03)' },
+                    { transform: 'scale(1)' }
+                ],
+                {
+                    duration: 220,
+                    easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+                    fill: 'forwards'
+                }
+            )
+        }
+
+        const onPointerDown = () => press()
+        const onPointerUp = () => release()
+        const onPointerLeave = () => release()
+        const onBlur = () => release()
+
+        node.addEventListener('pointerdown', onPointerDown)
+        node.addEventListener('pointerup', onPointerUp)
+        node.addEventListener('pointerleave', onPointerLeave)
+        node.addEventListener('blur', onBlur)
+
+        node.style.touchAction = 'manipulation'
+
+        return {
+            destroy() {
+                node.removeEventListener('pointerdown', onPointerDown)
+                node.removeEventListener('pointerup', onPointerUp)
+                node.removeEventListener('pointerleave', onPointerLeave)
+                node.removeEventListener('blur', onBlur)
+                downAnim?.cancel()
+                upAnim?.cancel()
+            }
+        }
+    }
+
+    const features = [
+        {
+            title: 'Lightning Fast',
+            description:
+                'In-memory storage with O(1) lookups. No network latency, no disk I/O—just pure speed.',
+            icon: 'fa-solid fa-bolt'
+        },
+        {
+            title: 'TTL Expiration',
+            description:
+                'Set time-to-live for cache entries. Expired items are automatically cleaned up.',
+            icon: 'fa-solid fa-clock'
+        },
+        {
+            title: 'LRU Eviction',
+            description:
+                'Smart eviction policy removes least recently used items when the cache reaches max size.',
+            icon: 'fa-solid fa-layer-group'
+        },
+        {
+            title: '@cached Decorator',
+            description:
+                'Automatic method-level caching with a simple decorator. No boilerplate required.',
+            icon: 'fa-solid fa-at'
+        },
+        {
+            title: 'TypeScript First',
+            description:
+                'Full type safety with generics. Your cached values are properly typed.',
+            icon: 'fa-brands fa-js'
+        },
+        {
+            title: 'Zero Dependencies',
+            description:
+                'Lightweight and self-contained. No bloat, no supply chain risks.',
+            icon: 'fa-solid fa-feather'
+        }
+    ]
+
+    function splitHeadingWords(root: HTMLElement) {
+        const lines = root.querySelectorAll('h1 span')
+        const words: HTMLElement[] = []
+        lines.forEach((line) => {
+            const text = line.textContent ?? ''
+            line.textContent = ''
+            const tokens = text.split(/(\s+)/)
+            for (const t of tokens) {
+                if (t.trim().length === 0) {
+                    line.appendChild(document.createTextNode(t))
+                } else {
+                    const w = document.createElement('span')
+                    w.className = 'split-word'
+                    w.textContent = t
+                    line.appendChild(w)
+                    words.push(w)
+                }
+            }
+        })
+        return words
+    }
+
+    $effect(() => {
+        if (typeof document === 'undefined') return
+        if (!headingContainer) return
+        // hide until fonts are loaded and spans are built
+        headingContainer.style.visibility = 'hidden'
+        document.fonts?.ready
+            .then(() => {
+                if (!headingContainer) return
+                const words = splitHeadingWords(headingContainer)
+                headingContainer.style.visibility = 'visible'
+                words.forEach((el, i) => {
+                    el.animate(
+                        [
+                            { opacity: 0, transform: 'translateY(10px)' },
+                            { opacity: 1, transform: 'translateY(0)' }
+                        ],
+                        {
+                            duration: 800,
+                            easing: 'ease-out',
+                            delay: i * 50,
+                            fill: 'forwards'
+                        }
+                    )
+                })
+            })
+            .catch(() => {
+                // Fallback: ensure visible
+                headingContainer!.style.visibility = 'visible'
+            })
+    })
 </script>
 
-<div class="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
-    <!-- Hero Section -->
-    <header class="relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-primary-500/10 via-transparent to-primary-600/10"></div>
-        <div class="relative mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
-            <div class="text-center">
-                <h1 class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
-                    <span class="bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
-                        @humanspeak/memory-cache
-                    </span>
-                </h1>
-                <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                    A lightweight, zero-dependency in-memory cache for TypeScript and JavaScript with
-                    TTL expiration, LRU-style eviction, wildcard pattern deletion, and a powerful
-                    <code class="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm">@cached</code>
-                    decorator for method-level memoization.
-                </p>
-                <div class="mt-10 flex items-center justify-center gap-x-6">
-                    <a
-                        href="/docs/getting-started"
-                        class="rounded-lg bg-primary-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-colors"
-                    >
-                        Get Started
-                    </a>
-                    <a
-                        href="https://github.com/humanspeak/memory-cache"
-                        class="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                    >
-                        View on GitHub <span aria-hidden="true">→</span>
-                    </a>
-                </div>
+<div class="flex min-h-svh flex-col">
+    <!-- Header with links -->
+    <Header />
+    <div class="relative flex flex-1 flex-col overflow-hidden">
+        <!-- Layer: subtle grid -->
+        <div class="bg-grid pointer-events-none absolute inset-0 -z-20"></div>
+        <!-- Layer: soft radial glow -->
+        <div class="bg-glow pointer-events-none absolute inset-0 -z-10"></div>
+        <!-- Layer: animated orbs via motion -->
+        <div
+            class="orb-a-bg pointer-events-none absolute bottom-[-80px] left-[-80px] h-[320px] w-[320px] rounded-full opacity-50 blur-[30px]"
+            style="will-change: transform;"
+        ></div>
+        <div
+            class="orb-b-bg pointer-events-none absolute top-[20%] right-[-60px] h-[260px] w-[260px] rounded-full opacity-50 blur-[30px]"
+            style="will-change: transform;"
+        ></div>
 
-                <!-- Install command -->
-                <div class="mt-10 flex justify-center">
-                    <div class="bg-gray-900 dark:bg-gray-800 rounded-lg px-6 py-3 font-mono text-sm text-gray-100 shadow-lg">
-                        <span class="text-gray-500">$</span> npm install @humanspeak/memory-cache
+        <!-- Hero Section -->
+        <section class="relative flex flex-1">
+            <div
+                class="relative mx-auto flex w-full max-w-7xl items-center justify-center px-6 py-8 md:py-12"
+            >
+                <div class="mx-auto max-w-4xl text-center">
+                    <div bind:this={headingContainer} class="mx-auto max-w-4xl text-center">
+                        <h1
+                            class="text-5xl leading-tight font-semibold text-balance text-foreground md:text-7xl"
+                        >
+                            <span class="block">Memory</span>
+                            <span
+                                class="sheen-gradient block bg-gradient-to-r from-foreground via-brand-500 to-foreground bg-clip-text text-transparent"
+                            >
+                                Cache
+                            </span>
+                        </h1>
+                        <p
+                            class="mt-6 text-base leading-7 text-pretty text-muted-foreground md:text-lg"
+                        >
+                            A high-performance, in-memory caching library for TypeScript. TTL expiration,
+                            LRU eviction, and a powerful @cached decorator—all in a zero-dependency package.
+                        </p>
+                        <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+                            <a
+                                href="/docs/getting-started"
+                                class="inline-flex items-center justify-center rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow transition-colors hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30"
+                                use:springTap
+                            >
+                                Get Started
+                                <i class="fa-solid fa-rocket ml-2 text-xs"></i>
+                            </a>
+                            <a
+                                href="/docs/api/memory-cache"
+                                class="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-500/50 hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/20"
+                                use:springTap
+                            >
+                                API Reference
+                                <i class="fa-solid fa-book ml-2 text-xs"></i>
+                            </a>
+                        </div>
+                        <ul
+                            class="mt-10 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground"
+                        >
+                            <li class="rounded-full border border-border-muted px-3 py-1">
+                                Zero Dependencies
+                            </li>
+                            <li class="rounded-full border border-border-muted px-3 py-1">
+                                TypeScript
+                            </li>
+                            <li class="rounded-full border border-border-muted px-3 py-1">
+                                TTL + LRU
+                            </li>
+                            <li class="rounded-full border border-border-muted px-3 py-1">
+                                Decorator Support
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
-        </div>
-    </header>
+        </section>
 
-    <!-- Features Section -->
-    <section class="py-24 sm:py-32">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <div class="mx-auto max-w-2xl text-center">
-                <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-                    Everything you need for caching
-                </h2>
-                <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                    A complete caching solution with all the features you'd expect, and zero dependencies.
-                </p>
+        <!-- Features Section -->
+        <section class="relative px-6 py-10">
+            <div class="container mx-auto max-w-7xl">
+                <!-- Section Header -->
+                <div class="mb-16 text-center">
+                    <h2
+                        class="mb-4 bg-gradient-to-r from-brand-500 to-brand-600 bg-clip-text text-4xl font-bold text-transparent md:text-5xl"
+                    >
+                        Why Memory Cache
+                    </h2>
+                    <p class="mx-auto max-w-2xl text-lg text-muted-foreground">
+                        Simple, fast, and reliable caching for your TypeScript applications.
+                    </p>
+                </div>
+                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {#each features as feature}
+                        <div
+                            class="group relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-500/50 hover:shadow-lg hover:shadow-brand-500/10"
+                        >
+                            <div
+                                class="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                            ></div>
+                            <div class="relative z-10">
+                                <div
+                                    class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 text-white"
+                                >
+                                    <i class={feature.icon}></i>
+                                </div>
+                                <h3
+                                    class="mb-2 text-xl font-semibold transition-colors group-hover:text-brand-600"
+                                >
+                                    {feature.title}
+                                </h3>
+                                <p class="text-sm leading-relaxed text-muted-foreground">
+                                    {feature.description}
+                                </p>
+                            </div>
+                            <div
+                                class="absolute top-0 right-0 h-20 w-20 rounded-bl-full bg-gradient-to-bl from-brand-500/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                            ></div>
+                        </div>
+                    {/each}
+                </div>
             </div>
+        </section>
 
-            <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-                <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-                    <div class="flex flex-col">
-                        <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900 dark:text-white">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600">
-                                <Clock class="h-6 w-6 text-white" />
-                            </div>
-                            TTL Expiration
-                        </dt>
-                        <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600 dark:text-gray-300">
-                            <p class="flex-auto">
-                                Automatic cache entry expiration with configurable time-to-live.
-                                Set entries to expire after a specific duration.
-                            </p>
-                        </dd>
-                    </div>
+        <!-- Code Example Section -->
+        <section class="relative px-6 py-10">
+            <div class="container mx-auto max-w-4xl">
+                <div class="mb-8 text-center">
+                    <h2 class="mb-4 text-3xl font-bold text-foreground">Quick Example</h2>
+                    <p class="text-muted-foreground">Get started in seconds with simple, intuitive APIs.</p>
+                </div>
+                <div class="rounded-xl border border-border bg-code-block-background p-6 font-mono text-sm">
+                    <pre class="text-code-block-foreground"><code><span class="text-brand-500">import</span> {'{'} MemoryCache, cached {'}'} <span class="text-brand-500">from</span> <span class="text-green-500">'@humanspeak/memory-cache'</span>
 
-                    <div class="flex flex-col">
-                        <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900 dark:text-white">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600">
-                                <Database class="h-6 w-6 text-white" />
-                            </div>
-                            Size-Based Eviction
-                        </dt>
-                        <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600 dark:text-gray-300">
-                            <p class="flex-auto">
-                                LRU-style eviction when the cache reaches its maximum size.
-                                Oldest entries are automatically removed to make room for new ones.
-                            </p>
-                        </dd>
-                    </div>
-
-                    <div class="flex flex-col">
-                        <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900 dark:text-white">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600">
-                                <Trash2 class="h-6 w-6 text-white" />
-                            </div>
-                            Wildcard Deletion
-                        </dt>
-                        <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600 dark:text-gray-300">
-                            <p class="flex-auto">
-                                Delete cache entries by prefix or wildcard patterns.
-                                Perfect for invalidating related cache entries at once.
-                            </p>
-                        </dd>
-                    </div>
-
-                    <div class="flex flex-col">
-                        <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900 dark:text-white">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600">
-                                <Code class="h-6 w-6 text-white" />
-                            </div>
-                            Method Decorator
-                        </dt>
-                        <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600 dark:text-gray-300">
-                            <p class="flex-auto">
-                                Use the <code class="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm">@cached</code> decorator
-                                for automatic method-level memoization with zero boilerplate.
-                            </p>
-                        </dd>
-                    </div>
-
-                    <div class="flex flex-col">
-                        <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900 dark:text-white">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600">
-                                <Zap class="h-6 w-6 text-white" />
-                            </div>
-                            Zero Dependencies
-                        </dt>
-                        <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600 dark:text-gray-300">
-                            <p class="flex-auto">
-                                Lightweight and fast with no external dependencies.
-                                Keep your bundle size small and your app fast.
-                            </p>
-                        </dd>
-                    </div>
-
-                    <div class="flex flex-col">
-                        <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900 dark:text-white">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600">
-                                <Package class="h-6 w-6 text-white" />
-                            </div>
-                            Full TypeScript Support
-                        </dt>
-                        <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600 dark:text-gray-300">
-                            <p class="flex-auto">
-                                Written in TypeScript with complete type definitions.
-                                Get full IntelliSense and type safety out of the box.
-                            </p>
-                        </dd>
-                    </div>
-                </dl>
-            </div>
-        </div>
-    </section>
-
-    <!-- Quick Example Section -->
-    <section class="bg-gray-50 dark:bg-gray-900/50 py-24 sm:py-32">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <div class="mx-auto max-w-2xl text-center">
-                <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-                    Simple to use
-                </h2>
-                <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                    Get started in seconds with an intuitive API.
-                </p>
-            </div>
-
-            <div class="mt-16 mx-auto max-w-3xl">
-                <div class="bg-gray-900 dark:bg-gray-800 rounded-xl overflow-hidden shadow-2xl">
-                    <div class="flex items-center gap-2 px-4 py-3 bg-gray-800 dark:bg-gray-700/50 border-b border-gray-700">
-                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                        <span class="ml-2 text-sm text-gray-400">example.ts</span>
-                    </div>
-                    <pre class="p-6 text-sm leading-relaxed overflow-x-auto"><code class="text-gray-100"><span class="text-purple-400">import</span> {'{'} <span class="text-yellow-300">MemoryCache</span>, <span class="text-yellow-300">cached</span> {'}'} <span class="text-purple-400">from</span> <span class="text-green-400">'@humanspeak/memory-cache'</span>
-
-<span class="text-gray-500">// Create a cache with custom options</span>
-<span class="text-purple-400">const</span> <span class="text-blue-300">cache</span> = <span class="text-purple-400">new</span> <span class="text-yellow-300">MemoryCache</span>&lt;<span class="text-blue-300">string</span>&gt;({'{'}
-    <span class="text-blue-300">maxSize</span>: <span class="text-orange-400">1000</span>,
-    <span class="text-blue-300">ttl</span>: <span class="text-orange-400">5</span> * <span class="text-orange-400">60</span> * <span class="text-orange-400">1000</span>  <span class="text-gray-500">// 5 minutes</span>
+<span class="text-muted-foreground">// Create a cache with 5 minute TTL and max 100 items</span>
+<span class="text-brand-500">const</span> cache = <span class="text-brand-500">new</span> MemoryCache&lt;<span class="text-yellow-500">User</span>&gt;({'{'}
+    ttl: <span class="text-orange-500">300000</span>,
+    maxSize: <span class="text-orange-500">100</span>
 {'}'})
 
-<span class="text-gray-500">// Store and retrieve values</span>
-<span class="text-blue-300">cache</span>.<span class="text-yellow-300">set</span>(<span class="text-green-400">'user:123'</span>, <span class="text-green-400">'John Doe'</span>)
-<span class="text-purple-400">const</span> <span class="text-blue-300">name</span> = <span class="text-blue-300">cache</span>.<span class="text-yellow-300">get</span>(<span class="text-green-400">'user:123'</span>)
+<span class="text-muted-foreground">// Simple get/set operations</span>
+cache.set(<span class="text-green-500">'user:123'</span>, {'{'} name: <span class="text-green-500">'Alice'</span> {'}'})
+<span class="text-brand-500">const</span> user = cache.get(<span class="text-green-500">'user:123'</span>)
 
-<span class="text-gray-500">// Use the decorator for automatic caching</span>
-<span class="text-purple-400">class</span> <span class="text-yellow-300">UserService</span> {'{'}
-    <span class="text-yellow-300">@cached</span>&lt;<span class="text-blue-300">User</span>&gt;({'{'} <span class="text-blue-300">ttl</span>: <span class="text-orange-400">60000</span> {'}'})
-    <span class="text-purple-400">async</span> <span class="text-yellow-300">getUser</span>(<span class="text-blue-300">id</span>: <span class="text-blue-300">string</span>): <span class="text-yellow-300">Promise</span>&lt;<span class="text-blue-300">User</span>&gt; {'{'}
-        <span class="text-purple-400">return await</span> <span class="text-blue-300">database</span>.<span class="text-yellow-300">findUser</span>(<span class="text-blue-300">id</span>)
+<span class="text-muted-foreground">// Or use the @cached decorator</span>
+<span class="text-brand-500">class</span> <span class="text-yellow-500">UserService</span> {'{'}
+    <span class="text-purple-500">@cached</span>({'{'} ttl: <span class="text-orange-500">60000</span> {'}'})
+    <span class="text-brand-500">async</span> getUser(id: <span class="text-yellow-500">string</span>) {'{'}
+        <span class="text-brand-500">return</span> <span class="text-brand-500">await</span> fetchUserFromDb(id)
     {'}'}
 {'}'}</code></pre>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="py-24 sm:py-32">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <div class="mx-auto max-w-2xl text-center">
-                <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-                    Ready to get started?
-                </h2>
-                <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                    Check out the documentation for detailed API reference and examples.
-                </p>
-                <div class="mt-10 flex items-center justify-center gap-x-6">
-                    <a
-                        href="/docs/getting-started"
-                        class="rounded-lg bg-primary-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-colors"
-                    >
-                        Read the Docs
-                    </a>
-                    <a
-                        href="https://www.npmjs.com/package/@humanspeak/memory-cache"
-                        class="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                    >
-                        View on NPM <span aria-hidden="true">→</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="border-t border-gray-200 dark:border-gray-800">
-        <div class="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-            <p class="text-center text-sm text-gray-500 dark:text-gray-400">
-                © {new Date().getFullYear()} Humanspeak, Inc. All rights reserved.
-                <a href="https://github.com/humanspeak/memory-cache" class="hover:text-primary-600 dark:hover:text-primary-400">
-                    MIT License
-                </a>
-            </p>
-        </div>
-    </footer>
+        </section>
+    </div>
+    <Footer />
 </div>
 
+<style>
+    /* Decorative layers */
+    .bg-grid {
+        background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+        background-size: 24px 24px;
+        background-position: 50% 0;
+        mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 0) 70%);
+    }
+    .bg-glow {
+        background:
+            radial-gradient(60% 50% at 50% 0%, rgba(84, 219, 188, 0.18), transparent 60%),
+            radial-gradient(40% 40% at 90% 20%, rgba(84, 219, 188, 0.12), transparent 60%),
+            radial-gradient(40% 40% at 10% 15%, rgba(84, 219, 188, 0.12), transparent 60%);
+        filter: blur(0.2px);
+    }
+
+    /* Orb animations to replace motion components */
+    .orb-a-bg {
+        animation: orbA 28s ease-in-out infinite;
+    }
+    .orb-b-bg {
+        animation: orbB 24s ease-in-out infinite;
+        animation-delay: 3s;
+    }
+
+    @keyframes orbA {
+        0% {
+            transform: translate(0, 0);
+        }
+        25% {
+            transform: translate(8vw, -10vh);
+        }
+        50% {
+            transform: translate(-4vw, 6vh);
+        }
+        75% {
+            transform: translate(2vw, -4vh);
+        }
+        100% {
+            transform: translate(0, 0);
+        }
+    }
+
+    @keyframes orbB {
+        0% {
+            transform: translate(0, 0);
+        }
+        25% {
+            transform: translate(-6vw, -8vh);
+        }
+        50% {
+            transform: translate(3vw, 4vh);
+        }
+        75% {
+            transform: translate(-2vw, -6vh);
+        }
+        100% {
+            transform: translate(0, 0);
+        }
+    }
+</style>
