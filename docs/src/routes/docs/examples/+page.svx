@@ -381,3 +381,5 @@ const electronics = await productService.getProductsByCategory('electronics')
 const results = await productService.searchProducts('laptop', 10)
 ```
 
+
+

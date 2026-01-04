@@ -58,8 +58,8 @@ const cache = new MemoryCache<string>()
 
 // Or customize the options
 const cache = new MemoryCache<string>({
-    maxSize: 1000,        // Maximum entries before eviction
-    ttl: 10 * 60 * 1000   // 10 minutes TTL
+    maxSize: 1000, // Maximum entries before eviction
+    ttl: 10 * 60 * 1000 // 10 minutes TTL
 })
 
 // Store and retrieve values
@@ -91,7 +91,7 @@ cache.deleteByPrefix('user:123:') // Removes user:123:name and user:123:email
 
 // Delete by wildcard pattern
 cache.deleteByMagicString('user:*:name') // Removes all user names
-cache.deleteByMagicString('*:123:*')     // Removes all entries with :123:
+cache.deleteByMagicString('*:123:*') // Removes all entries with :123:
 ```
 
 ### Method Decorator
@@ -128,23 +128,23 @@ await service.getUser('123')
 
 #### Constructor Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `maxSize` | `number` | `100` | Maximum entries before eviction (0 = unlimited) |
-| `ttl` | `number` | `300000` | Time-to-live in milliseconds (0 = no expiration) |
+| Option    | Type     | Default  | Description                                      |
+| --------- | -------- | -------- | ------------------------------------------------ |
+| `maxSize` | `number` | `100`    | Maximum entries before eviction (0 = unlimited)  |
+| `ttl`     | `number` | `300000` | Time-to-live in milliseconds (0 = no expiration) |
 
 #### Methods
 
-| Method | Description |
-|--------|-------------|
-| `get(key)` | Retrieves a value from the cache |
-| `set(key, value)` | Stores a value in the cache |
-| `has(key)` | Checks if a key exists (useful for cached undefined) |
-| `delete(key)` | Removes a specific entry |
-| `deleteAsync(key)` | Async version of delete |
-| `clear()` | Removes all entries |
-| `deleteByPrefix(prefix)` | Removes entries starting with prefix |
-| `deleteByMagicString(pattern)` | Removes entries matching wildcard pattern |
+| Method                         | Description                                          |
+| ------------------------------ | ---------------------------------------------------- |
+| `get(key)`                     | Retrieves a value from the cache                     |
+| `set(key, value)`              | Stores a value in the cache                          |
+| `has(key)`                     | Checks if a key exists (useful for cached undefined) |
+| `delete(key)`                  | Removes a specific entry                             |
+| `deleteAsync(key)`             | Async version of delete                              |
+| `clear()`                      | Removes all entries                                  |
+| `deleteByPrefix(prefix)`       | Removes entries starting with prefix                 |
+| `deleteByMagicString(pattern)` | Removes entries matching wildcard pattern            |
 
 ### `@cached<T>(options?)`
 
@@ -161,25 +161,25 @@ methodName(args): ReturnType { ... }
 // High-traffic API cache
 const apiCache = new MemoryCache<Response>({
     maxSize: 10000,
-    ttl: 5 * 60 * 1000  // 5 minutes
+    ttl: 5 * 60 * 1000 // 5 minutes
 })
 
 // Session storage (longer TTL, smaller size)
 const sessionCache = new MemoryCache<Session>({
     maxSize: 1000,
-    ttl: 30 * 60 * 1000  // 30 minutes
+    ttl: 30 * 60 * 1000 // 30 minutes
 })
 
 // Computation cache (no TTL, size-limited)
 const computeCache = new MemoryCache<Result>({
     maxSize: 500,
-    ttl: 0  // No expiration
+    ttl: 0 // No expiration
 })
 
 // Unlimited cache (use with caution)
 const unlimitedCache = new MemoryCache<Data>({
-    maxSize: 0,  // No size limit
-    ttl: 0       // No expiration
+    maxSize: 0, // No size limit
+    ttl: 0 // No expiration
 })
 ```
 
@@ -194,4 +194,3 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
