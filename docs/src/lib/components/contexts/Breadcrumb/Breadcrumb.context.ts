@@ -10,6 +10,3 @@ export const getBreadcrumbContext = (): BreadcrumbContext | undefined => {
 export const setBreadcrumbContext = (context: BreadcrumbContext): void => {
     setContext(BreadcrumbContextSymbol, context)
 }
-
-
-

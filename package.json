@@ -89,6 +89,8 @@
         "prettier": "^3.7.4",
         "prettier-plugin-organize-imports": "^4.3.0",
         "prettier-plugin-sort-json": "^4.1.1",
+        "prettier-plugin-svelte": "^3.4.1",
+        "prettier-plugin-tailwindcss": "^0.7.2",
         "publint": "^0.3.16",
         "tslib": "^2.8.1",
         "typescript": "^5.9.3",
@@ -101,4 +103,3 @@
         "node": "22.21.1"
     }
 }
-

@@ -315,6 +315,3 @@ export function cached<T>(options: CacheOptions = {}) {
         return descriptor
     }
 }
-
-
-
