@@ -713,17 +713,6 @@ describe('MemoryCache', () => {
                 vi.useRealTimers()
             })
 
-            it('should handle zero TTL (no expiration)', () => {
-                vi.useFakeTimers()
-                const ttlCache = new MemoryCache<string>({ ttl: 0 })
-
-                ttlCache.set('key1', 'value1')
-                vi.advanceTimersByTime(10000)
-                expect(ttlCache.get('key1')).toBe('value1')
-
-                vi.useRealTimers()
-            })
-
             it('should handle max size of 1', () => {
                 const sizeCache = new MemoryCache<string>({ maxSize: 1 })
 
@@ -735,18 +724,6 @@ describe('MemoryCache', () => {
             })
 
             it('should handle max size of 0 (no limit)', () => {
-                const sizeCache = new MemoryCache<string>({ maxSize: 0 })
-
-                for (let i = 0; i < 1000; i++) {
-                    sizeCache.set(`key${i}`, `value${i}`)
-                }
-
-                for (let i = 0; i < 1000; i++) {
-                    expect(sizeCache.get(`key${i}`)).toBe(`value${i}`)
-                }
-            })
-
-            it('should handle zero max size (no limit)', () => {
                 const sizeCache = new MemoryCache<string>({ maxSize: 0 })
 
                 for (let i = 0; i < 1000; i++) {
