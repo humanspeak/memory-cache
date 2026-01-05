@@ -191,7 +191,7 @@
 
     /* Ensure headings override typography plugin defaults in light mode */
     .prose :where(h1, h2, h3, h4, h5, h6) {
-        @apply font-bold !text-text-primary;
+        @apply !text-text-primary font-bold;
     }
 
     /* Ensure heading links inherit heading color/contrast */
@@ -201,7 +201,7 @@
     .prose h4 a,
     .prose h5 a,
     .prose h6 a {
-        @apply text-text-primary no-underline hover:text-text-primary;
+        @apply text-text-primary hover:text-text-primary no-underline;
     }
 
     .prose p {
@@ -211,30 +211,30 @@
     /* Strong emphasis readability in dark mode */
     .prose strong,
     .prose b {
-        @apply font-bold text-text-primary!;
+        @apply text-text-primary! font-bold;
     }
 
     /* ensure link color inside paragraphs and lists has adequate contrast */
     .prose p a,
     .prose li a {
-        @apply text-accent! underline-offset-2 hover:text-accent/80!;
+        @apply text-accent! hover:text-accent/80! underline-offset-2;
     }
 
     .prose code {
-        @apply rounded bg-code-background! px-1.5 py-0.5 font-mono text-sm text-code-foreground!;
+        @apply bg-code-background! text-code-foreground! rounded px-1.5 py-0.5 font-mono text-sm;
     }
 
     .prose pre {
-        @apply rounded-lg border border-border bg-code-background! text-code-block-foreground!;
+        @apply border-border bg-code-background! text-code-block-foreground! rounded-lg border;
     }
 
     .prose pre code {
-        @apply bg-transparent p-0 text-code-block-foreground;
+        @apply text-code-block-foreground bg-transparent p-0;
     }
 
     /* Shiki syntax highlighting support */
     .prose .shiki-container {
-        @apply overflow-hidden rounded-lg border border-border;
+        @apply border-border overflow-hidden rounded-lg border;
     }
 
     .prose .shiki-container pre {
@@ -265,7 +265,7 @@
     }
 
     .prose a {
-        @apply text-accent no-underline hover:text-accent/80;
+        @apply text-accent hover:text-accent/80 no-underline;
     }
 
     /* Maintain paragraph/list contrast in dark mode */
@@ -275,7 +275,7 @@
     }
 
     .prose blockquote {
-        @apply border-l-4 border-border pl-4 text-text-muted italic;
+        @apply border-border text-text-muted border-l-4 pl-4 italic;
     }
 
     /* Improve list readability and marker contrast (light/dark) */
