@@ -41,6 +41,22 @@ const unlimitedCache = new MemoryCache<Data>({
 })
 ```
 
+### Validation
+
+The constructor throws `CacheConfigError` if invalid options are provided:
+
+```typescript
+import { MemoryCache, CacheConfigError } from '@humanspeak/memory-cache'
+
+try {
+    const cache = new MemoryCache<string>({ maxSize: -1 })
+} catch (error) {
+    if (error instanceof CacheConfigError) {
+        console.error('Invalid config:', error.message)
+    }
+}
+```
+
 ## Methods
 
 ### get(key)
@@ -222,6 +238,181 @@ cache.deleteByMagicString('user:123:*')
 // Delete all entries containing :123:
 cache.deleteByMagicString('*:123:*')
 ```
+
+## Introspection Methods
+
+### size()
+
+Returns the current number of entries in the cache. Internally calls [`prune()`](#prune) to remove expired entries before counting.
+
+```typescript
+size(): number
+```
+
+**Returns:** The number of cached entries
+
+**Example:**
+
+```typescript
+const cache = new MemoryCache<string>()
+cache.set('key1', 'value1')
+cache.set('key2', 'value2')
+console.log(cache.size())  // 2
+```
+
+### keys()
+
+Returns an array of all keys currently in the cache. Internally calls [`prune()`](#prune) to remove expired entries before returning results.
+
+```typescript
+keys(): string[]
+```
+
+**Returns:** Array of cache keys
+
+**Example:**
+
+```typescript
+const cache = new MemoryCache<string>()
+cache.set('user:1', 'Alice')
+cache.set('user:2', 'Bob')
+console.log(cache.keys())  // ['user:1', 'user:2']
+```
+
+### values()
+
+Returns an array of all values currently in the cache. Internally calls [`prune()`](#prune) to remove expired entries before returning results.
+
+```typescript
+values(): (T | undefined)[]
+```
+
+**Returns:** Array of cached values
+
+**Example:**
+
+```typescript
+const cache = new MemoryCache<string>()
+cache.set('key1', 'value1')
+cache.set('key2', 'value2')
+console.log(cache.values())  // ['value1', 'value2']
+```
+
+### entries()
+
+Returns an array of all key-value pairs currently in the cache. Internally calls [`prune()`](#prune) to remove expired entries before returning results.
+
+```typescript
+entries(): [string, T | undefined][]
+```
+
+**Returns:** Array of [key, value] tuples
+
+**Example:**
+
+```typescript
+const cache = new MemoryCache<string>()
+cache.set('key1', 'value1')
+cache.set('key2', 'value2')
+console.log(cache.entries())  // [['key1', 'value1'], ['key2', 'value2']]
+```
+
+## Statistics
+
+### getStats()
+
+Returns statistics about cache usage and performance.
+
+```typescript
+getStats(): CacheStats
+```
+
+**Returns:** Object containing cache statistics (see [CacheStats](#cachestats) type)
+
+**Example:**
+
+```typescript
+const cache = new MemoryCache<string>()
+cache.set('key', 'value')
+cache.get('key')       // hit
+cache.get('missing')   // miss
+
+const stats = cache.getStats()
+console.log(stats)
+// { hits: 1, misses: 1, evictions: 0, expirations: 0, size: 1 }
+```
+
+### resetStats()
+
+Resets all statistics counters to zero. Does not affect cached data.
+
+```typescript
+resetStats(): void
+```
+
+**Example:**
+
+```typescript
+const cache = new MemoryCache<string>()
+cache.get('missing')  // increments misses
+cache.resetStats()
+console.log(cache.getStats().misses)  // 0
+```
+
+### prune()
+
+Proactively removes all expired entries from the cache. This is useful for reclaiming memory when you don't want to wait for lazy cleanup (which occurs when expired entries are accessed).
+
+```typescript
+prune(): number
+```
+
+**Returns:** The number of expired entries that were removed
+
+**Example:**
+
+```typescript
+const cache = new MemoryCache<string>({ ttl: 1000 })
+cache.set('key1', 'value1')
+cache.set('key2', 'value2')
+
+// ... time passes ...
+
+const pruned = cache.prune()
+console.log(`Removed ${pruned} expired entries`)
+```
+
+## Types
+
+### CacheStats
+
+Statistics about cache usage and performance.
+
+```typescript
+type CacheStats = {
+    hits: number
+    misses: number
+    evictions: number
+    expirations: number
+    size: number
+}
+```
+
+### CacheConfigError
+
+Error thrown when cache configuration is invalid.
+
+```typescript
+import { CacheConfigError } from '@humanspeak/memory-cache'
+
+class CacheConfigError extends Error {
+    readonly name = 'CacheConfigError'
+}
+```
+
+Thrown when:
+- `maxSize` is negative
+- `ttl` is negative
 
 ## Type Safety
 

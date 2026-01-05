@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cached, MemoryCache } from './cache.js'
+import { CacheConfigError, cached, MemoryCache } from './cache.js'
 
 describe('MemoryCache', () => {
     let cache: MemoryCache<string>
@@ -713,17 +713,6 @@ describe('MemoryCache', () => {
                 vi.useRealTimers()
             })
 
-            it('should handle negative TTL (no expiration)', () => {
-                vi.useFakeTimers()
-                const ttlCache = new MemoryCache<string>({ ttl: -1000 })
-
-                ttlCache.set('key1', 'value1')
-                vi.advanceTimersByTime(10000)
-                expect(ttlCache.get('key1')).toBe('value1')
-
-                vi.useRealTimers()
-            })
-
             it('should handle max size of 1', () => {
                 const sizeCache = new MemoryCache<string>({ maxSize: 1 })
 
@@ -736,18 +725,6 @@ describe('MemoryCache', () => {
 
             it('should handle max size of 0 (no limit)', () => {
                 const sizeCache = new MemoryCache<string>({ maxSize: 0 })
-
-                for (let i = 0; i < 1000; i++) {
-                    sizeCache.set(`key${i}`, `value${i}`)
-                }
-
-                for (let i = 0; i < 1000; i++) {
-                    expect(sizeCache.get(`key${i}`)).toBe(`value${i}`)
-                }
-            })
-
-            it('should handle negative max size (no limit)', () => {
-                const sizeCache = new MemoryCache<string>({ maxSize: -1 })
 
                 for (let i = 0; i < 1000; i++) {
                     sizeCache.set(`key${i}`, `value${i}`)
@@ -1032,6 +1009,471 @@ describe('MemoryCache', () => {
             })
         })
     })
+
+    // ==========================================
+    // CONSTRUCTOR VALIDATION TESTS
+    // ==========================================
+    describe('Constructor Validation', () => {
+        it('should throw CacheConfigError for negative maxSize', () => {
+            expect(() => new MemoryCache<string>({ maxSize: -1 })).toThrow(CacheConfigError)
+            expect(() => new MemoryCache<string>({ maxSize: -1 })).toThrow(
+                'maxSize must be a non-negative number'
+            )
+        })
+
+        it('should throw CacheConfigError for negative ttl', () => {
+            expect(() => new MemoryCache<string>({ ttl: -1 })).toThrow(CacheConfigError)
+            expect(() => new MemoryCache<string>({ ttl: -1 })).toThrow(
+                'ttl must be a non-negative number'
+            )
+        })
+
+        it('should accept zero maxSize', () => {
+            const zeroCache = new MemoryCache<string>({ maxSize: 0 })
+            expect(zeroCache).toBeInstanceOf(MemoryCache)
+        })
+
+        it('should accept zero ttl', () => {
+            const zeroCache = new MemoryCache<string>({ ttl: 0 })
+            expect(zeroCache).toBeInstanceOf(MemoryCache)
+        })
+    })
+
+    // ==========================================
+    // INTROSPECTION TESTS
+    // ==========================================
+    describe('Introspection Methods', () => {
+        describe('size()', () => {
+            it('should return 0 for empty cache', () => {
+                expect(cache.size()).toBe(0)
+            })
+
+            it('should return correct count after adding entries', () => {
+                cache.set('key1', 'value1')
+                expect(cache.size()).toBe(1)
+
+                cache.set('key2', 'value2')
+                expect(cache.size()).toBe(2)
+
+                cache.set('key3', 'value3')
+                expect(cache.size()).toBe(3)
+            })
+
+            it('should not increase size when overwriting', () => {
+                cache.set('key1', 'value1')
+                cache.set('key1', 'value2')
+                expect(cache.size()).toBe(1)
+            })
+
+            it('should decrease after delete', () => {
+                cache.set('key1', 'value1')
+                cache.set('key2', 'value2')
+                cache.delete('key1')
+                expect(cache.size()).toBe(1)
+            })
+
+            it('should be 0 after clear', () => {
+                cache.set('key1', 'value1')
+                cache.set('key2', 'value2')
+                cache.clear()
+                expect(cache.size()).toBe(0)
+            })
+
+            it('should exclude expired entries', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                ttlCache.set('key1', 'value1')
+                ttlCache.set('key2', 'value2')
+
+                expect(ttlCache.size()).toBe(2)
+
+                vi.advanceTimersByTime(101)
+
+                expect(ttlCache.size()).toBe(0)
+                vi.useRealTimers()
+            })
+        })
+
+        describe('keys()', () => {
+            it('should return empty array for empty cache', () => {
+                expect(cache.keys()).toEqual([])
+            })
+
+            it('should return all keys', () => {
+                cache.set('key1', 'value1')
+                cache.set('key2', 'value2')
+                cache.set('key3', 'value3')
+
+                const keys = cache.keys()
+                expect(keys).toHaveLength(3)
+                expect(keys).toContain('key1')
+                expect(keys).toContain('key2')
+                expect(keys).toContain('key3')
+            })
+
+            it('should preserve insertion order', () => {
+                cache.set('a', 'value')
+                cache.set('b', 'value')
+                cache.set('c', 'value')
+
+                expect(cache.keys()).toEqual(['a', 'b', 'c'])
+            })
+
+            it('should exclude expired entries', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                ttlCache.set('key1', 'value1')
+                ttlCache.set('key2', 'value2')
+
+                expect(ttlCache.keys()).toEqual(['key1', 'key2'])
+
+                vi.advanceTimersByTime(101)
+
+                expect(ttlCache.keys()).toEqual([])
+                vi.useRealTimers()
+            })
+        })
+
+        describe('values()', () => {
+            it('should return empty array for empty cache', () => {
+                expect(cache.values()).toEqual([])
+            })
+
+            it('should return all values', () => {
+                cache.set('key1', 'value1')
+                cache.set('key2', 'value2')
+
+                const values = cache.values()
+                expect(values).toHaveLength(2)
+                expect(values).toContain('value1')
+                expect(values).toContain('value2')
+            })
+
+            it('should handle undefined values', () => {
+                const mixedCache = new MemoryCache<string | undefined>()
+                mixedCache.set('key1', 'value1')
+                mixedCache.set('key2', undefined)
+
+                const values = mixedCache.values()
+                expect(values).toEqual(['value1', undefined])
+            })
+
+            it('should handle null values', () => {
+                const mixedCache = new MemoryCache<string | null>()
+                mixedCache.set('key1', 'value1')
+                mixedCache.set('key2', null)
+
+                const values = mixedCache.values()
+                expect(values).toEqual(['value1', null])
+            })
+
+            it('should exclude expired entries', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                ttlCache.set('key1', 'value1')
+                ttlCache.set('key2', 'value2')
+
+                expect(ttlCache.values()).toEqual(['value1', 'value2'])
+
+                vi.advanceTimersByTime(101)
+
+                expect(ttlCache.values()).toEqual([])
+                vi.useRealTimers()
+            })
+        })
+
+        describe('entries()', () => {
+            it('should return empty array for empty cache', () => {
+                expect(cache.entries()).toEqual([])
+            })
+
+            it('should return all key-value pairs', () => {
+                cache.set('key1', 'value1')
+                cache.set('key2', 'value2')
+
+                const entries = cache.entries()
+                expect(entries).toHaveLength(2)
+                expect(entries).toContainEqual(['key1', 'value1'])
+                expect(entries).toContainEqual(['key2', 'value2'])
+            })
+
+            it('should handle undefined values', () => {
+                const mixedCache = new MemoryCache<string | undefined>()
+                mixedCache.set('key1', 'value1')
+                mixedCache.set('key2', undefined)
+
+                const entries = mixedCache.entries()
+                expect(entries).toEqual([
+                    ['key1', 'value1'],
+                    ['key2', undefined]
+                ])
+            })
+
+            it('should handle null values', () => {
+                const mixedCache = new MemoryCache<string | null>()
+                mixedCache.set('key1', 'value1')
+                mixedCache.set('key2', null)
+
+                const entries = mixedCache.entries()
+                expect(entries).toEqual([
+                    ['key1', 'value1'],
+                    ['key2', null]
+                ])
+            })
+
+            it('should exclude expired entries', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                ttlCache.set('key1', 'value1')
+                ttlCache.set('key2', 'value2')
+
+                expect(ttlCache.entries()).toEqual([
+                    ['key1', 'value1'],
+                    ['key2', 'value2']
+                ])
+
+                vi.advanceTimersByTime(101)
+
+                expect(ttlCache.entries()).toEqual([])
+                vi.useRealTimers()
+            })
+        })
+    })
+
+    // ==========================================
+    // STATISTICS TESTS
+    // ==========================================
+    describe('Statistics', () => {
+        describe('getStats()', () => {
+            it('should return initial stats with all zeros', () => {
+                const stats = cache.getStats()
+                expect(stats).toEqual({
+                    hits: 0,
+                    misses: 0,
+                    evictions: 0,
+                    expirations: 0,
+                    size: 0
+                })
+            })
+
+            it('should track cache hits', () => {
+                cache.set('key', 'value')
+                cache.get('key')
+                cache.get('key')
+                cache.get('key')
+
+                const stats = cache.getStats()
+                expect(stats.hits).toBe(3)
+            })
+
+            it('should track cache misses', () => {
+                cache.get('nonexistent1')
+                cache.get('nonexistent2')
+
+                const stats = cache.getStats()
+                expect(stats.misses).toBe(2)
+            })
+
+            it('should track evictions', () => {
+                const smallCache = new MemoryCache<string>({ maxSize: 2 })
+                smallCache.set('key1', 'value1')
+                smallCache.set('key2', 'value2')
+                smallCache.set('key3', 'value3') // evicts key1
+                smallCache.set('key4', 'value4') // evicts key2
+
+                const stats = smallCache.getStats()
+                expect(stats.evictions).toBe(2)
+            })
+
+            it('should track expirations', () => {
+                vi.useFakeTimers()
+                const shortTtlCache = new MemoryCache<string>({ ttl: 10 })
+                shortTtlCache.set('key', 'value')
+
+                vi.advanceTimersByTime(20)
+
+                shortTtlCache.get('key') // triggers expiration
+
+                const stats = shortTtlCache.getStats()
+                expect(stats.expirations).toBe(1)
+                expect(stats.misses).toBe(1) // expiration also counts as miss
+                vi.useRealTimers()
+            })
+
+            it('should return current size', () => {
+                cache.set('key1', 'value1')
+                cache.set('key2', 'value2')
+
+                const stats = cache.getStats()
+                expect(stats.size).toBe(2)
+            })
+
+            it('should exclude expired entries from size', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                ttlCache.set('key1', 'value1')
+                ttlCache.set('key2', 'value2')
+
+                expect(ttlCache.getStats().size).toBe(2)
+
+                vi.advanceTimersByTime(101)
+
+                expect(ttlCache.getStats().size).toBe(0)
+                vi.useRealTimers()
+            })
+
+            it('should return a copy of stats (not reference)', () => {
+                cache.get('nonexistent')
+                const stats1 = cache.getStats()
+                cache.get('nonexistent2')
+                const stats2 = cache.getStats()
+
+                expect(stats1.misses).toBe(1)
+                expect(stats2.misses).toBe(2)
+            })
+        })
+
+        describe('resetStats()', () => {
+            it('should reset all counters to zero', () => {
+                cache.set('key', 'value')
+                cache.get('key') // hit
+                cache.get('nonexistent') // miss
+
+                cache.resetStats()
+
+                const stats = cache.getStats()
+                expect(stats.hits).toBe(0)
+                expect(stats.misses).toBe(0)
+                expect(stats.evictions).toBe(0)
+                expect(stats.expirations).toBe(0)
+            })
+
+            it('should not affect cache size', () => {
+                cache.set('key1', 'value1')
+                cache.set('key2', 'value2')
+
+                cache.resetStats()
+
+                expect(cache.size()).toBe(2)
+                expect(cache.getStats().size).toBe(2)
+            })
+
+            it('should allow stats to accumulate again after reset', () => {
+                cache.set('key', 'value')
+                cache.get('key')
+                cache.resetStats()
+                cache.get('key')
+                cache.get('key')
+
+                const stats = cache.getStats()
+                expect(stats.hits).toBe(2)
+            })
+        })
+
+        describe('prune()', () => {
+            it('should remove expired entries and return count', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                ttlCache.set('key1', 'value1')
+                ttlCache.set('key2', 'value2')
+                ttlCache.set('key3', 'value3')
+
+                vi.advanceTimersByTime(101)
+
+                const pruned = ttlCache.prune()
+                expect(pruned).toBe(3)
+                expect(ttlCache.size()).toBe(0)
+                vi.useRealTimers()
+            })
+
+            it('should only remove expired entries', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                ttlCache.set('old', 'value1')
+
+                vi.advanceTimersByTime(50)
+                ttlCache.set('new', 'value2')
+
+                vi.advanceTimersByTime(51)
+
+                const pruned = ttlCache.prune()
+                expect(pruned).toBe(1)
+                expect(ttlCache.size()).toBe(1)
+                expect(ttlCache.get('new')).toBe('value2')
+                vi.useRealTimers()
+            })
+
+            it('should return 0 when no entries are expired', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                ttlCache.set('key1', 'value1')
+                ttlCache.set('key2', 'value2')
+
+                const pruned = ttlCache.prune()
+                expect(pruned).toBe(0)
+                expect(ttlCache.size()).toBe(2)
+                vi.useRealTimers()
+            })
+
+            it('should return 0 when TTL is disabled', () => {
+                const noTtlCache = new MemoryCache<string>({ ttl: 0 })
+                noTtlCache.set('key1', 'value1')
+
+                const pruned = noTtlCache.prune()
+                expect(pruned).toBe(0)
+                expect(noTtlCache.size()).toBe(1)
+            })
+
+            it('should increment expirations stat for each pruned entry', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                ttlCache.set('key1', 'value1')
+                ttlCache.set('key2', 'value2')
+
+                vi.advanceTimersByTime(101)
+
+                ttlCache.prune()
+                expect(ttlCache.getStats().expirations).toBe(2)
+                vi.useRealTimers()
+            })
+
+            it('should return 0 when cache is empty', () => {
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                const pruned = ttlCache.prune()
+                expect(pruned).toBe(0)
+            })
+        })
+
+        describe('Combined Statistics Scenarios', () => {
+            it('should track all stats correctly in typical usage', () => {
+                const testCache = new MemoryCache<string>({ maxSize: 3 })
+
+                // Add entries
+                testCache.set('key1', 'value1')
+                testCache.set('key2', 'value2')
+                testCache.set('key3', 'value3')
+
+                // Hits
+                testCache.get('key1')
+                testCache.get('key2')
+
+                // Misses
+                testCache.get('nonexistent')
+
+                // Eviction
+                testCache.set('key4', 'value4') // evicts key1
+
+                // Miss after eviction
+                testCache.get('key1')
+
+                const stats = testCache.getStats()
+                expect(stats.hits).toBe(2)
+                expect(stats.misses).toBe(2)
+                expect(stats.evictions).toBe(1)
+                expect(stats.size).toBe(3)
+            })
+        })
+    })
 })
 
 describe('cached decorator', () => {
@@ -1186,8 +1628,8 @@ describe('cached decorator', () => {
         })
 
         describe('Cache options', () => {
-            it('should respect TTL', async () => {
-                vi.useRealTimers()
+            it('should respect TTL', () => {
+                vi.useFakeTimers()
 
                 class TestClass {
                     callCount = 0
@@ -1205,10 +1647,11 @@ describe('cached decorator', () => {
                 expect(instance.getValue('123')).toBe('value-123')
                 expect(instance.callCount).toBe(1)
 
-                await new Promise((resolve) => setTimeout(resolve, 150))
+                vi.advanceTimersByTime(150)
 
                 expect(instance.getValue('123')).toBe('value-123')
                 expect(instance.callCount).toBe(2)
+                vi.useRealTimers()
             })
 
             it('should respect max size', () => {
