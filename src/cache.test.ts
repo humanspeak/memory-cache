@@ -1285,17 +1285,19 @@ describe('MemoryCache', () => {
                 expect(stats.evictions).toBe(2)
             })
 
-            it('should track expirations', async () => {
+            it('should track expirations', () => {
+                vi.useFakeTimers()
                 const shortTtlCache = new MemoryCache<string>({ ttl: 10 })
                 shortTtlCache.set('key', 'value')
 
-                await new Promise((resolve) => setTimeout(resolve, 20))
+                vi.advanceTimersByTime(20)
 
                 shortTtlCache.get('key') // triggers expiration
 
                 const stats = shortTtlCache.getStats()
                 expect(stats.expirations).toBe(1)
                 expect(stats.misses).toBe(1) // expiration also counts as miss
+                vi.useRealTimers()
             })
 
             it('should return current size', () => {
@@ -1626,8 +1628,8 @@ describe('cached decorator', () => {
         })
 
         describe('Cache options', () => {
-            it('should respect TTL', async () => {
-                vi.useRealTimers()
+            it('should respect TTL', () => {
+                vi.useFakeTimers()
 
                 class TestClass {
                     callCount = 0
@@ -1645,10 +1647,11 @@ describe('cached decorator', () => {
                 expect(instance.getValue('123')).toBe('value-123')
                 expect(instance.callCount).toBe(1)
 
-                await new Promise((resolve) => setTimeout(resolve, 150))
+                vi.advanceTimersByTime(150)
 
                 expect(instance.getValue('123')).toBe('value-123')
                 expect(instance.callCount).toBe(2)
+                vi.useRealTimers()
             })
 
             it('should respect max size', () => {
