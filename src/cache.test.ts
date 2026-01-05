@@ -1102,16 +1102,18 @@ describe('MemoryCache', () => {
                 expect(cache.size()).toBe(0)
             })
 
-            it('should exclude expired entries', async () => {
-                const ttlCache = new MemoryCache<string>({ ttl: 10 })
+            it('should exclude expired entries', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
                 ttlCache.set('key1', 'value1')
                 ttlCache.set('key2', 'value2')
 
                 expect(ttlCache.size()).toBe(2)
 
-                await new Promise((resolve) => setTimeout(resolve, 20))
+                vi.advanceTimersByTime(101)
 
                 expect(ttlCache.size()).toBe(0)
+                vi.useRealTimers()
             })
         })
 
@@ -1140,16 +1142,18 @@ describe('MemoryCache', () => {
                 expect(cache.keys()).toEqual(['a', 'b', 'c'])
             })
 
-            it('should exclude expired entries', async () => {
-                const ttlCache = new MemoryCache<string>({ ttl: 10 })
+            it('should exclude expired entries', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
                 ttlCache.set('key1', 'value1')
                 ttlCache.set('key2', 'value2')
 
                 expect(ttlCache.keys()).toEqual(['key1', 'key2'])
 
-                await new Promise((resolve) => setTimeout(resolve, 20))
+                vi.advanceTimersByTime(101)
 
                 expect(ttlCache.keys()).toEqual([])
+                vi.useRealTimers()
             })
         })
 
@@ -1186,16 +1190,18 @@ describe('MemoryCache', () => {
                 expect(values).toEqual(['value1', null])
             })
 
-            it('should exclude expired entries', async () => {
-                const ttlCache = new MemoryCache<string>({ ttl: 10 })
+            it('should exclude expired entries', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
                 ttlCache.set('key1', 'value1')
                 ttlCache.set('key2', 'value2')
 
                 expect(ttlCache.values()).toEqual(['value1', 'value2'])
 
-                await new Promise((resolve) => setTimeout(resolve, 20))
+                vi.advanceTimersByTime(101)
 
                 expect(ttlCache.values()).toEqual([])
+                vi.useRealTimers()
             })
         })
 
@@ -1238,8 +1244,9 @@ describe('MemoryCache', () => {
                 ])
             })
 
-            it('should exclude expired entries', async () => {
-                const ttlCache = new MemoryCache<string>({ ttl: 10 })
+            it('should exclude expired entries', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
                 ttlCache.set('key1', 'value1')
                 ttlCache.set('key2', 'value2')
 
@@ -1248,9 +1255,10 @@ describe('MemoryCache', () => {
                     ['key2', 'value2']
                 ])
 
-                await new Promise((resolve) => setTimeout(resolve, 20))
+                vi.advanceTimersByTime(101)
 
                 expect(ttlCache.entries()).toEqual([])
+                vi.useRealTimers()
             })
         })
     })
@@ -1321,16 +1329,18 @@ describe('MemoryCache', () => {
                 expect(stats.size).toBe(2)
             })
 
-            it('should exclude expired entries from size', async () => {
-                const ttlCache = new MemoryCache<string>({ ttl: 10 })
+            it('should exclude expired entries from size', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
                 ttlCache.set('key1', 'value1')
                 ttlCache.set('key2', 'value2')
 
                 expect(ttlCache.getStats().size).toBe(2)
 
-                await new Promise((resolve) => setTimeout(resolve, 20))
+                vi.advanceTimersByTime(101)
 
                 expect(ttlCache.getStats().size).toBe(0)
+                vi.useRealTimers()
             })
 
             it('should return a copy of stats (not reference)', () => {
