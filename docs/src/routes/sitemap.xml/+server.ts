@@ -1,14 +1,23 @@
 import { env } from '$env/dynamic/public'
-import manifest from '$lib/sitemap-manifest.json'
+import manifestData from '$lib/sitemap-manifest.json'
 import type { RequestHandler } from '@sveltejs/kit'
+
+// Type the manifest with an index signature for path lookups
+const manifest: Record<string, string> = manifestData
 
 // Eager=false keeps build light; we only need the keys for paths
 const pageFiles = Object.keys(
     import.meta.glob('/src/routes/**/+page.{svelte,svx,md}', { eager: false })
 )
 
+/**
+ * Converts a file path to a route path.
+ * Strips /src/routes and "+page.*" suffix; default root to '/'.
+ *
+ * @param file - The file path to convert
+ * @returns The route path
+ */
 function toPath(file: string): string {
-    // Strip /src/routes and "+page.*" suffix; default root to '/'
     const p = file.replace('/src/routes', '').replace(/\/\+page\.(svelte|svx|md)$/i, '')
     return p === '' ? '/' : p
 }
