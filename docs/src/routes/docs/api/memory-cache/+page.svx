@@ -327,17 +327,7 @@ Returns statistics about cache usage and performance.
 getStats(): CacheStats
 ```
 
-**Returns:** Object containing cache statistics
-
-```typescript
-type CacheStats = {
-    hits: number        // Successful cache retrievals
-    misses: number      // Cache misses (key not found or expired)
-    evictions: number   // Entries removed due to size limits
-    expirations: number // Entries removed due to TTL expiration
-    size: number        // Current number of entries
-}
-```
+**Returns:** Object containing cache statistics (see [CacheStats](#cachestats) type)
 
 **Example:**
 
@@ -416,7 +406,7 @@ Error thrown when cache configuration is invalid.
 import { CacheConfigError } from '@humanspeak/memory-cache'
 
 class CacheConfigError extends Error {
-    name: 'CacheConfigError'
+    readonly name = 'CacheConfigError'
 }
 ```
 
