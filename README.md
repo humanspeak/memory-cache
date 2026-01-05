@@ -31,6 +31,8 @@ Visit the [documentation](https://memory.svelte.page/) for detailed API referenc
 - **Full TypeScript Support** - Complete type definitions included
 - **Method Decorator** - `@cached` decorator for automatic memoization
 - **Null/Undefined Support** - Properly caches falsy values
+- **Cache Statistics** - Track hits, misses, evictions, and expirations
+- **Introspection** - Query cache size, keys, values, and entries
 
 ## Installation
 
@@ -145,6 +147,13 @@ await service.getUser('123')
 | `clear()`                      | Removes all entries                                  |
 | `deleteByPrefix(prefix)`       | Removes entries starting with prefix                 |
 | `deleteByMagicString(pattern)` | Removes entries matching wildcard pattern            |
+| `size()`                       | Returns the number of entries in cache               |
+| `keys()`                       | Returns array of all cache keys                      |
+| `values()`                     | Returns array of all cached values                   |
+| `entries()`                    | Returns array of [key, value] pairs                  |
+| `getStats()`                   | Returns cache statistics (hits, misses, etc.)        |
+| `resetStats()`                 | Resets statistics counters to zero                   |
+| `prune()`                      | Removes all expired entries, returns count           |
 
 ### `@cached<T>(options?)`
 
@@ -181,6 +190,27 @@ const unlimitedCache = new MemoryCache<Data>({
     maxSize: 0, // No size limit
     ttl: 0 // No expiration
 })
+```
+
+## Cache Statistics
+
+Track cache performance with built-in statistics:
+
+```typescript
+const cache = new MemoryCache<string>()
+
+cache.set('key', 'value')
+cache.get('key') // hit
+cache.get('missing') // miss
+
+const stats = cache.getStats()
+// { hits: 1, misses: 1, evictions: 0, expirations: 0, size: 1 }
+
+// Reset statistics
+cache.resetStats()
+
+// Proactively remove expired entries
+const prunedCount = cache.prune()
 ```
 
 ## Documentation
