@@ -243,7 +243,7 @@ cache.deleteByMagicString('*:123:*')
 
 ### size()
 
-Returns the current number of entries in the cache. Runs [`prune()`](#prune) prior to counting.
+Returns the current number of entries in the cache. Internally calls [`prune()`](#prune) to remove expired entries before counting.
 
 ```typescript
 size(): number
@@ -262,7 +262,7 @@ console.log(cache.size())  // 2
 
 ### keys()
 
-Returns an array of all keys currently in the cache. Runs [`prune()`](#prune) prior to returning results.
+Returns an array of all keys currently in the cache. Internally calls [`prune()`](#prune) to remove expired entries before returning results.
 
 ```typescript
 keys(): string[]
@@ -281,7 +281,7 @@ console.log(cache.keys())  // ['user:1', 'user:2']
 
 ### values()
 
-Returns an array of all values currently in the cache. Runs [`prune()`](#prune) prior to returning results.
+Returns an array of all values currently in the cache. Internally calls [`prune()`](#prune) to remove expired entries before returning results.
 
 ```typescript
 values(): (T | undefined)[]
@@ -300,7 +300,7 @@ console.log(cache.values())  // ['value1', 'value2']
 
 ### entries()
 
-Returns an array of all key-value pairs currently in the cache. Runs [`prune()`](#prune) prior to returning results.
+Returns an array of all key-value pairs currently in the cache. Internally calls [`prune()`](#prune) to remove expired entries before returning results.
 
 ```typescript
 entries(): [string, T | undefined][]
