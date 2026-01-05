@@ -1391,6 +1391,80 @@ describe('MemoryCache', () => {
             })
         })
 
+        describe('prune()', () => {
+            it('should remove expired entries and return count', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                ttlCache.set('key1', 'value1')
+                ttlCache.set('key2', 'value2')
+                ttlCache.set('key3', 'value3')
+
+                vi.advanceTimersByTime(101)
+
+                const pruned = ttlCache.prune()
+                expect(pruned).toBe(3)
+                expect(ttlCache.size()).toBe(0)
+                vi.useRealTimers()
+            })
+
+            it('should only remove expired entries', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                ttlCache.set('old', 'value1')
+
+                vi.advanceTimersByTime(50)
+                ttlCache.set('new', 'value2')
+
+                vi.advanceTimersByTime(51)
+
+                const pruned = ttlCache.prune()
+                expect(pruned).toBe(1)
+                expect(ttlCache.size()).toBe(1)
+                expect(ttlCache.get('new')).toBe('value2')
+                vi.useRealTimers()
+            })
+
+            it('should return 0 when no entries are expired', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                ttlCache.set('key1', 'value1')
+                ttlCache.set('key2', 'value2')
+
+                const pruned = ttlCache.prune()
+                expect(pruned).toBe(0)
+                expect(ttlCache.size()).toBe(2)
+                vi.useRealTimers()
+            })
+
+            it('should return 0 when TTL is disabled', () => {
+                const noTtlCache = new MemoryCache<string>({ ttl: 0 })
+                noTtlCache.set('key1', 'value1')
+
+                const pruned = noTtlCache.prune()
+                expect(pruned).toBe(0)
+                expect(noTtlCache.size()).toBe(1)
+            })
+
+            it('should increment expirations stat for each pruned entry', () => {
+                vi.useFakeTimers()
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                ttlCache.set('key1', 'value1')
+                ttlCache.set('key2', 'value2')
+
+                vi.advanceTimersByTime(101)
+
+                ttlCache.prune()
+                expect(ttlCache.getStats().expirations).toBe(2)
+                vi.useRealTimers()
+            })
+
+            it('should return 0 when cache is empty', () => {
+                const ttlCache = new MemoryCache<string>({ ttl: 100 })
+                const pruned = ttlCache.prune()
+                expect(pruned).toBe(0)
+            })
+        })
+
         describe('Combined Statistics Scenarios', () => {
             it('should track all stats correctly in typical usage', () => {
                 const testCache = new MemoryCache<string>({ maxSize: 3 })

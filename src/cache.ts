@@ -38,6 +38,7 @@ export class CacheConfigError extends Error {
     constructor(message: string) {
         super(message)
         this.name = 'CacheConfigError'
+        Object.setPrototypeOf(this, CacheConfigError.prototype)
     }
 }
 
@@ -328,6 +329,7 @@ export class MemoryCache<T> {
 
     /**
      * Returns the current number of non-expired entries in the cache.
+     * Automatically prunes expired entries before counting.
      *
      * @returns {number} The number of cached entries
      *
@@ -340,21 +342,13 @@ export class MemoryCache<T> {
      * ```
      */
     size(): number {
-        if (this.ttl <= 0) {
-            return this.cache.size
-        }
-        let count = 0
-        const now = Date.now()
-        for (const entry of this.cache.values()) {
-            if (now - entry.timestamp <= this.ttl) {
-                count++
-            }
-        }
-        return count
+        this.prune()
+        return this.cache.size
     }
 
     /**
-     * Returns an array of all non-expired keys currently in the cache.
+     * Returns an array of all keys currently in the cache.
+     * Automatically prunes expired entries before returning keys.
      *
      * @returns {string[]} Array of cache keys
      *
@@ -367,18 +361,13 @@ export class MemoryCache<T> {
      * ```
      */
     keys(): string[] {
-        const result: string[] = []
-        const now = Date.now()
-        for (const [key, entry] of this.cache.entries()) {
-            if (this.ttl <= 0 || now - entry.timestamp <= this.ttl) {
-                result.push(key)
-            }
-        }
-        return result
+        this.prune()
+        return Array.from(this.cache.keys())
     }
 
     /**
-     * Returns an array of all non-expired values currently in the cache.
+     * Returns an array of all values currently in the cache.
+     * Automatically prunes expired entries before returning values.
      * Cached undefined values are returned as undefined, cached null values as null.
      *
      * @returns {(T | undefined)[]} Array of cached values
@@ -392,24 +381,23 @@ export class MemoryCache<T> {
      * ```
      */
     values(): (T | undefined)[] {
+        this.prune()
         const result: (T | undefined)[] = []
-        const now = Date.now()
         for (const entry of this.cache.values()) {
-            if (this.ttl <= 0 || now - entry.timestamp <= this.ttl) {
-                if (entry.value === CACHED_UNDEFINED) {
-                    result.push(undefined)
-                } else if (entry.value === CACHED_NULL) {
-                    result.push(null as T)
-                } else {
-                    result.push(entry.value as T)
-                }
+            if (entry.value === CACHED_UNDEFINED) {
+                result.push(undefined)
+            } else if (entry.value === CACHED_NULL) {
+                result.push(null as T)
+            } else {
+                result.push(entry.value as T)
             }
         }
         return result
     }
 
     /**
-     * Returns an array of all non-expired key-value pairs currently in the cache.
+     * Returns an array of all key-value pairs currently in the cache.
+     * Automatically prunes expired entries before returning entries.
      *
      * @returns {[string, T | undefined][]} Array of [key, value] tuples
      *
@@ -422,20 +410,18 @@ export class MemoryCache<T> {
      * ```
      */
     entries(): [string, T | undefined][] {
+        this.prune()
         const result: [string, T | undefined][] = []
-        const now = Date.now()
         for (const [key, entry] of this.cache.entries()) {
-            if (this.ttl <= 0 || now - entry.timestamp <= this.ttl) {
-                let value: T | undefined
-                if (entry.value === CACHED_UNDEFINED) {
-                    value = undefined
-                } else if (entry.value === CACHED_NULL) {
-                    value = null as T
-                } else {
-                    value = entry.value as T
-                }
-                result.push([key, value])
+            let value: T | undefined
+            if (entry.value === CACHED_UNDEFINED) {
+                value = undefined
+            } else if (entry.value === CACHED_NULL) {
+                value = null as T
+            } else {
+                value = entry.value as T
             }
+            result.push([key, value])
         }
         return result
     }
@@ -482,6 +468,39 @@ export class MemoryCache<T> {
         this.stats.misses = 0
         this.stats.evictions = 0
         this.stats.expirations = 0
+    }
+
+    /**
+     * Proactively removes all expired entries from the cache.
+     * This is useful for reclaiming memory when you don't want to wait for
+     * lazy cleanup (which only occurs when expired entries are accessed).
+     *
+     * @returns {number} The number of expired entries that were removed
+     *
+     * @example
+     * ```typescript
+     * const cache = new MemoryCache<string>({ ttl: 1000 });
+     * cache.set('key1', 'value1');
+     * cache.set('key2', 'value2');
+     * // ... time passes ...
+     * const pruned = cache.prune(); // Returns number of expired entries removed
+     * ```
+     */
+    prune(): number {
+        if (this.ttl <= 0) {
+            return 0
+        }
+
+        let count = 0
+        const now = Date.now()
+        for (const [key, entry] of this.cache.entries()) {
+            if (now - entry.timestamp > this.ttl) {
+                this.cache.delete(key)
+                this.stats.expirations++
+                count++
+            }
+        }
+        return count
     }
 }
 
