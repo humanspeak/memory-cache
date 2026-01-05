@@ -7,6 +7,9 @@
 
     const { children } = $props()
     const imageLocation = `${page.url.origin}/`
+
+    // Dynamic canonical URL based on current page path
+    const canonicalUrl = $derived(`${imageLocation}/${page.url.pathname}`)
 </script>
 
 <svelte:head>
@@ -23,7 +26,7 @@
         content="A lightweight, zero-dependency in-memory cache for TypeScript with TTL expiration, LRU eviction, and @cached decorator for method-level memoization."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://memory.svelte.page" />
+    <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content="{imageLocation}memory-cache-opengraph.png" />
 
     <!-- Twitter -->
@@ -44,7 +47,7 @@
     <!-- Additional Meta -->
     <meta name="author" content="Humanspeak, Inc." />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://memory.svelte.page" />
+    <link rel="canonical" href={canonicalUrl} />
 
     <!-- JSON-LD structured data -->
     <script type="application/ld+json">
