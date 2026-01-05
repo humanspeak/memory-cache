@@ -11,6 +11,37 @@ export type CacheOptions = {
 }
 
 /**
+ * Statistics about cache usage and performance.
+ *
+ * @interface CacheStats
+ * @property {number} hits - Number of successful cache retrievals
+ * @property {number} misses - Number of cache misses (key not found or expired)
+ * @property {number} evictions - Number of entries removed due to size limits
+ * @property {number} expirations - Number of entries removed due to TTL expiration
+ * @property {number} size - Current number of entries in the cache
+ */
+export type CacheStats = {
+    hits: number
+    misses: number
+    evictions: number
+    expirations: number
+    size: number
+}
+
+/**
+ * Error thrown when cache configuration is invalid.
+ *
+ * @class CacheConfigError
+ * @extends Error
+ */
+export class CacheConfigError extends Error {
+    constructor(message: string) {
+        super(message)
+        this.name = 'CacheConfigError'
+    }
+}
+
+/**
  * Internal representation of a cached entry with its metadata.
  *
  * @interface CacheEntry
@@ -56,6 +87,12 @@ export class MemoryCache<T> {
         new Map()
     private maxSize: number
     private ttl: number
+    private stats: Omit<CacheStats, 'size'> = {
+        hits: 0,
+        misses: 0,
+        evictions: 0,
+        expirations: 0
+    }
 
     /**
      * Creates a new MemoryCache instance.
@@ -63,10 +100,21 @@ export class MemoryCache<T> {
      * @param {CacheOptions} options - Configuration options for the cache
      * @param {number} [options.maxSize=100] - Maximum number of entries (default: 100)
      * @param {number} [options.ttl=300000] - Time-to-live in milliseconds (default: 5 minutes)
+     * @throws {CacheConfigError} If maxSize is negative or ttl is negative
      */
     constructor(options: CacheOptions = {}) {
-        this.maxSize = options.maxSize ?? 100
-        this.ttl = options.ttl ?? 5 * 60 * 1000 // 5 minutes default
+        const maxSize = options.maxSize ?? 100
+        const ttl = options.ttl ?? 5 * 60 * 1000 // 5 minutes default
+
+        if (maxSize < 0) {
+            throw new CacheConfigError('maxSize must be a non-negative number')
+        }
+        if (ttl < 0) {
+            throw new CacheConfigError('ttl must be a non-negative number')
+        }
+
+        this.maxSize = maxSize
+        this.ttl = ttl
     }
 
     /**
@@ -85,13 +133,20 @@ export class MemoryCache<T> {
      */
     get(key: string): T | undefined {
         const entry = this.cache.get(key)
-        if (!entry) return undefined
+        if (!entry) {
+            this.stats.misses++
+            return undefined
+        }
 
         // Check if entry has expired (skip check if TTL is 0 or negative)
         if (this.ttl > 0 && Date.now() - entry.timestamp > this.ttl) {
             this.cache.delete(key)
+            this.stats.expirations++
+            this.stats.misses++
             return undefined
         }
+
+        this.stats.hits++
 
         // Handle the special sentinel values for cached undefined/null
         if (entry.value === CACHED_UNDEFINED) {
@@ -142,6 +197,7 @@ export class MemoryCache<T> {
             const oldestKey = this.cache.keys().next().value
             if (oldestKey) {
                 this.cache.delete(oldestKey)
+                this.stats.evictions++
             }
         }
 
@@ -268,6 +324,164 @@ export class MemoryCache<T> {
             }
         }
         return count
+    }
+
+    /**
+     * Returns the current number of non-expired entries in the cache.
+     *
+     * @returns {number} The number of cached entries
+     *
+     * @example
+     * ```typescript
+     * const cache = new MemoryCache<string>();
+     * cache.set('key1', 'value1');
+     * cache.set('key2', 'value2');
+     * console.log(cache.size()); // 2
+     * ```
+     */
+    size(): number {
+        if (this.ttl <= 0) {
+            return this.cache.size
+        }
+        let count = 0
+        const now = Date.now()
+        for (const entry of this.cache.values()) {
+            if (now - entry.timestamp <= this.ttl) {
+                count++
+            }
+        }
+        return count
+    }
+
+    /**
+     * Returns an array of all non-expired keys currently in the cache.
+     *
+     * @returns {string[]} Array of cache keys
+     *
+     * @example
+     * ```typescript
+     * const cache = new MemoryCache<string>();
+     * cache.set('user:1', 'Alice');
+     * cache.set('user:2', 'Bob');
+     * console.log(cache.keys()); // ['user:1', 'user:2']
+     * ```
+     */
+    keys(): string[] {
+        const result: string[] = []
+        const now = Date.now()
+        for (const [key, entry] of this.cache.entries()) {
+            if (this.ttl <= 0 || now - entry.timestamp <= this.ttl) {
+                result.push(key)
+            }
+        }
+        return result
+    }
+
+    /**
+     * Returns an array of all non-expired values currently in the cache.
+     * Cached undefined values are returned as undefined, cached null values as null.
+     *
+     * @returns {(T | undefined)[]} Array of cached values
+     *
+     * @example
+     * ```typescript
+     * const cache = new MemoryCache<string>();
+     * cache.set('key1', 'value1');
+     * cache.set('key2', 'value2');
+     * console.log(cache.values()); // ['value1', 'value2']
+     * ```
+     */
+    values(): (T | undefined)[] {
+        const result: (T | undefined)[] = []
+        const now = Date.now()
+        for (const entry of this.cache.values()) {
+            if (this.ttl <= 0 || now - entry.timestamp <= this.ttl) {
+                if (entry.value === CACHED_UNDEFINED) {
+                    result.push(undefined)
+                } else if (entry.value === CACHED_NULL) {
+                    result.push(null as T)
+                } else {
+                    result.push(entry.value as T)
+                }
+            }
+        }
+        return result
+    }
+
+    /**
+     * Returns an array of all non-expired key-value pairs currently in the cache.
+     *
+     * @returns {[string, T | undefined][]} Array of [key, value] tuples
+     *
+     * @example
+     * ```typescript
+     * const cache = new MemoryCache<string>();
+     * cache.set('key1', 'value1');
+     * cache.set('key2', 'value2');
+     * console.log(cache.entries()); // [['key1', 'value1'], ['key2', 'value2']]
+     * ```
+     */
+    entries(): [string, T | undefined][] {
+        const result: [string, T | undefined][] = []
+        const now = Date.now()
+        for (const [key, entry] of this.cache.entries()) {
+            if (this.ttl <= 0 || now - entry.timestamp <= this.ttl) {
+                let value: T | undefined
+                if (entry.value === CACHED_UNDEFINED) {
+                    value = undefined
+                } else if (entry.value === CACHED_NULL) {
+                    value = null as T
+                } else {
+                    value = entry.value as T
+                }
+                result.push([key, value])
+            }
+        }
+        return result
+    }
+
+    /**
+     * Returns statistics about cache usage and performance.
+     *
+     * @returns {CacheStats} Object containing cache statistics
+     *
+     * @example
+     * ```typescript
+     * const cache = new MemoryCache<string>();
+     * cache.set('key', 'value');
+     * cache.get('key');     // hit
+     * cache.get('missing'); // miss
+     * const stats = cache.getStats();
+     * console.log(stats); // { hits: 1, misses: 1, evictions: 0, expirations: 0, size: 1 }
+     * ```
+     */
+    getStats(): CacheStats {
+        return {
+            hits: this.stats.hits,
+            misses: this.stats.misses,
+            evictions: this.stats.evictions,
+            expirations: this.stats.expirations,
+            size: this.size()
+        }
+    }
+
+    /**
+     * Resets all cache statistics counters to zero.
+     *
+     * @example
+     * ```typescript
+     * const cache = new MemoryCache<string>();
+     * cache.get('missing'); // increments misses
+     * cache.resetStats();
+     * const stats = cache.getStats();
+     * console.log(stats.misses); // 0
+     * ```
+     */
+    resetStats(): void {
+        this.stats.hits = 0
+        this.stats.misses = 0
+        this.stats.evictions = 0
+        this.stats.expirations = 0
     }
 }
 

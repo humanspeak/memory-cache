@@ -44,6 +44,12 @@
     "license": "MIT",
     "author": "Humanspeak, Inc.",
     "type": "module",
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
