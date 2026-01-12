@@ -27,7 +27,7 @@
         "chokidar-cli": "^3.0.0",
         "@humanspeak/svelte-motion": "^0.1.12",
         "@sveltejs/adapter-cloudflare": "^7.2.4",
-        "@sveltejs/kit": "^2.49.3",
+        "@sveltejs/kit": "^2.49.4",
         "@sveltejs/vite-plugin-svelte": "^6.2.1",
         "@tailwindcss/postcss": "^4.1.18",
         "@tailwindcss/typography": "^0.5.19",
