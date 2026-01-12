@@ -37,7 +37,7 @@
         "autoprefixer": "^10.4.23",
         "eslint": "^9.39.2",
         "eslint-config-prettier": "10.1.8",
-        "eslint-plugin-svelte": "3.13.1",
+        "eslint-plugin-svelte": "3.14.0",
         "globals": "^17.0.0",
         "lucide-svelte": "^0.562.0",
         "mdsvex": "^0.12.6",
