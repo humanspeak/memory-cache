@@ -5,7 +5,7 @@ description: Get started with @humanspeak/memory-cache
 
 # Getting Started
 
-@humanspeak/memory-cache is a lightweight, zero-dependency in-memory cache for TypeScript and JavaScript. It provides TTL expiration, LRU-style eviction, wildcard pattern deletion, and a powerful `@cached` decorator for method-level memoization.
+@humanspeak/memory-cache is a lightweight, zero-dependency in-memory cache for TypeScript and JavaScript. It provides TTL expiration, true LRU (Least Recently Used) eviction, wildcard pattern deletion, and a powerful `@cached` decorator for method-level memoization.
 
 ## Installation
 
@@ -88,7 +88,7 @@ await service.getUser('123')
 
 - **Zero Dependencies** - No external dependencies, keeping your bundle small
 - **TTL Expiration** - Entries automatically expire after a configurable time
-- **Size-Based Eviction** - Oldest entries are evicted when the cache is full
+- **LRU Eviction** - Least recently used entries are evicted when the cache is full
 - **Wildcard Deletion** - Delete entries by prefix or wildcard patterns
 - **Full TypeScript Support** - Complete type definitions included
 - **Method Decorator** - `@cached` decorator for automatic memoization
