@@ -63,9 +63,10 @@ const CACHED_UNDEFINED = Symbol('CACHED_UNDEFINED')
 const CACHED_NULL = Symbol('CACHED_NULL')
 
 /**
- * Generic in-memory cache implementation with TTL and size-based eviction.
+ * Generic in-memory cache implementation with TTL and LRU (Least Recently Used) eviction.
  * Provides efficient caching for any type of data with automatic cleanup
- * of expired or excess entries.
+ * of expired or excess entries. When the cache reaches maxSize, the least
+ * recently accessed entry is evicted to make room for new entries.
  *
  * @class MemoryCache
  * @template T - The type of values being cached
@@ -120,6 +121,7 @@ export class MemoryCache<T> {
 
     /**
      * Retrieves a value from the cache if it exists and hasn't expired.
+     * Accessing an entry moves it to the most-recently-used position (LRU behavior).
      *
      * @param {string} key - The key to look up
      * @returns {T | undefined} The cached value if found and valid, undefined otherwise
@@ -146,6 +148,10 @@ export class MemoryCache<T> {
             this.stats.misses++
             return undefined
         }
+
+        // Move entry to end of Map for LRU ordering (most recently used)
+        this.cache.delete(key)
+        this.cache.set(key, entry)
 
         this.stats.hits++
 
@@ -181,7 +187,8 @@ export class MemoryCache<T> {
     }
 
     /**
-     * Stores a value in the cache. If the cache is full, the oldest entry is removed.
+     * Stores a value in the cache. If the cache is full and this is a new key,
+     * the least recently used entry is evicted to make room.
      *
      * @param {string} key - The key under which to store the value
      * @param {T} value - The value to cache
@@ -193,8 +200,10 @@ export class MemoryCache<T> {
      * ```
      */
     set(key: string, value: T): void {
-        // Remove oldest entry if cache is full (skip if maxSize is 0 or negative)
-        if (this.maxSize > 0 && this.cache.size >= this.maxSize) {
+        const isNewKey = !this.cache.has(key)
+
+        // Remove LRU entry if cache is full and this is a new key (skip if maxSize is 0)
+        if (isNewKey && this.maxSize > 0 && this.cache.size >= this.maxSize) {
             const oldestKey = this.cache.keys().next().value
             if (oldestKey) {
                 this.cache.delete(oldestKey)

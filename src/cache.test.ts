@@ -290,6 +290,90 @@ describe('MemoryCache', () => {
                 expect(sizeCache.get('key1')).toBe('value1-updated')
                 expect(sizeCache.get('key2')).toBe('value2')
             })
+
+            it('should use LRU eviction - accessing an entry protects it from eviction', () => {
+                const sizeCache = new MemoryCache<string>({ maxSize: 3 })
+
+                sizeCache.set('key1', 'value1')
+                sizeCache.set('key2', 'value2')
+                sizeCache.set('key3', 'value3')
+
+                // Access key1, making it the most recently used
+                sizeCache.get('key1')
+
+                // Add key4 - should evict key2 (LRU), not key1
+                sizeCache.set('key4', 'value4')
+
+                expect(sizeCache.get('key1')).toBe('value1') // Protected by access
+                expect(sizeCache.get('key2')).toBeUndefined() // Evicted (was LRU)
+                expect(sizeCache.get('key3')).toBe('value3')
+                expect(sizeCache.get('key4')).toBe('value4')
+            })
+
+            it('should maintain correct LRU order with multiple accesses', () => {
+                const sizeCache = new MemoryCache<string>({ maxSize: 3 })
+
+                sizeCache.set('key1', 'value1')
+                sizeCache.set('key2', 'value2')
+                sizeCache.set('key3', 'value3')
+
+                // Access in order: key1, key3, key2
+                // LRU order after: key1 (oldest), key3, key2 (newest)
+                sizeCache.get('key1')
+                sizeCache.get('key3')
+                sizeCache.get('key2')
+
+                // Add key4 - should evict key1 (now LRU after accesses)
+                sizeCache.set('key4', 'value4')
+
+                expect(sizeCache.get('key1')).toBeUndefined() // Evicted (was LRU)
+                expect(sizeCache.get('key2')).toBe('value2')
+                expect(sizeCache.get('key3')).toBe('value3')
+                expect(sizeCache.get('key4')).toBe('value4')
+            })
+
+            it('should evict least recently used entry, not oldest inserted', () => {
+                const sizeCache = new MemoryCache<string>({ maxSize: 2 })
+
+                sizeCache.set('old', 'value1')
+                sizeCache.set('new', 'value2')
+
+                // Access 'old' making it most recently used
+                sizeCache.get('old')
+
+                // Add another entry - should evict 'new' (LRU), not 'old'
+                sizeCache.set('newest', 'value3')
+
+                expect(sizeCache.get('old')).toBe('value1') // Protected by recent access
+                expect(sizeCache.get('new')).toBeUndefined() // Evicted
+                expect(sizeCache.get('newest')).toBe('value3')
+            })
+
+            it('should update LRU order on every get()', () => {
+                const sizeCache = new MemoryCache<string>({ maxSize: 3 })
+
+                sizeCache.set('a', '1')
+                sizeCache.set('b', '2')
+                sizeCache.set('c', '3')
+
+                // Repeatedly access 'a' to keep it as MRU
+                sizeCache.get('a')
+                sizeCache.set('d', '4') // Evicts 'b'
+
+                sizeCache.get('a')
+                sizeCache.set('e', '5') // Evicts 'c'
+
+                sizeCache.get('a')
+                sizeCache.set('f', '6') // Evicts 'd'
+
+                // 'a' should still exist due to repeated access
+                expect(sizeCache.get('a')).toBe('1')
+                expect(sizeCache.get('b')).toBeUndefined()
+                expect(sizeCache.get('c')).toBeUndefined()
+                expect(sizeCache.get('d')).toBeUndefined()
+                expect(sizeCache.get('e')).toBe('5')
+                expect(sizeCache.get('f')).toBe('6')
+            })
         })
 
         describe('delete()', () => {
@@ -1453,22 +1537,26 @@ describe('MemoryCache', () => {
                 testCache.set('key2', 'value2')
                 testCache.set('key3', 'value3')
 
-                // Hits
-                testCache.get('key1')
-                testCache.get('key2')
+                // Hits - these also update LRU order
+                testCache.get('key1') // hit, key1 becomes MRU
+                testCache.get('key2') // hit, key2 becomes MRU
+                // LRU order is now: key3 (oldest), key1, key2 (newest)
 
                 // Misses
                 testCache.get('nonexistent')
 
-                // Eviction
-                testCache.set('key4', 'value4') // evicts key1
+                // Eviction - evicts key3 (LRU), not key1
+                testCache.set('key4', 'value4')
 
-                // Miss after eviction
-                testCache.get('key1')
+                // Hit - key1 was protected by LRU access
+                testCache.get('key1') // hit (key1 still exists)
+
+                // Miss - key3 was evicted
+                testCache.get('key3')
 
                 const stats = testCache.getStats()
-                expect(stats.hits).toBe(2)
-                expect(stats.misses).toBe(2)
+                expect(stats.hits).toBe(3) // key1, key2, then key1 again
+                expect(stats.misses).toBe(2) // nonexistent, key3
                 expect(stats.evictions).toBe(1)
                 expect(stats.size).toBe(3)
             })
