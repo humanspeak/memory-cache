@@ -129,9 +129,9 @@ await sleep(4000)  // Total 6 seconds
 const t3 = service.getTimestamp()  // New value (cache expired)
 ```
 
-## Size-Based Eviction
+## LRU Eviction
 
-When the cache reaches `maxSize`, the oldest entries are evicted:
+When the cache reaches `maxSize`, the least recently used entries are evicted:
 
 ```typescript
 class ProductService {
@@ -142,7 +142,7 @@ class ProductService {
 }
 
 // After caching 100 different products,
-// the oldest ones are evicted to make room for new ones
+// the least recently used ones are evicted to make room for new ones
 ```
 
 ## Handling Undefined and Null
