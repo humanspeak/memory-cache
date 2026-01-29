@@ -5,7 +5,7 @@ description: Complete API reference for the MemoryCache class
 
 # MemoryCache API
 
-The `MemoryCache` class is a generic in-memory cache with TTL expiration and size-based eviction.
+The `MemoryCache` class is a generic in-memory cache with TTL expiration and LRU (Least Recently Used) eviction.
 
 ## Constructor
 
@@ -61,7 +61,7 @@ try {
 
 ### get(key)
 
-Retrieves a value from the cache if it exists and hasn't expired.
+Retrieves a value from the cache if it exists and hasn't expired. Accessing an entry moves it to the most-recently-used position, protecting it from eviction.
 
 ```typescript
 get(key: string): T | undefined
@@ -82,7 +82,7 @@ const missing = cache.get('unknown') // undefined
 
 ### set(key, value)
 
-Stores a value in the cache. If the cache is full, the oldest entry is evicted.
+Stores a value in the cache. If the cache is full and this is a new key, the least recently used entry is evicted.
 
 ```typescript
 set(key: string, value: T): void

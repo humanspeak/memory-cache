@@ -18,7 +18,7 @@
 
 </div>
 
-A powerful, feature-rich in-memory caching solution with TTL expiration, LRU-style eviction, wildcard pattern deletion, and a `@cached` decorator for effortless method-level memoization. Perfect for API response caching, session storage, expensive computation caching, and performance optimization.
+A powerful, feature-rich in-memory caching solution with TTL expiration, true LRU (Least Recently Used) eviction, wildcard pattern deletion, and a `@cached` decorator for effortless method-level memoization. Perfect for API response caching, session storage, expensive computation caching, and performance optimization.
 
 Visit the [documentation](https://memory.svelte.page/) for detailed API reference and examples.
 
@@ -26,7 +26,7 @@ Visit the [documentation](https://memory.svelte.page/) for detailed API referenc
 
 - **Zero Dependencies** - Lightweight and fast
 - **TTL Expiration** - Automatic cache entry expiration
-- **Size-Based Eviction** - LRU-style eviction when cache is full
+- **LRU Eviction** - Least recently used entries are evicted when cache is full
 - **Wildcard Deletion** - Delete entries by prefix or wildcard patterns
 - **Full TypeScript Support** - Complete type definitions included
 - **Method Decorator** - `@cached` decorator for automatic memoization
