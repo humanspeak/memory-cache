@@ -57,9 +57,39 @@
             title: 'Examples',
             items: [
                 {
-                    title: 'Usage Examples',
+                    title: 'Overview',
                     href: '/docs/examples',
                     icon: 'fa-solid fa-code'
+                },
+                {
+                    title: 'API Caching',
+                    href: '/docs/examples/api-caching',
+                    icon: 'fa-solid fa-cloud'
+                },
+                {
+                    title: 'Sessions',
+                    href: '/docs/examples/sessions',
+                    icon: 'fa-solid fa-user-clock'
+                },
+                {
+                    title: 'Database Caching',
+                    href: '/docs/examples/database-caching',
+                    icon: 'fa-solid fa-database'
+                },
+                {
+                    title: 'Monitoring',
+                    href: '/docs/examples/monitoring',
+                    icon: 'fa-solid fa-chart-line'
+                },
+                {
+                    title: 'Multi-Tenant',
+                    href: '/docs/examples/multi-tenant',
+                    icon: 'fa-solid fa-building'
+                },
+                {
+                    title: 'Rate Limiting',
+                    href: '/docs/examples/rate-limiting',
+                    icon: 'fa-solid fa-gauge-high'
                 }
             ]
         },
