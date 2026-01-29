@@ -55,6 +55,8 @@ function checkRateLimit(clientId: string, limit: number = 100): boolean {
 import { MemoryCache } from '@humanspeak/memory-cache'
 import type { Request, Response, NextFunction } from 'express'
 
+// Uses RateLimitEntry type and checkRateLimit function from Basic Pattern above
+
 const rateLimitCache = new MemoryCache<RateLimitEntry>({
     maxSize: 100000,
     ttl: 60 * 1000
