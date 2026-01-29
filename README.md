@@ -59,7 +59,7 @@ import { MemoryCache } from '@humanspeak/memory-cache'
 const cache = new MemoryCache<string>()
 
 // Or customize the options
-const cache = new MemoryCache<string>({
+const customCache = new MemoryCache<string>({
     maxSize: 1000, // Maximum entries before eviction
     ttl: 10 * 60 * 1000 // 10 minutes TTL
 })
