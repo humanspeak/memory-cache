@@ -1,13 +1,66 @@
 /**
+ * Context passed to onHit hook when a cache entry is successfully retrieved.
+ */
+export type OnHitContext<T> = { key: string; value: T | undefined }
+
+/**
+ * Context passed to onMiss hook when a cache lookup fails.
+ */
+export type OnMissContext = { key: string; reason: 'not_found' | 'expired' }
+
+/**
+ * Context passed to onSet hook when a value is stored in the cache.
+ */
+export type OnSetContext<T> = { key: string; value: T; isUpdate: boolean }
+
+/**
+ * Context passed to onEvict hook when an entry is evicted due to size limits.
+ */
+export type OnEvictContext<T> = { key: string; value: T | undefined }
+
+/**
+ * Context passed to onExpire hook when an entry expires due to TTL.
+ */
+export type OnExpireContext<T> = {
+    key: string
+    value: T | undefined
+    source: 'get' | 'has' | 'prune'
+}
+
+/**
+ * Context passed to onDelete hook when an entry is explicitly deleted.
+ */
+export type OnDeleteContext<T> = {
+    key: string
+    value: T | undefined
+    source: 'delete' | 'deleteAsync' | 'deleteByPrefix' | 'deleteByMagicString' | 'clear'
+}
+
+/**
+ * Callback hooks for observing cache lifecycle events.
+ * All hooks are synchronous and errors are silently caught to prevent cache corruption.
+ */
+export type CacheHooks<T> = {
+    onHit?: (_ctx: OnHitContext<T>) => void
+    onMiss?: (_ctx: OnMissContext) => void
+    onSet?: (_ctx: OnSetContext<T>) => void
+    onEvict?: (_ctx: OnEvictContext<T>) => void
+    onExpire?: (_ctx: OnExpireContext<T>) => void
+    onDelete?: (_ctx: OnDeleteContext<T>) => void
+}
+
+/**
  * Configuration options for cache initialization.
  *
  * @interface CacheOptions
  * @property {number} [maxSize] - Maximum number of entries the cache can hold before evicting oldest entries
  * @property {number} [ttl] - Time-to-live in milliseconds for cache entries before they expire
+ * @property {CacheHooks} [hooks] - Optional lifecycle hooks for observing cache events
  */
-export type CacheOptions = {
+export type CacheOptions<T = unknown> = {
     maxSize?: number
     ttl?: number // milliseconds
+    hooks?: CacheHooks<T>
 }
 
 /**
@@ -89,6 +142,7 @@ export class MemoryCache<T> {
         new Map()
     private maxSize: number
     private ttl: number
+    private hooks: CacheHooks<T>
     private stats: Omit<CacheStats, 'size'> = {
         hits: 0,
         misses: 0,
@@ -102,9 +156,10 @@ export class MemoryCache<T> {
      * @param {CacheOptions} options - Configuration options for the cache
      * @param {number} [options.maxSize=100] - Maximum number of entries (default: 100)
      * @param {number} [options.ttl=300000] - Time-to-live in milliseconds (default: 5 minutes)
+     * @param {CacheHooks} [options.hooks] - Optional lifecycle hooks
      * @throws {CacheConfigError} If maxSize is negative or ttl is negative
      */
-    constructor(options: CacheOptions = {}) {
+    constructor(options: CacheOptions<T> = {}) {
         const maxSize = options.maxSize ?? 100
         const ttl = options.ttl ?? 5 * 60 * 1000 // 5 minutes default
 
@@ -117,6 +172,31 @@ export class MemoryCache<T> {
 
         this.maxSize = maxSize
         this.ttl = ttl
+        this.hooks = options.hooks ?? {}
+    }
+
+    /**
+     * Safely calls a hook function, catching any errors to prevent cache corruption.
+     */
+    // eslint-disable-next-line no-unused-vars
+    private callHook<C>(hook: ((context: C) => void) | undefined, context: C): void {
+        if (!hook) return
+        try {
+            hook(context)
+        } catch {
+            /* silent - hooks should not affect cache operation */
+        }
+    }
+
+    /**
+     * Unwraps a stored value, converting sentinel values back to their original form.
+     */
+    private unwrapValue(
+        storedValue: T | typeof CACHED_UNDEFINED | typeof CACHED_NULL
+    ): T | undefined {
+        if (storedValue === CACHED_UNDEFINED) return undefined
+        if (storedValue === CACHED_NULL) return null as T
+        return storedValue as T
     }
 
     /**
@@ -138,14 +218,18 @@ export class MemoryCache<T> {
         const entry = this.cache.get(key)
         if (!entry) {
             this.stats.misses++
+            this.callHook(this.hooks.onMiss, { key, reason: 'not_found' })
             return undefined
         }
 
         // Check if entry has expired (skip check if TTL is 0 or negative)
         if (this.ttl > 0 && Date.now() - entry.timestamp > this.ttl) {
+            const expiredValue = this.unwrapValue(entry.value)
             this.cache.delete(key)
             this.stats.expirations++
             this.stats.misses++
+            this.callHook(this.hooks.onExpire, { key, value: expiredValue, source: 'get' })
+            this.callHook(this.hooks.onMiss, { key, reason: 'expired' })
             return undefined
         }
 
@@ -156,14 +240,10 @@ export class MemoryCache<T> {
         this.stats.hits++
 
         // Handle the special sentinel values for cached undefined/null
-        if (entry.value === CACHED_UNDEFINED) {
-            return undefined
-        }
-        if (entry.value === CACHED_NULL) {
-            return null as T
-        }
+        const value = this.unwrapValue(entry.value)
+        this.callHook(this.hooks.onHit, { key, value })
 
-        return entry.value as T
+        return value
     }
 
     /**
@@ -179,7 +259,9 @@ export class MemoryCache<T> {
 
         // Check if entry has expired (skip check if TTL is 0 or negative)
         if (this.ttl > 0 && Date.now() - entry.timestamp > this.ttl) {
+            const expiredValue = this.unwrapValue(entry.value)
             this.cache.delete(key)
+            this.callHook(this.hooks.onExpire, { key, value: expiredValue, source: 'has' })
             return false
         }
 
@@ -207,8 +289,11 @@ export class MemoryCache<T> {
         if (isNewKey && this.maxSize > 0 && this.cache.size >= this.maxSize) {
             const oldestKey = this.cache.keys().next().value
             if (oldestKey) {
+                const evictedEntry = this.cache.get(oldestKey)
+                const evictedValue = evictedEntry ? this.unwrapValue(evictedEntry.value) : undefined
                 this.cache.delete(oldestKey)
                 this.stats.evictions++
+                this.callHook(this.hooks.onEvict, { key: oldestKey, value: evictedValue })
             }
         }
 
@@ -232,6 +317,8 @@ export class MemoryCache<T> {
             value: valueToStore,
             timestamp: Date.now()
         })
+
+        this.callHook(this.hooks.onSet, { key, value, isUpdate: !isNewKey })
     }
 
     /**
@@ -249,7 +336,13 @@ export class MemoryCache<T> {
      * ```
      */
     delete(key: string): boolean {
-        return this.cache.delete(key)
+        const entry = this.cache.get(key)
+        const deleted = this.cache.delete(key)
+        if (deleted && entry) {
+            const value = this.unwrapValue(entry.value)
+            this.callHook(this.hooks.onDelete, { key, value, source: 'delete' })
+        }
+        return deleted
     }
 
     /**
@@ -259,7 +352,13 @@ export class MemoryCache<T> {
      * @returns {Promise<boolean>} Promise resolving to true if removed, false otherwise
      */
     async deleteAsync(key: string): Promise<boolean> {
-        return Promise.resolve(this.cache.delete(key))
+        const entry = this.cache.get(key)
+        const deleted = this.cache.delete(key)
+        if (deleted && entry) {
+            const value = this.unwrapValue(entry.value)
+            this.callHook(this.hooks.onDelete, { key, value, source: 'deleteAsync' })
+        }
+        return Promise.resolve(deleted)
     }
 
     /**
@@ -274,6 +373,11 @@ export class MemoryCache<T> {
      * ```
      */
     clear(): void {
+        // Call onDelete for each entry before clearing
+        for (const [key, entry] of this.cache.entries()) {
+            const value = this.unwrapValue(entry.value)
+            this.callHook(this.hooks.onDelete, { key, value, source: 'clear' })
+        }
         this.cache.clear()
     }
 
@@ -295,9 +399,11 @@ export class MemoryCache<T> {
      */
     deleteByPrefix(prefix: string): number {
         let count = 0
-        for (const key of this.cache.keys()) {
+        for (const [key, entry] of this.cache.entries()) {
             if (key.startsWith(prefix)) {
+                const value = this.unwrapValue(entry.value)
                 this.cache.delete(key)
+                this.callHook(this.hooks.onDelete, { key, value, source: 'deleteByPrefix' })
                 count++
             }
         }
@@ -334,9 +440,11 @@ export class MemoryCache<T> {
 
         const regex = new RegExp(`^${escapedPattern}$`)
 
-        for (const key of this.cache.keys()) {
+        for (const [key, entry] of this.cache.entries()) {
             if (regex.test(key)) {
+                const value = this.unwrapValue(entry.value)
                 this.cache.delete(key)
+                this.callHook(this.hooks.onDelete, { key, value, source: 'deleteByMagicString' })
                 count++
             }
         }
@@ -511,8 +619,10 @@ export class MemoryCache<T> {
         const now = Date.now()
         for (const [key, entry] of this.cache.entries()) {
             if (now - entry.timestamp > this.ttl) {
+                const value = this.unwrapValue(entry.value)
                 this.cache.delete(key)
                 this.stats.expirations++
+                this.callHook(this.hooks.onExpire, { key, value, source: 'prune' })
                 count++
             }
         }

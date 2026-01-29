@@ -33,6 +33,7 @@ Visit the [documentation](https://memory.svelte.page/) for detailed API referenc
 - **Null/Undefined Support** - Properly caches falsy values
 - **Cache Statistics** - Track hits, misses, evictions, and expirations
 - **Introspection** - Query cache size, keys, values, and entries
+- **Lifecycle Hooks** - Observe cache events for monitoring and debugging
 
 ## Installation
 
@@ -130,10 +131,11 @@ await service.getUser('123')
 
 #### Constructor Options
 
-| Option    | Type     | Default  | Description                                      |
-| --------- | -------- | -------- | ------------------------------------------------ |
-| `maxSize` | `number` | `100`    | Maximum entries before eviction (0 = unlimited)  |
-| `ttl`     | `number` | `300000` | Time-to-live in milliseconds (0 = no expiration) |
+| Option    | Type         | Default  | Description                                      |
+| --------- | ------------ | -------- | ------------------------------------------------ |
+| `maxSize` | `number`     | `100`    | Maximum entries before eviction (0 = unlimited)  |
+| `ttl`     | `number`     | `300000` | Time-to-live in milliseconds (0 = no expiration) |
+| `hooks`   | `CacheHooks` | `{}`     | Lifecycle hooks for observing cache events       |
 
 #### Methods
 
@@ -212,6 +214,38 @@ cache.resetStats()
 // Proactively remove expired entries
 const prunedCount = cache.prune()
 ```
+
+## Cache Hooks
+
+Monitor cache lifecycle events with optional hooks:
+
+```typescript
+const cache = new MemoryCache<string>({
+    maxSize: 100,
+    ttl: 60000,
+    hooks: {
+        onHit: ({ key, value }) => console.log(`Cache hit: ${key}`),
+        onMiss: ({ key, reason }) => console.log(`Cache miss: ${key} (${reason})`),
+        onSet: ({ key, isUpdate }) => console.log(`Set: ${key} ${isUpdate ? '(update)' : '(new)'}`),
+        onEvict: ({ key }) => console.log(`Evicted: ${key}`),
+        onExpire: ({ key, source }) => console.log(`Expired: ${key} via ${source}`),
+        onDelete: ({ key, source }) => console.log(`Deleted: ${key} via ${source}`)
+    }
+})
+```
+
+### Hook Events
+
+| Hook       | When Called                         | Context                                     |
+| ---------- | ----------------------------------- | ------------------------------------------- |
+| `onHit`    | Successful cache retrieval          | `{ key, value }`                            |
+| `onMiss`   | Cache miss (not found or expired)   | `{ key, reason: 'not_found' \| 'expired' }` |
+| `onSet`    | Value stored in cache               | `{ key, value, isUpdate }`                  |
+| `onEvict`  | Entry evicted due to size limit     | `{ key, value }`                            |
+| `onExpire` | Entry removed due to TTL expiration | `{ key, value, source }`                    |
+| `onDelete` | Entry explicitly deleted            | `{ key, value, source }`                    |
+
+Hooks are synchronous and errors are silently caught to prevent cache corruption.
 
 ## Documentation
 
