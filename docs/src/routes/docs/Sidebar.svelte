@@ -136,8 +136,8 @@
      */
     function isActive(href: string) {
         const basePath = currentPath.split(/[?#]/)[0]
-        if (href === '/docs') {
-            // Only mark the root Docs link active for the exact page or when query/hash is present
+        if (href === '/docs' || href === '/docs/examples') {
+            // Only mark index pages active for the exact page or when query/hash is present
             return (
                 basePath === href ||
                 currentPath.startsWith(`${href}?`) ||
