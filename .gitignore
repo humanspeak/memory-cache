@@ -19,6 +19,6 @@ junit-vitest.xml
 /docs/build/
 
 .notes
-
+!.trunk/
 
 
