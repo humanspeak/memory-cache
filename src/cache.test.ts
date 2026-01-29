@@ -291,6 +291,27 @@ describe('MemoryCache', () => {
                 expect(sizeCache.get('key2')).toBe('value2')
             })
 
+            it('should move entry to MRU position when updating via set()', () => {
+                const sizeCache = new MemoryCache<string>({ maxSize: 3 })
+
+                sizeCache.set('key1', 'value1')
+                sizeCache.set('key2', 'value2')
+                sizeCache.set('key3', 'value3')
+                // Order: key1 (LRU), key2, key3 (MRU)
+
+                // Update key1 - should move it to MRU position
+                sizeCache.set('key1', 'value1-updated')
+                // Order: key2 (LRU), key3, key1 (MRU)
+
+                // Add key4 - should evict key2 (now LRU), not key1
+                sizeCache.set('key4', 'value4')
+
+                expect(sizeCache.get('key1')).toBe('value1-updated') // Protected by update
+                expect(sizeCache.get('key2')).toBeUndefined() // Evicted (was LRU)
+                expect(sizeCache.get('key3')).toBe('value3')
+                expect(sizeCache.get('key4')).toBe('value4')
+            })
+
             it('should use LRU eviction - accessing an entry protects it from eviction', () => {
                 const sizeCache = new MemoryCache<string>({ maxSize: 3 })
 

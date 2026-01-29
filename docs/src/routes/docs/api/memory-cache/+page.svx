@@ -82,7 +82,7 @@ const missing = cache.get('unknown') // undefined
 
 ### set(key, value)
 
-Stores a value in the cache. If the cache is full and this is a new key, the least recently used entry is evicted.
+Stores a value in the cache. If the cache is full and this is a new key, the least recently used entry is evicted. Setting a value (new or update) moves the entry to the most-recently-used position.
 
 ```typescript
 set(key: string, value: T): void

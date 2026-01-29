@@ -188,7 +188,8 @@ export class MemoryCache<T> {
 
     /**
      * Stores a value in the cache. If the cache is full and this is a new key,
-     * the least recently used entry is evicted to make room.
+     * the least recently used entry is evicted to make room. Setting a value
+     * (new or update) moves the entry to the most-recently-used position.
      *
      * @param {string} key - The key under which to store the value
      * @param {T} value - The value to cache
@@ -209,6 +210,12 @@ export class MemoryCache<T> {
                 this.cache.delete(oldestKey)
                 this.stats.evictions++
             }
+        }
+
+        // For existing keys, delete first to move to end (MRU position)
+        // Map.set() on existing key doesn't change position in iteration order
+        if (!isNewKey) {
+            this.cache.delete(key)
         }
 
         // Store undefined/null values as sentinels to distinguish from cache misses
