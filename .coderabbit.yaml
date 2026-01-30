@@ -1,0 +1,44 @@
+# CodeRabbit Configuration
+# https://docs.coderabbit.ai/guides/configure-coderabbit
+
+language: en-US
+
+reviews:
+    # Disable the summary comment on PRs
+    review_comment: false
+
+    # Enable high-level summary in walkthrough
+    high_level_summary: false
+
+    # Request changes workflow
+    request_changes_workflow: false
+
+    # Collapse walkthrough when files > threshold
+    collapse_walkthrough: true
+
+    # Auto-review on push
+    auto_review:
+        enabled: true
+        drafts: false
+
+    # Path filters - ignore generated/config files
+    path_filters:
+        - '!pnpm-lock.yaml'
+        - '!**/dist/**'
+        - '!**/coverage/**'
+        - '!**/*.min.js'
+
+    # Path instructions for context
+    path_instructions:
+        - path: src/**/*.ts
+          instructions: This is a TypeScript memory cache library. Focus on cache correctness, memory management, and TypeScript types.
+        - path: src/**/*.test.ts
+          instructions: These are Vitest tests. Verify test coverage and edge cases.
+        - path: docs/**
+          instructions: Documentation site built with SvelteKit. Check for accuracy and clarity.
+
+chat:
+    auto_reply: true
+
+# Tone and style
+tone_instructions: Be concise and direct. Focus on actionable feedback.
