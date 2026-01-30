@@ -1,6 +1,6 @@
 {
     "name": "@humanspeak/memory-cache",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "A lightweight, zero-dependency in-memory cache for TypeScript and JavaScript with TTL expiration, LRU eviction, wildcard pattern deletion, and a powerful @cached decorator for method-level memoization. Perfect for API response caching, session storage, and performance optimization.",
     "keywords": [
         "cache",
