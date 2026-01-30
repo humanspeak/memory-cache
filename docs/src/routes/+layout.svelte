@@ -9,7 +9,7 @@
     const imageLocation = `${page.url.origin}/`
 
     // Dynamic canonical URL based on current page path
-    const canonicalUrl = $derived(`${imageLocation}/${page.url.pathname}`)
+    const canonicalUrl = $derived(`${page.url.origin}${page.url.pathname}`)
 </script>
 
 <svelte:head>
@@ -28,6 +28,8 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content="{imageLocation}memory-cache-opengraph.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
