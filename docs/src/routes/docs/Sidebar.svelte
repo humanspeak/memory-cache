@@ -62,9 +62,9 @@
                     icon: 'fa-solid fa-code'
                 },
                 {
-                    title: 'Async Fetching',
-                    href: '/docs/examples/async-fetching',
-                    icon: 'fa-solid fa-rotate'
+                    title: 'Configuration',
+                    href: '/docs/examples/configuration',
+                    icon: 'fa-solid fa-sliders'
                 },
                 {
                     title: 'API Caching',
@@ -72,9 +72,14 @@
                     icon: 'fa-solid fa-cloud'
                 },
                 {
-                    title: 'Sessions',
-                    href: '/docs/examples/sessions',
-                    icon: 'fa-solid fa-user-clock'
+                    title: 'Async Fetching',
+                    href: '/docs/examples/async-fetching',
+                    icon: 'fa-solid fa-rotate'
+                },
+                {
+                    title: 'Computed Values',
+                    href: '/docs/examples/computed-values',
+                    icon: 'fa-solid fa-calculator'
                 },
                 {
                     title: 'Database Caching',
@@ -95,6 +100,16 @@
                     title: 'Rate Limiting',
                     href: '/docs/examples/rate-limiting',
                     icon: 'fa-solid fa-gauge-high'
+                },
+                {
+                    title: 'Service Class',
+                    href: '/docs/examples/service-class',
+                    icon: 'fa-solid fa-cube'
+                },
+                {
+                    title: 'Sessions',
+                    href: '/docs/examples/sessions',
+                    icon: 'fa-solid fa-user-clock'
                 }
             ]
         },
