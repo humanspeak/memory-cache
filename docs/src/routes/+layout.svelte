@@ -9,7 +9,7 @@
     const imageLocation = `${page.url.origin}/`
 
     // Dynamic canonical URL based on current page path
-    const canonicalUrl = $derived(`${imageLocation}/${page.url.pathname}`)
+    const canonicalUrl = $derived(`${page.url.origin}${page.url.pathname}`)
 </script>
 
 <svelte:head>
