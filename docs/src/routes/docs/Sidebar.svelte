@@ -57,9 +57,59 @@
             title: 'Examples',
             items: [
                 {
-                    title: 'Usage Examples',
+                    title: 'Overview',
                     href: '/docs/examples',
                     icon: 'fa-solid fa-code'
+                },
+                {
+                    title: 'Configuration',
+                    href: '/docs/examples/configuration',
+                    icon: 'fa-solid fa-sliders'
+                },
+                {
+                    title: 'API Caching',
+                    href: '/docs/examples/api-caching',
+                    icon: 'fa-solid fa-cloud'
+                },
+                {
+                    title: 'Async Fetching',
+                    href: '/docs/examples/async-fetching',
+                    icon: 'fa-solid fa-rotate'
+                },
+                {
+                    title: 'Computed Values',
+                    href: '/docs/examples/computed-values',
+                    icon: 'fa-solid fa-calculator'
+                },
+                {
+                    title: 'Database Caching',
+                    href: '/docs/examples/database-caching',
+                    icon: 'fa-solid fa-database'
+                },
+                {
+                    title: 'Monitoring',
+                    href: '/docs/examples/monitoring',
+                    icon: 'fa-solid fa-chart-line'
+                },
+                {
+                    title: 'Multi-Tenant',
+                    href: '/docs/examples/multi-tenant',
+                    icon: 'fa-solid fa-building'
+                },
+                {
+                    title: 'Rate Limiting',
+                    href: '/docs/examples/rate-limiting',
+                    icon: 'fa-solid fa-gauge-high'
+                },
+                {
+                    title: 'Service Class',
+                    href: '/docs/examples/service-class',
+                    icon: 'fa-solid fa-cube'
+                },
+                {
+                    title: 'Sessions',
+                    href: '/docs/examples/sessions',
+                    icon: 'fa-solid fa-user-clock'
                 }
             ]
         },
@@ -106,8 +156,8 @@
      */
     function isActive(href: string) {
         const basePath = currentPath.split(/[?#]/)[0]
-        if (href === '/docs') {
-            // Only mark the root Docs link active for the exact page or when query/hash is present
+        if (href === '/docs' || href === '/docs/examples') {
+            // Only mark index pages active for the exact page or when query/hash is present
             return (
                 basePath === href ||
                 currentPath.startsWith(`${href}?`) ||

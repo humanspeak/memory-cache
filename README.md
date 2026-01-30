@@ -33,6 +33,7 @@ Visit the [documentation](https://memory.svelte.page/) for detailed API referenc
 - **Null/Undefined Support** - Properly caches falsy values
 - **Cache Statistics** - Track hits, misses, evictions, and expirations
 - **Introspection** - Query cache size, keys, values, and entries
+- **Lifecycle Hooks** - Observe cache events for monitoring and debugging
 
 ## Installation
 
@@ -124,16 +125,36 @@ await service.getUser('123')
 await service.getUser('123')
 ```
 
+### Async Fetch with getOrSet
+
+```typescript
+import { MemoryCache } from '@humanspeak/memory-cache'
+
+const cache = new MemoryCache<User>({ ttl: 60000 })
+
+// Automatically fetch and cache on miss
+const user = await cache.getOrSet('user:123', async () => {
+    return await fetchUserFromDB(123)
+})
+
+// Concurrent requests share the same fetch (thundering herd prevention)
+const promises = Array.from({ length: 100 }, () =>
+    cache.getOrSet('popular-key', fetchExpensiveData)
+)
+await Promise.all(promises) // fetchExpensiveData called only once
+```
+
 ## API Reference
 
 ### `MemoryCache<T>`
 
 #### Constructor Options
 
-| Option    | Type     | Default  | Description                                      |
-| --------- | -------- | -------- | ------------------------------------------------ |
-| `maxSize` | `number` | `100`    | Maximum entries before eviction (0 = unlimited)  |
-| `ttl`     | `number` | `300000` | Time-to-live in milliseconds (0 = no expiration) |
+| Option    | Type         | Default  | Description                                      |
+| --------- | ------------ | -------- | ------------------------------------------------ |
+| `maxSize` | `number`     | `100`    | Maximum entries before eviction (0 = unlimited)  |
+| `ttl`     | `number`     | `300000` | Time-to-live in milliseconds (0 = no expiration) |
+| `hooks`   | `CacheHooks` | `{}`     | Lifecycle hooks for observing cache events       |
 
 #### Methods
 
@@ -141,6 +162,7 @@ await service.getUser('123')
 | ------------------------------ | ---------------------------------------------------- |
 | `get(key)`                     | Retrieves a value from the cache                     |
 | `set(key, value)`              | Stores a value in the cache                          |
+| `getOrSet(key, fetcher)`       | Gets cached value or fetches and caches on miss      |
 | `has(key)`                     | Checks if a key exists (useful for cached undefined) |
 | `delete(key)`                  | Removes a specific entry                             |
 | `deleteAsync(key)`             | Async version of delete                              |
@@ -212,6 +234,38 @@ cache.resetStats()
 // Proactively remove expired entries
 const prunedCount = cache.prune()
 ```
+
+## Cache Hooks
+
+Monitor cache lifecycle events with optional hooks:
+
+```typescript
+const cache = new MemoryCache<string>({
+    maxSize: 100,
+    ttl: 60000,
+    hooks: {
+        onHit: ({ key, value }) => console.log(`Cache hit: ${key}`),
+        onMiss: ({ key, reason }) => console.log(`Cache miss: ${key} (${reason})`),
+        onSet: ({ key, isUpdate }) => console.log(`Set: ${key} ${isUpdate ? '(update)' : '(new)'}`),
+        onEvict: ({ key }) => console.log(`Evicted: ${key}`),
+        onExpire: ({ key, source }) => console.log(`Expired: ${key} via ${source}`),
+        onDelete: ({ key, source }) => console.log(`Deleted: ${key} via ${source}`)
+    }
+})
+```
+
+### Hook Events
+
+| Hook       | When Called                         | Context                                     |
+| ---------- | ----------------------------------- | ------------------------------------------- |
+| `onHit`    | Successful cache retrieval          | `{ key, value }`                            |
+| `onMiss`   | Cache miss (not found or expired)   | `{ key, reason: 'not_found' \| 'expired' }` |
+| `onSet`    | Value stored in cache               | `{ key, value, isUpdate }`                  |
+| `onEvict`  | Entry evicted due to size limit     | `{ key, value }`                            |
+| `onExpire` | Entry removed due to TTL expiration | `{ key, value, source }`                    |
+| `onDelete` | Entry explicitly deleted            | `{ key, value, source }`                    |
+
+Hooks are synchronous and errors are silently caught to prevent cache corruption.
 
 ## Documentation
 

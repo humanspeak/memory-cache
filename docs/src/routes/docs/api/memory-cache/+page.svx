@@ -19,6 +19,7 @@ new MemoryCache<T>(options?: CacheOptions)
 |--------|------|---------|-------------|
 | `maxSize` | `number` | `100` | Maximum entries before eviction (0 = unlimited) |
 | `ttl` | `number` | `300000` | Time-to-live in milliseconds (0 = no expiration) |
+| `hooks` | `CacheHooks<T>` | `{}` | Lifecycle hooks for observing cache events |
 
 ### Example
 
@@ -79,6 +80,44 @@ cache.set('user:123', 'John Doe')
 const name = cache.get('user:123')  // 'John Doe'
 const missing = cache.get('unknown') // undefined
 ```
+
+### getOrSet(key, fetcher)
+
+Gets a value from cache, or fetches and caches it if not present. Implements single-flight pattern to prevent multiple concurrent fetches for the same key (thundering herd prevention).
+
+```typescript
+getOrSet(key: string, fetcher: () => T | Promise<T>): Promise<T>
+```
+
+**Parameters:**
+- `key` - The cache key
+- `fetcher` - Function that returns the value to cache (can be sync or async)
+
+**Returns:** `Promise<T>` - The cached or fetched value
+
+**Example:**
+
+```typescript
+// Basic usage with async fetcher
+const user = await cache.getOrSet('user:123', async () => {
+    return await database.findUser(123)
+})
+
+// Works with sync fetchers too
+const config = await cache.getOrSet('config', () => loadConfig())
+
+// Concurrent requests share the same fetch
+const promises = Array.from({ length: 100 }, () =>
+    cache.getOrSet('popular-key', fetchExpensiveData)
+)
+await Promise.all(promises) // fetchExpensiveData called only once
+```
+
+**Key behaviors:**
+- **Single-flight**: Concurrent requests for the same uncached key share one fetch
+- **Error handling**: Errors from the fetcher are not cached and propagate to callers
+- **Null/undefined**: Values including `null` and `undefined` are properly cached
+- **Uses instance TTL**: Cached values expire based on cache configuration
 
 ### set(key, value)
 
@@ -451,6 +490,70 @@ cache.has('null')       // true
 cache.has('undefined')  // true
 cache.has('missing')    // false
 ```
+
+## Hooks
+
+Hooks allow you to observe cache lifecycle events for monitoring, debugging, and integration with external systems.
+
+### CacheHooks
+
+```typescript
+type CacheHooks<T> = {
+    onHit?: (context: OnHitContext<T>) => void
+    onMiss?: (context: OnMissContext) => void
+    onSet?: (context: OnSetContext<T>) => void
+    onEvict?: (context: OnEvictContext<T>) => void
+    onExpire?: (context: OnExpireContext<T>) => void
+    onDelete?: (context: OnDeleteContext<T>) => void
+}
+```
+
+### Hook Events
+
+| Hook | When Called | Context Type |
+|------|-------------|--------------|
+| `onHit` | Successful `get()` retrieval | `{ key: string, value: T \| undefined }` |
+| `onMiss` | `get()` returns undefined | `{ key: string, reason: 'not_found' \| 'expired' }` |
+| `onSet` | Value stored via `set()` | `{ key: string, value: T, isUpdate: boolean }` |
+| `onEvict` | Entry evicted due to `maxSize` | `{ key: string, value: T \| undefined }` |
+| `onExpire` | Entry expired due to TTL | `{ key: string, value: T \| undefined, source: 'get' \| 'has' \| 'prune' }` |
+| `onDelete` | Entry explicitly deleted | `{ key: string, value: T \| undefined, source: 'delete' \| 'deleteAsync' \| 'deleteByPrefix' \| 'deleteByMagicString' \| 'clear' }` |
+
+### Example: Metrics Integration
+
+```typescript
+import { MemoryCache } from '@humanspeak/memory-cache'
+
+const cache = new MemoryCache<string>({
+    maxSize: 1000,
+    ttl: 5 * 60 * 1000,
+    hooks: {
+        onHit: ({ key }) => {
+            metrics.increment('cache.hit')
+            console.log(`Cache hit: ${key}`)
+        },
+        onMiss: ({ key, reason }) => {
+            metrics.increment('cache.miss')
+            console.log(`Cache miss: ${key} (${reason})`)
+        },
+        onEvict: ({ key }) => {
+            metrics.increment('cache.eviction')
+            console.log(`Evicted: ${key}`)
+        },
+        onExpire: ({ key, source }) => {
+            metrics.increment('cache.expiration')
+            console.log(`Expired: ${key} via ${source}`)
+        }
+    }
+})
+```
+
+### Important Notes
+
+- **Synchronous only**: Hooks must be synchronous functions. Async hooks are not supported.
+- **Error handling**: Errors thrown in hooks are silently caught to prevent cache corruption.
+- **Performance**: Keep hooks lightweight to avoid impacting cache performance.
+- **Batch operations**: `clear()`, `deleteByPrefix()`, and `deleteByMagicString()` call `onDelete` once per deleted entry.
 
 
 
