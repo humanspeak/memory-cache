@@ -62,6 +62,11 @@
                     icon: 'fa-solid fa-code'
                 },
                 {
+                    title: 'Async Fetching',
+                    href: '/docs/examples/async-fetching',
+                    icon: 'fa-solid fa-rotate'
+                },
+                {
                     title: 'API Caching',
                     href: '/docs/examples/api-caching',
                     icon: 'fa-solid fa-cloud'

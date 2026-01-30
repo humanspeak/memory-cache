@@ -81,6 +81,44 @@ const name = cache.get('user:123')  // 'John Doe'
 const missing = cache.get('unknown') // undefined
 ```
 
+### getOrSet(key, fetcher)
+
+Gets a value from cache, or fetches and caches it if not present. Implements single-flight pattern to prevent multiple concurrent fetches for the same key (thundering herd prevention).
+
+```typescript
+getOrSet(key: string, fetcher: () => T | Promise<T>): Promise<T>
+```
+
+**Parameters:**
+- `key` - The cache key
+- `fetcher` - Function that returns the value to cache (can be sync or async)
+
+**Returns:** `Promise<T>` - The cached or fetched value
+
+**Example:**
+
+```typescript
+// Basic usage with async fetcher
+const user = await cache.getOrSet('user:123', async () => {
+    return await database.findUser(123)
+})
+
+// Works with sync fetchers too
+const config = await cache.getOrSet('config', () => loadConfig())
+
+// Concurrent requests share the same fetch
+const promises = Array.from({ length: 100 }, () =>
+    cache.getOrSet('popular-key', fetchExpensiveData)
+)
+await Promise.all(promises) // fetchExpensiveData called only once
+```
+
+**Key behaviors:**
+- **Single-flight**: Concurrent requests for the same uncached key share one fetch
+- **Error handling**: Errors from the fetcher are not cached and propagate to callers
+- **Null/undefined**: Values including `null` and `undefined` are properly cached
+- **Uses instance TTL**: Cached values expire based on cache configuration
+
 ### set(key, value)
 
 Stores a value in the cache. If the cache is full and this is a new key, the least recently used entry is evicted. Setting a value (new or update) moves the entry to the most-recently-used position.

@@ -140,6 +140,7 @@ const CACHED_NULL = Symbol('CACHED_NULL')
 export class MemoryCache<T> {
     private cache: Map<string, CacheEntry<T | typeof CACHED_UNDEFINED | typeof CACHED_NULL>> =
         new Map()
+    private inFlight: Map<string, Promise<T>> = new Map()
     private maxSize: number
     private ttl: number
     private hooks: CacheHooks<T>
@@ -244,6 +245,48 @@ export class MemoryCache<T> {
         this.callHook(this.hooks.onHit, { key, value })
 
         return value
+    }
+
+    /**
+     * Gets a value from cache, or fetches and caches it if not present.
+     * Implements single-flight pattern to prevent thundering herd.
+     *
+     * @param {string} key - The key to look up or store
+     * @param {() => T | Promise<T>} fetcher - Function that returns the value to cache
+     * @returns {Promise<T>} The cached or fetched value
+     *
+     * @example
+     * ```typescript
+     * const user = await cache.getOrSet('user:123', async () => {
+     *     return await fetchUserFromDB(123)
+     * })
+     * ```
+     */
+    async getOrSet(key: string, fetcher: () => T | Promise<T>): Promise<T> {
+        // 1. Check cache (calls onHit if found)
+        if (this.has(key)) {
+            return this.get(key) as T
+        }
+
+        // 2. Check in-flight (join existing fetch)
+        const existing = this.inFlight.get(key)
+        if (existing) return existing
+
+        // 3. Create fetch promise with single-flight
+        const fetchPromise = (async () => {
+            try {
+                this.stats.misses++
+                this.callHook(this.hooks.onMiss, { key, reason: 'not_found' })
+                const value = await fetcher()
+                this.set(key, value)
+                return value
+            } finally {
+                this.inFlight.delete(key)
+            }
+        })()
+
+        this.inFlight.set(key, fetchPromise)
+        return fetchPromise
     }
 
     /**

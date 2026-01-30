@@ -125,6 +125,25 @@ await service.getUser('123')
 await service.getUser('123')
 ```
 
+### Async Fetch with getOrSet
+
+```typescript
+import { MemoryCache } from '@humanspeak/memory-cache'
+
+const cache = new MemoryCache<User>({ ttl: 60000 })
+
+// Automatically fetch and cache on miss
+const user = await cache.getOrSet('user:123', async () => {
+    return await fetchUserFromDB(123)
+})
+
+// Concurrent requests share the same fetch (thundering herd prevention)
+const promises = Array.from({ length: 100 }, () =>
+    cache.getOrSet('popular-key', fetchExpensiveData)
+)
+await Promise.all(promises) // fetchExpensiveData called only once
+```
+
 ## API Reference
 
 ### `MemoryCache<T>`
@@ -143,6 +162,7 @@ await service.getUser('123')
 | ------------------------------ | ---------------------------------------------------- |
 | `get(key)`                     | Retrieves a value from the cache                     |
 | `set(key, value)`              | Stores a value in the cache                          |
+| `getOrSet(key, fetcher)`       | Gets cached value or fetches and caches on miss      |
 | `has(key)`                     | Checks if a key exists (useful for cached undefined) |
 | `delete(key)`                  | Removes a specific entry                             |
 | `deleteAsync(key)`             | Async version of delete                              |
