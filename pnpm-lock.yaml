@@ -100,8 +100,8 @@ importers:
         specifier: ^9.39.2
         version: 9.39.2
       '@humanspeak/svelte-motion':
-        specifier: ^0.1.14
-        version: 0.1.14(svelte@5.49.0)
+        specifier: ^0.1.16
+        version: 0.1.16(svelte@5.49.0)
       '@sveltejs/adapter-cloudflare':
         specifier: ^7.2.6
         version: 7.2.6(@sveltejs/kit@2.50.1(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.49.0)(vite@7.3.1(@types/node@25.1.0)(jiti@2.6.1)(lightningcss@1.30.2)))(svelte@5.49.0)(typescript@5.9.3)(vite@7.3.1(@types/node@25.1.0)(jiti@2.6.1)(lightningcss@1.30.2)))(wrangler@4.61.1(@cloudflare/workers-types@4.20260129.0))
@@ -647,8 +647,8 @@ packages:
     resolution: {integrity: sha512-/zUx+yOsIrG4Y43Eh2peDeKCxlRt/gET6aHfaKpuq267qXdYDFViVHfMaLyygZOnl0kGWxFIgsBy8QFuTLUXEQ==}
     engines: {node: '>=18.18.0'}
 
-  '@humanspeak/svelte-motion@0.1.14':
-    resolution: {integrity: sha512-T7lpTdZlA0BtltWbaL1hzPHoAGjahtR4lW+BS2AoukGlxRwzcvXc9FUv5+l9KvqdBhvADeCtE4FGm+ll9tjxnA==}
+  '@humanspeak/svelte-motion@0.1.16':
+    resolution: {integrity: sha512-qLdQ/mK/NZI0EgJ/9tp+NUYI/hgnJH1tNrIVsgs1vvdYtzQR9hwGPArmxSuSQ2dOFely1gAbdmhim/nbViCAWQ==}
     peerDependencies:
       svelte: ^5.0.0
 
@@ -3209,7 +3209,7 @@ snapshots:
       '@humanfs/core': 0.19.1
       '@humanwhocodes/retry': 0.4.3
 
-  '@humanspeak/svelte-motion@0.1.14(svelte@5.49.0)':
+  '@humanspeak/svelte-motion@0.1.16(svelte@5.49.0)':
     dependencies:
       motion: 12.29.2
       motion-dom: 12.29.2
