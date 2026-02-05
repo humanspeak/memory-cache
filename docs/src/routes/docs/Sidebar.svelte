@@ -39,6 +39,36 @@
             ]
         },
         {
+            title: 'Interactive Demos',
+            items: [
+                {
+                    title: 'All Examples',
+                    href: '/examples',
+                    icon: 'fa-solid fa-play'
+                },
+                {
+                    title: 'Basic Cache',
+                    href: '/examples/basic-cache',
+                    icon: 'fa-solid fa-box'
+                },
+                {
+                    title: 'TTL Expiration',
+                    href: '/examples/ttl-expiration',
+                    icon: 'fa-solid fa-clock'
+                },
+                {
+                    title: 'LRU Eviction',
+                    href: '/examples/lru-eviction',
+                    icon: 'fa-solid fa-layer-group'
+                },
+                {
+                    title: 'Cache Statistics',
+                    href: '/examples/cache-statistics',
+                    icon: 'fa-solid fa-chart-line'
+                }
+            ]
+        },
+        {
             title: 'API Reference',
             items: [
                 {

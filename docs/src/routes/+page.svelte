@@ -225,6 +225,14 @@
                                 API Reference
                                 <i class="fa-solid fa-book ml-2 text-xs"></i>
                             </a>
+                            <a
+                                href="/examples"
+                                class="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-500/50 hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/20"
+                                use:springTap
+                            >
+                                Examples
+                                <i class="fa-solid fa-play ml-2 text-xs"></i>
+                            </a>
                         </div>
                         <ul
                             class="mt-10 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground"
