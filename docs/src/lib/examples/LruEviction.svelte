@@ -18,10 +18,11 @@
     let accessCounter = $state(0)
 
     function updateEntries() {
-        const keys = cache.keys()
-        entries = keys.map((key, index) => ({
+        // Use entries() to read values without affecting LRU order
+        const cacheEntries = cache.entries()
+        entries = cacheEntries.map(([key, value], index) => ({
             key,
-            value: cache.get(key) ?? '',
+            value: value ?? '',
             accessOrder: index // Lower = least recently used
         }))
     }
