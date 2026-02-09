@@ -21,7 +21,7 @@
         "github-slugger": "^2.0.0"
     },
     "devDependencies": {
-        "@cloudflare/workers-types": "^4.20260203.0",
+        "@cloudflare/workers-types": "^4.20260207.0",
         "@eslint/compat": "^2.0.2",
         "@eslint/js": "^9.39.2",
         "chokidar-cli": "^3.0.0",
