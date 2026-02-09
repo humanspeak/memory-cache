@@ -25,7 +25,7 @@
         "@eslint/compat": "^2.0.2",
         "@eslint/js": "^9.39.2",
         "chokidar-cli": "^3.0.0",
-        "@humanspeak/svelte-motion": "^0.1.17",
+        "@humanspeak/svelte-motion": "^0.1.19",
         "@sveltejs/adapter-cloudflare": "^7.2.6",
         "@sveltejs/kit": "^2.50.2",
         "@sveltejs/vite-plugin-svelte": "^6.2.4",
