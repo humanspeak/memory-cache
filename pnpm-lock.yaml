@@ -100,8 +100,8 @@ importers:
         specifier: ^9.39.2
         version: 9.39.2
       '@humanspeak/svelte-motion':
-        specifier: ^0.1.17
-        version: 0.1.17(svelte@5.49.2)
+        specifier: ^0.1.19
+        version: 0.1.19(svelte@5.49.2)
       '@sveltejs/adapter-cloudflare':
         specifier: ^7.2.6
         version: 7.2.6(@sveltejs/kit@2.50.2(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.49.2)(vite@7.3.1(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.30.2)))(svelte@5.49.2)(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.0)(jiti@2.6.1)(lightningcss@1.30.2)))(wrangler@4.62.0(@cloudflare/workers-types@4.20260203.0))
@@ -647,8 +647,8 @@ packages:
     resolution: {integrity: sha512-/zUx+yOsIrG4Y43Eh2peDeKCxlRt/gET6aHfaKpuq267qXdYDFViVHfMaLyygZOnl0kGWxFIgsBy8QFuTLUXEQ==}
     engines: {node: '>=18.18.0'}
 
-  '@humanspeak/svelte-motion@0.1.17':
-    resolution: {integrity: sha512-a8V9T4nhhwagNP0GX6Lnv4AFGM3YspQLn8hM++suGDXN9FXqBdceNseOwkXJQeL76SgkjfSlvYf5DeEWc2uvBw==}
+  '@humanspeak/svelte-motion@0.1.19':
+    resolution: {integrity: sha512-SwjUmhsniSdDJTo2ti1vuYV1Mg/p5TvD8aSBp554YD1FA6VDI87PvJb2L2QNioaS/lQ1cksT5pyQbEwdHQaneQ==}
     peerDependencies:
       svelte: ^5.0.0
 
@@ -1766,8 +1766,8 @@ packages:
   fraction.js@5.3.4:
     resolution: {integrity: sha512-1X1NTtiJphryn/uLQz3whtY6jK3fTqoE3ohKs0tT+Ujr1W59oopxmoEh7Lu5p6vBaPbgoM0bzveAW4Qi5RyWDQ==}
 
-  framer-motion@12.31.0:
-    resolution: {integrity: sha512-Tnd0FU05zGRFI3JJmBegXonF1rfuzYeuXd1QSdQ99Ysnppk0yWBWSW2wUsqzRpS5nv0zPNx+y0wtDj4kf0q5RQ==}
+  framer-motion@12.33.0:
+    resolution: {integrity: sha512-ca8d+rRPcDP5iIF+MoT3WNc0KHJMjIyFAbtVLvM9eA7joGSpeqDfiNH/kCs1t4CHi04njYvWyj0jS4QlEK/rJQ==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0 || ^19.0.0
@@ -2133,14 +2133,14 @@ packages:
     peerDependencies:
       svelte: ^5.27.0
 
-  motion-dom@12.30.1:
-    resolution: {integrity: sha512-QXB+iFJRzZTqL+Am4a1CRoHdH+0Nq12wLdqQQZZsfHlp9AMt6PA098L/61oVZsDA+Ep3QSGudzpViyRrhYhGcQ==}
+  motion-dom@12.33.0:
+    resolution: {integrity: sha512-XRPebVypsl0UM+7v0Hr8o9UAj0S2djsQWRdHBd5iVouVpMrQqAI0C/rDAT3QaYnXnHuC5hMcwDHCboNeyYjPoQ==}
 
   motion-utils@12.29.2:
     resolution: {integrity: sha512-G3kc34H2cX2gI63RqU+cZq+zWRRPSsNIOjpdl9TN4AQwC4sgwYPl/Q/Obf/d53nOm569T0fYK+tcoSV50BWx8A==}
 
-  motion@12.31.0:
-    resolution: {integrity: sha512-KpZQik3LLFdsiaLdFXQGnty84KcDvvdvBCHSvA9aH+RjQTP6jkJGyngRPSngau13ARUI6TbPphf/Vv/QxwxRJQ==}
+  motion@12.33.0:
+    resolution: {integrity: sha512-TcND7PijsrTeIA9SRVUB8TOJQ+6mJnJ5K4a9oAJZvyI0Zy47Gq5oofU+VkTxbLcvDoKXnHspQcII2mnk3TbFsQ==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0 || ^19.0.0
@@ -3209,10 +3209,10 @@ snapshots:
       '@humanfs/core': 0.19.1
       '@humanwhocodes/retry': 0.4.3
 
-  '@humanspeak/svelte-motion@0.1.17(svelte@5.49.2)':
+  '@humanspeak/svelte-motion@0.1.19(svelte@5.49.2)':
     dependencies:
-      motion: 12.31.0
-      motion-dom: 12.30.1
+      motion: 12.33.0
+      motion-dom: 12.33.0
       svelte: 5.49.2
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
@@ -4366,9 +4366,9 @@ snapshots:
 
   fraction.js@5.3.4: {}
 
-  framer-motion@12.31.0:
+  framer-motion@12.33.0:
     dependencies:
-      motion-dom: 12.30.1
+      motion-dom: 12.33.0
       motion-utils: 12.29.2
       tslib: 2.8.1
 
@@ -4702,15 +4702,15 @@ snapshots:
       svelte: 5.49.2
       svelte-toolbelt: 0.7.1(svelte@5.49.2)
 
-  motion-dom@12.30.1:
+  motion-dom@12.33.0:
     dependencies:
       motion-utils: 12.29.2
 
   motion-utils@12.29.2: {}
 
-  motion@12.31.0:
+  motion@12.33.0:
     dependencies:
-      framer-motion: 12.31.0
+      framer-motion: 12.33.0
       tslib: 2.8.1
 
   mri@1.2.0: {}
