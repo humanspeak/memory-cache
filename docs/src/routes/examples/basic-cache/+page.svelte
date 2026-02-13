@@ -1,9 +1,11 @@
 <script lang="ts">
     import { getBreadcrumbContext } from '$lib/components/contexts/Breadcrumb/Breadcrumb.context'
+    import { getSeoContext } from '$lib/components/contexts/Seo/Seo.context'
     import Example from '$lib/components/general/Example.svelte'
     import BasicCache from '$lib/examples/BasicCache.svelte'
 
     const breadcrumbs = getBreadcrumbContext()
+    const seo = getSeoContext()
     $effect(() => {
         if (breadcrumbs) {
             breadcrumbs.breadcrumbs = [
@@ -11,13 +13,12 @@
                 { title: 'Basic Cache' }
             ]
         }
+        if (seo) {
+            seo.title = 'Basic Cache | Examples | Memory Cache'
+            seo.description = 'Interactive demo of basic memory cache operations in TypeScript. Try get, set, and delete with a live visual cache state powered by @humanspeak/memory-cache.'
+        }
     })
 </script>
-
-<svelte:head>
-    <title>Basic Cache | Examples | Memory Cache</title>
-    <meta name="description" content="Interactive demo of basic cache operations: get, set, and delete." />
-</svelte:head>
 
 <Example title="Basic Cache">
     <BasicCache />

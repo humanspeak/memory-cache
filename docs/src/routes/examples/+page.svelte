@@ -1,10 +1,16 @@
 <script lang="ts">
     import { getBreadcrumbContext } from '$lib/components/contexts/Breadcrumb/Breadcrumb.context'
+    import { getSeoContext } from '$lib/components/contexts/Seo/Seo.context'
 
     const breadcrumbs = $derived(getBreadcrumbContext())
+    const seo = $derived(getSeoContext())
     $effect(() => {
         if (breadcrumbs) {
             breadcrumbs.breadcrumbs = [{ title: 'Examples' }]
+        }
+        if (seo) {
+            seo.title = 'Interactive Examples | Memory Cache'
+            seo.description = 'Explore interactive examples of @humanspeak/memory-cache featuring live demos of cache operations, TTL expiration, LRU eviction, and performance stats.'
         }
     })
 
@@ -35,11 +41,6 @@
         }
     ]
 </script>
-
-<svelte:head>
-    <title>Interactive Examples | Memory Cache</title>
-    <meta name="description" content="Interactive examples demonstrating @humanspeak/memory-cache features" />
-</svelte:head>
 
 <div class="container mx-auto px-4 py-12">
     <!-- Hero Section -->
