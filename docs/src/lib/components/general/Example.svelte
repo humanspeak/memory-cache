@@ -15,6 +15,10 @@
     }
 </script>
 
+{#if title}
+    <h1 class="sr-only">{title}</h1>
+{/if}
+
 <div class="isolate flex h-full w-full flex-1 flex-col">
     <!-- Toolbar -->
     <div class="flex h-12 w-full items-center border-b border-border bg-card/50 px-4">

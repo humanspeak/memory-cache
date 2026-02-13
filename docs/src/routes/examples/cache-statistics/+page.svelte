@@ -1,9 +1,11 @@
 <script lang="ts">
     import { getBreadcrumbContext } from '$lib/components/contexts/Breadcrumb/Breadcrumb.context'
+    import { getSeoContext } from '$lib/components/contexts/Seo/Seo.context'
     import Example from '$lib/components/general/Example.svelte'
     import CacheStatistics from '$lib/examples/CacheStatistics.svelte'
 
     const breadcrumbs = getBreadcrumbContext()
+    const seo = getSeoContext()
     $effect(() => {
         if (breadcrumbs) {
             breadcrumbs.breadcrumbs = [
@@ -11,13 +13,12 @@
                 { title: 'Cache Statistics' }
             ]
         }
+        if (seo) {
+            seo.title = 'Cache Statistics | Examples | Memory Cache'
+            seo.description = 'Monitor cache hit rate, miss rate, and overall performance in real-time. Interactive demo of built-in statistics tracking in @humanspeak/memory-cache.'
+        }
     })
 </script>
-
-<svelte:head>
-    <title>Cache Statistics | Examples | Memory Cache</title>
-    <meta name="description" content="Monitor hit rate, miss rate, and cache performance in real-time." />
-</svelte:head>
 
 <Example title="Cache Statistics">
     <CacheStatistics />

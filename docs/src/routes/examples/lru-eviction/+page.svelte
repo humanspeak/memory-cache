@@ -1,9 +1,11 @@
 <script lang="ts">
     import { getBreadcrumbContext } from '$lib/components/contexts/Breadcrumb/Breadcrumb.context'
+    import { getSeoContext } from '$lib/components/contexts/Seo/Seo.context'
     import Example from '$lib/components/general/Example.svelte'
     import LruEviction from '$lib/examples/LruEviction.svelte'
 
     const breadcrumbs = getBreadcrumbContext()
+    const seo = getSeoContext()
     $effect(() => {
         if (breadcrumbs) {
             breadcrumbs.breadcrumbs = [
@@ -11,13 +13,12 @@
                 { title: 'LRU Eviction' }
             ]
         }
+        if (seo) {
+            seo.title = 'LRU Eviction | Examples | Memory Cache'
+            seo.description = 'See how least recently used items are evicted when the cache reaches capacity. Interactive demo of LRU eviction in @humanspeak/memory-cache for TypeScript.'
+        }
     })
 </script>
-
-<svelte:head>
-    <title>LRU Eviction | Examples | Memory Cache</title>
-    <meta name="description" content="See how least recently used items are evicted when the cache is full." />
-</svelte:head>
 
 <Example title="LRU Eviction">
     <LruEviction />

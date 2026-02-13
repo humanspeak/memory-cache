@@ -1,13 +1,19 @@
 <script lang="ts">
     import { getBreadcrumbContext } from '$lib/components/contexts/Breadcrumb/Breadcrumb.context'
+    import { getSeoContext } from '$lib/components/contexts/Seo/Seo.context'
 
     const breadcrumbs = $derived(getBreadcrumbContext())
+    const seo = $derived(getSeoContext())
     $effect(() => {
         if (breadcrumbs) {
             breadcrumbs.breadcrumbs = [
                 { title: 'Docs', href: '/docs' },
                 { title: 'Examples' }
             ]
+        }
+        if (seo) {
+            seo.title = 'Usage Examples | Memory Cache'
+            seo.description = 'Real-world usage examples for @humanspeak/memory-cache covering API caching, session storage, database queries, rate limiting, and the @cached decorator.'
         }
     })
 
@@ -103,11 +109,6 @@
         { useCase: 'Configuration', ttl: '5-10 minutes', maxSize: '100', keyPattern: 'config:{env}' }
     ]
 </script>
-
-<svelte:head>
-    <title>Usage Examples | Memory Cache</title>
-    <meta name="description" content="Real-world examples of @humanspeak/memory-cache" />
-</svelte:head>
 
 <!-- Hero Section -->
 <div class="not-prose mb-10">
