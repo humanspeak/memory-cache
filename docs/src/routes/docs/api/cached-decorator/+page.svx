@@ -177,7 +177,7 @@ class UserService {
 
     // Combine multiple arguments into a custom key
     @cached<SearchResult[]>({
-        keyGenerator: (args) => `${args[0]}-${args[1].sort().join(',')}`
+        keyGenerator: (args) => `${args[0]}-${[...args[1]].sort().join(',')}`
     })
     search(query: string, tags: string[]): SearchResult[] {
         return performSearch(query, tags)
