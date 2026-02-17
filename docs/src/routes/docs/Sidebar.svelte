@@ -228,8 +228,9 @@
                                 rel={item?.external ? 'noopener' : undefined}
                                 class="group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150
                                  {isActive(item.href)
-                                    ? 'bg-sidebar-active text-sidebar-active-foreground'
-                                    : 'text-sidebar-foreground hover:bg-muted hover:text-text-primary'}"
+                                    ? 'bg-accent text-accent-foreground'
+                                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'}"
+
                             >
                                 {#if item.icon}
                                     <motion.span
@@ -239,13 +240,13 @@
                                     >
                                         <i
                                             class="{item.icon} fa-fw text-sm {isActive(item.href)
-                                                ? 'text-sidebar-active-foreground'
-                                                : 'text-text-muted group-hover:text-text-secondary'}"
-                                        ></i>
+                                            ? 'text-accent-foreground'
+                                            : 'text-muted-foreground group-hover:text-foreground'}"
+                                    ></i>
                                     </motion.span>
                                 {:else}
                                     <i
-                                        class="fa-solid fa-arrow-right fa-fw mr-3 text-xs text-text-muted"
+                                        class="fa-solid fa-arrow-right fa-fw mr-3 text-xs text-muted-foreground"
                                     ></i>
                                 {/if}
                                 {item.title}
