@@ -855,6 +855,26 @@ describe('cached decorator', () => {
                 expect(hitKeys.length).toBe(1)
                 expect(hitKeys[0]).toMatch(/^getValue:[0-9a-f]+$/)
             })
+
+            it('should treat undefined and null arguments as the same hash (known limitation)', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({ hashKeys: true })
+                    getValue(id: string | null | undefined): string {
+                        this.callCount++
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                // JSON.stringify([undefined]) === "[null]" === JSON.stringify([null])
+                // so hashed keys for undefined and null collide (same as default behavior)
+                expect(instance.getValue(undefined)).toBe('value-undefined')
+                expect(instance.getValue(null)).toBe('value-undefined')
+                expect(instance.callCount).toBe(1)
+            })
         })
 
         describe('Precedence', () => {
