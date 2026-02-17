@@ -64,6 +64,20 @@ export type CacheOptions<T = unknown> = {
 }
 
 /**
+ * Configuration options for the `@cached` method decorator.
+ * Extends `CacheOptions` with decorator-specific key generation options.
+ *
+ * @interface CachedDecoratorOptions
+ * @property {function} [keyGenerator] - Custom function to generate cache keys from method arguments. Takes precedence over `hashKeys` when both are set.
+ * @property {boolean} [hashKeys] - When true, uses FNV-1a hashing on serialized arguments for shorter, fixed-length cache keys.
+ */
+export type CachedDecoratorOptions<T = unknown> = CacheOptions<T> & {
+    // trunk-ignore(eslint/@typescript-eslint/no-explicit-any)
+    keyGenerator?: (_args: any[]) => string
+    hashKeys?: boolean
+}
+
+/**
  * Statistics about cache usage and performance.
  *
  * @interface CacheStats
@@ -674,11 +688,29 @@ export class MemoryCache<T> {
 }
 
 /**
+ * FNV-1a 32-bit hash function.
+ * Pure JS implementation — no dependencies, works in browser and Node.
+ *
+ * @param str - The string to hash
+ * @returns Hex string of the 32-bit hash
+ */
+function fnv1aHash(str: string): string {
+    let hash = 0x811c9dc5
+    for (let i = 0; i < str.length; i++) {
+        hash ^= str.charCodeAt(i)
+        hash = Math.imul(hash, 0x01000193)
+    }
+    return (hash >>> 0).toString(16)
+}
+
+/**
  * Cache decorator factory for method-level caching.
  * Provides a way to cache method results based on their arguments.
  *
  * @template T - The return type of the decorated method
- * @param {CacheOptions} options - Configuration options for the cache
+ * @param {CachedDecoratorOptions} options - Configuration options for the cache
+ * @param {function} [options.keyGenerator] - Custom function to generate cache keys from method arguments. Takes precedence over `hashKeys`.
+ * @param {boolean} [options.hashKeys] - When true, uses FNV-1a hashing on serialized arguments for shorter, fixed-length cache keys.
  * @returns A method decorator that caches the results
  *
  * @example
@@ -689,11 +721,22 @@ export class MemoryCache<T> {
  *         // Expensive operation
  *         return await fetchUser(id);
  *     }
+ *
+ *     @cached<User>({ keyGenerator: (args) => args[0].id })
+ *     getByUser(user: User): string {
+ *         return user.name;
+ *     }
+ *
+ *     @cached<string>({ hashKeys: true })
+ *     process(data: LargeObject): string {
+ *         return expensiveComputation(data);
+ *     }
  * }
  * ```
  */
-export function cached<T>(options: CacheOptions = {}) {
-    const cache = new MemoryCache<T>(options)
+export function cached<T>(options: CachedDecoratorOptions = {}) {
+    const { keyGenerator, hashKeys, ...cacheOptions } = options
+    const cache = new MemoryCache<T>(cacheOptions)
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -701,7 +744,15 @@ export function cached<T>(options: CacheOptions = {}) {
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         descriptor.value = function (...args: any[]) {
-            const key = `${propertyKey}:${JSON.stringify(args)}`
+            let argKey: string
+            if (keyGenerator) {
+                argKey = keyGenerator(args)
+            } else if (hashKeys) {
+                argKey = fnv1aHash(JSON.stringify(args))
+            } else {
+                argKey = JSON.stringify(args)
+            }
+            const key = `${propertyKey}:${argKey}`
 
             // Use has() to check if key exists, then get() to retrieve value
             // This allows us to distinguish between cache miss and cached undefined

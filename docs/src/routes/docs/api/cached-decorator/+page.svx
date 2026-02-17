@@ -22,12 +22,16 @@ class MyService {
 
 ## Options
 
-The decorator accepts the same options as `MemoryCache`:
+The decorator accepts the same options as `MemoryCache`, plus decorator-specific key generation options:
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `maxSize` | `number` | `100` | Maximum cached results before eviction |
 | `ttl` | `number` | `300000` | Cache duration in milliseconds |
+| `keyGenerator` | `(args: any[]) => string` | — | Custom function to generate cache keys from method arguments |
+| `hashKeys` | `boolean` | `false` | Use FNV-1a hashing on serialized arguments for shorter, fixed-length keys |
+
+> When both `keyGenerator` and `hashKeys` are set, `keyGenerator` takes precedence.
 
 ## Basic Example
 
@@ -158,6 +162,56 @@ class LookupService {
     }
 }
 ```
+
+## Custom Key Generator
+
+Use the `keyGenerator` option to fully control how cache keys are derived from method arguments. This is useful when you want to cache based on specific properties of complex objects, or when `JSON.stringify` doesn't produce the desired key.
+
+```typescript
+class UserService {
+    // Cache by user ID only, ignoring other properties
+    @cached<string>({ keyGenerator: (args) => args[0].id })
+    getDisplayName(user: { id: string; name: string; updatedAt: Date }): string {
+        return computeDisplayName(user)
+    }
+
+    // Combine multiple arguments into a custom key
+    @cached<SearchResult[]>({
+        keyGenerator: (args) => `${args[0]}-${args[1].sort().join(',')}`
+    })
+    search(query: string, tags: string[]): SearchResult[] {
+        return performSearch(query, tags)
+    }
+
+    // Ignore all arguments (constant cache key)
+    @cached<Config>({ keyGenerator: () => 'config' })
+    getConfig(source: string): Config {
+        return loadConfig(source)
+    }
+}
+```
+
+## Hashed Keys
+
+Use the `hashKeys` option when you want shorter, fixed-length cache keys. This is particularly useful when arguments are large or deeply nested objects that would produce very long `JSON.stringify` output.
+
+```typescript
+class AnalyticsService {
+    @cached<Report>({ hashKeys: true, ttl: 60000 })
+    generateReport(filters: ComplexFilterObject): Report {
+        return buildReport(filters)
+    }
+}
+
+class DataService {
+    @cached<Result>({ hashKeys: true, maxSize: 500 })
+    process(largePayload: Record<string, unknown>): Result {
+        return expensiveComputation(largePayload)
+    }
+}
+```
+
+Hashed keys use FNV-1a 32-bit hashing internally — a fast, pure-JS hash that works in both browser and Node environments.
 
 ## Important Notes
 

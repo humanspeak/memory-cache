@@ -125,6 +125,34 @@ await service.getUser('123')
 await service.getUser('123')
 ```
 
+#### Custom Key Generator
+
+Use `keyGenerator` to control how cache keys are derived from arguments:
+
+```typescript
+class UserService {
+    @cached<string>({ keyGenerator: (args) => args[0].id })
+    getDisplayName(user: { id: string; name: string }): string {
+        return computeDisplayName(user)
+    }
+}
+```
+
+#### Hashed Keys
+
+Use `hashKeys` for shorter, fixed-length keys (useful with complex arguments):
+
+```typescript
+class AnalyticsService {
+    @cached<Report>({ hashKeys: true, ttl: 60000 })
+    generateReport(filters: ComplexFilterObject): Report {
+        return buildReport(filters)
+    }
+}
+```
+
+> When both `keyGenerator` and `hashKeys` are set, `keyGenerator` takes precedence.
+
 ### Async Fetch with getOrSet
 
 ```typescript
