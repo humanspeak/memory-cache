@@ -734,7 +734,7 @@ function fnv1aHash(str: string): string {
  * }
  * ```
  */
-export function cached<T>(options: CachedDecoratorOptions = {}) {
+export function cached<T>(options: CachedDecoratorOptions<T> = {}) {
     const { keyGenerator, hashKeys, ...cacheOptions } = options
     const cache = new MemoryCache<T>(cacheOptions)
 
