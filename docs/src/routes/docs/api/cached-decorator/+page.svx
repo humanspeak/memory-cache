@@ -211,7 +211,7 @@ class DataService {
 }
 ```
 
-Hashed keys use FNV-1a 32-bit hashing internally — a fast, pure-JS hash that works in both browser and Node environments.
+Hashed keys use FNV-1a 32-bit hashing internally — a fast, pure-JS hash that works in both browser and Node environments. Note that 32-bit hashes have a theoretical collision risk with very large key sets (~77K+ unique argument combinations). For most caching use cases this is not a concern, but if you need guaranteed uniqueness with a very large number of distinct keys, use `keyGenerator` instead.
 
 ## Important Notes
 
