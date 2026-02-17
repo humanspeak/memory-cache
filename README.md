@@ -1,11 +1,11 @@
 <!-- trunk-ignore-all(markdownlint/MD033) -->
+<!-- trunk-ignore-all(markdownlint/MD036) -->
+<!-- trunk-ignore(markdownlint/MD041) -->
 <div align="center">
 
 # @humanspeak/memory-cache
 
 **A lightweight, zero-dependency in-memory cache for TypeScript and JavaScript**
-
-</div>
 
 [![NPM version](https://img.shields.io/npm/v/@humanspeak/memory-cache.svg)](https://www.npmjs.com/package/@humanspeak/memory-cache)
 [![Build Status](https://github.com/humanspeak/memory-cache/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/humanspeak/memory-cache/actions/workflows/npm-publish.yml)
@@ -301,8 +301,8 @@ For complete documentation, examples, and API reference, visit [memory.svelte.pa
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT © [Humanspeak, Inc.](LICENSE)
 
-## Contributing
+## Credits
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Made with ❤️ by [Humanspeak](https://humanspeak.com)
