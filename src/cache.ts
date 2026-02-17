@@ -722,7 +722,7 @@ function fnv1aHash(str: string): string {
  *         return await fetchUser(id);
  *     }
  *
- *     @cached<User>({ keyGenerator: (args) => args[0].id })
+ *     @cached<string>({ keyGenerator: (args) => args[0].id })
  *     getByUser(user: User): string {
  *         return user.name;
  *     }
