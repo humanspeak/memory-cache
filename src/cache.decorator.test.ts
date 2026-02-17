@@ -708,6 +708,27 @@ describe('cached decorator', () => {
 
                 expect(hitKeys).toEqual(['getValue:k-x'])
             })
+
+            it('should propagate errors when keyGenerator throws', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({
+                        keyGenerator: () => {
+                            throw new Error('key generation failed')
+                        }
+                    })
+                    getValue(id: string): string {
+                        this.callCount++
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                expect(() => instance.getValue('a')).toThrow('key generation failed')
+                expect(instance.callCount).toBe(0)
+            })
         })
 
         describe('hashKeys option', () => {
