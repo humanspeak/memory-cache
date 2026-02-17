@@ -1,25 +1,55 @@
 /**
- * Context passed to onHit hook when a cache entry is successfully retrieved.
+ * Context passed to the {@link CacheHooks.onHit} callback when a cache entry
+ * is successfully retrieved.
+ *
+ * @template T - The type of values stored in the cache.
+ * @property {string} key - The cache key that was looked up.
+ * @property {T | undefined} value - The unwrapped value returned to the caller.
  */
 export type OnHitContext<T> = { key: string; value: T | undefined }
 
 /**
- * Context passed to onMiss hook when a cache lookup fails.
+ * Context passed to the {@link CacheHooks.onMiss} callback when a cache lookup
+ * does not produce a value.
+ *
+ * @property {string} key - The cache key that was looked up.
+ * @property {'not_found' | 'expired'} reason - Why the lookup missed:
+ *   `'not_found'` if no entry existed, `'expired'` if the entry's TTL had elapsed.
  */
 export type OnMissContext = { key: string; reason: 'not_found' | 'expired' }
 
 /**
- * Context passed to onSet hook when a value is stored in the cache.
+ * Context passed to the {@link CacheHooks.onSet} callback when a value is
+ * written to the cache.
+ *
+ * @template T - The type of values stored in the cache.
+ * @property {string} key - The cache key being written.
+ * @property {T} value - The value that was stored.
+ * @property {boolean} isUpdate - `true` when the key already existed (overwrite),
+ *   `false` when it is a brand-new entry.
  */
 export type OnSetContext<T> = { key: string; value: T; isUpdate: boolean }
 
 /**
- * Context passed to onEvict hook when an entry is evicted due to size limits.
+ * Context passed to the {@link CacheHooks.onEvict} callback when the
+ * least-recently-used entry is removed to make room for a new one.
+ *
+ * @template T - The type of values stored in the cache.
+ * @property {string} key - The cache key of the evicted entry.
+ * @property {T | undefined} value - The unwrapped value that was evicted.
  */
 export type OnEvictContext<T> = { key: string; value: T | undefined }
 
 /**
- * Context passed to onExpire hook when an entry expires due to TTL.
+ * Context passed to the {@link CacheHooks.onExpire} callback when a
+ * TTL-expired entry is removed from the cache.
+ *
+ * @template T - The type of values stored in the cache.
+ * @property {string} key - The cache key of the expired entry.
+ * @property {T | undefined} value - The unwrapped value that expired.
+ * @property {'get' | 'has' | 'prune'} source - The operation that discovered
+ *   the expiration: `'get'` / `'has'` for lazy cleanup, `'prune'` for
+ *   proactive cleanup.
  */
 export type OnExpireContext<T> = {
     key: string
@@ -28,7 +58,14 @@ export type OnExpireContext<T> = {
 }
 
 /**
- * Context passed to onDelete hook when an entry is explicitly deleted.
+ * Context passed to the {@link CacheHooks.onDelete} callback when an entry is
+ * explicitly removed by the caller.
+ *
+ * @template T - The type of values stored in the cache.
+ * @property {string} key - The cache key that was deleted.
+ * @property {T | undefined} value - The unwrapped value that was deleted.
+ * @property {'delete' | 'deleteAsync' | 'deleteByPrefix' | 'deleteByMagicString' | 'clear'} source -
+ *   The method that triggered the deletion.
  */
 export type OnDeleteContext<T> = {
     key: string
@@ -38,7 +75,16 @@ export type OnDeleteContext<T> = {
 
 /**
  * Callback hooks for observing cache lifecycle events.
- * All hooks are synchronous and errors are silently caught to prevent cache corruption.
+ * All hooks are synchronous and errors are silently caught to prevent cache
+ * corruption.
+ *
+ * @template T - The type of values stored in the cache.
+ * @property {function} [onHit] - Called after a successful cache read.
+ * @property {function} [onMiss] - Called when a key is not found or has expired.
+ * @property {function} [onSet] - Called after a value is written (insert or update).
+ * @property {function} [onEvict] - Called when an LRU entry is removed to stay within `maxSize`.
+ * @property {function} [onExpire] - Called when a TTL-expired entry is removed.
+ * @property {function} [onDelete] - Called when an entry is explicitly deleted by the caller.
  */
 export type CacheHooks<T> = {
     onHit?: (_ctx: OnHitContext<T>) => void
@@ -52,10 +98,26 @@ export type CacheHooks<T> = {
 /**
  * Configuration options for cache initialization.
  *
- * @interface CacheOptions
- * @property {number} [maxSize] - Maximum number of entries the cache can hold before evicting oldest entries
- * @property {number} [ttl] - Time-to-live in milliseconds for cache entries before they expire
- * @property {CacheHooks} [hooks] - Optional lifecycle hooks for observing cache events
+ * @template T - The type of values stored in the cache (defaults to `unknown`).
+ * @property {number} [maxSize=100] - Maximum number of entries the cache can
+ *   hold. When exceeded, the least-recently-used entry is evicted.
+ *   Set to `0` to disable the size limit.
+ * @property {number} [ttl=300000] - Time-to-live in milliseconds for cache
+ *   entries. After this duration, entries are considered expired and removed
+ *   lazily on access or proactively via {@link MemoryCache.prune}.
+ *   Set to `0` to disable expiration.
+ * @property {CacheHooks<T>} [hooks] - Optional lifecycle hooks for observing
+ *   cache events such as hits, misses, evictions, and deletions.
+ *
+ * @example
+ * ```typescript
+ * const options: CacheOptions<string> = {
+ *     maxSize: 500,
+ *     ttl: 60_000, // 1 minute
+ *     hooks: { onEvict: (ctx) => console.log(`Evicted ${ctx.key}`) }
+ * }
+ * const cache = new MemoryCache<string>(options)
+ * ```
  */
 export type CacheOptions<T = unknown> = {
     maxSize?: number
@@ -64,12 +126,27 @@ export type CacheOptions<T = unknown> = {
 }
 
 /**
- * Configuration options for the `@cached` method decorator.
- * Extends `CacheOptions` with decorator-specific key generation options.
+ * Configuration options for the {@link cached} method decorator.
+ * Extends {@link CacheOptions} with decorator-specific key generation options.
  *
- * @interface CachedDecoratorOptions
- * @property {function} [keyGenerator] - Custom function to generate cache keys from method arguments. Takes precedence over `hashKeys` when both are set.
- * @property {boolean} [hashKeys] - When true, uses FNV-1a hashing on serialized arguments for shorter, fixed-length cache keys.
+ * @template T - The return type of the decorated method (defaults to `unknown`).
+ * @property {function} [keyGenerator] - Custom function that receives the
+ *   method's arguments array and returns a cache key string. When provided,
+ *   this takes precedence over `hashKeys`.
+ * @property {boolean} [hashKeys=false] - When `true`, the decorator serialises
+ *   the arguments via `JSON.stringify` and produces an FNV-1a hash for a
+ *   shorter, fixed-length cache key. Ignored when `keyGenerator` is set.
+ *
+ * @example
+ * ```typescript
+ * // Custom key generation
+ * @cached<User>({ keyGenerator: (args) => `user-${args[0]}` })
+ * async getUser(id: number): Promise<User> { ... }
+ *
+ * // Hashed keys for large argument objects
+ * @cached<string>({ hashKeys: true, ttl: 30_000 })
+ * process(data: LargeObject): string { ... }
+ * ```
  */
 export type CachedDecoratorOptions<T = unknown> = CacheOptions<T> & {
     // trunk-ignore(eslint/@typescript-eslint/no-explicit-any)
@@ -80,12 +157,23 @@ export type CachedDecoratorOptions<T = unknown> = CacheOptions<T> & {
 /**
  * Statistics about cache usage and performance.
  *
- * @interface CacheStats
- * @property {number} hits - Number of successful cache retrievals
- * @property {number} misses - Number of cache misses (key not found or expired)
- * @property {number} evictions - Number of entries removed due to size limits
- * @property {number} expirations - Number of entries removed due to TTL expiration
- * @property {number} size - Current number of entries in the cache
+ * @property {number} hits - Number of successful cache retrievals.
+ * @property {number} misses - Number of cache misses (key not found or expired).
+ * @property {number} evictions - Number of entries removed due to `maxSize` limits.
+ * @property {number} expirations - Number of entries removed due to TTL expiration.
+ * @property {number} size - Current number of non-expired entries in the cache.
+ *
+ * @example
+ * ```typescript
+ * // Typical stats object
+ * const stats: CacheStats = {
+ *     hits: 42,
+ *     misses: 7,
+ *     evictions: 3,
+ *     expirations: 12,
+ *     size: 85
+ * }
+ * ```
  */
 export type CacheStats = {
     hits: number
@@ -98,10 +186,22 @@ export type CacheStats = {
 /**
  * Error thrown when cache configuration is invalid.
  *
- * @class CacheConfigError
  * @extends Error
+ *
+ * @example
+ * ```typescript
+ * try {
+ *     new MemoryCache({ maxSize: -1 })
+ * } catch (err) {
+ *     console.log(err instanceof CacheConfigError) // true
+ *     console.log(err.message) // 'maxSize must be a non-negative number'
+ * }
+ * ```
  */
 export class CacheConfigError extends Error {
+    /**
+     * @param {string} message - Human-readable description of the configuration error.
+     */
     constructor(message: string) {
         super(message)
         this.name = 'CacheConfigError'
@@ -123,10 +223,15 @@ type CacheEntry<T> = {
 }
 
 /**
- * Special sentinel values to represent cached undefined/null values.
- * This allows us to distinguish between "not cached" and "cached undefined/null".
+ * Sentinel value stored in place of a cached `undefined`.
+ * Allows the cache to distinguish "no entry" from "entry whose value is undefined".
  */
 const CACHED_UNDEFINED = Symbol('CACHED_UNDEFINED')
+
+/**
+ * Sentinel value stored in place of a cached `null`.
+ * Allows the cache to distinguish "no entry" from "entry whose value is null".
+ */
 const CACHED_NULL = Symbol('CACHED_NULL')
 
 /**
@@ -152,12 +257,23 @@ const CACHED_NULL = Symbol('CACHED_NULL')
  * ```
  */
 export class MemoryCache<T> {
+    /** Internal store mapping keys to their cached entries with metadata. */
     private cache: Map<string, CacheEntry<T | typeof CACHED_UNDEFINED | typeof CACHED_NULL>> =
         new Map()
+
+    /** Tracks in-flight fetcher promises for the single-flight pattern in {@link getOrSet}. */
     private inFlight: Map<string, Promise<T>> = new Map()
+
+    /** Maximum number of entries before LRU eviction kicks in. `0` means unlimited. */
     private maxSize: number
+
+    /** Time-to-live in milliseconds. `0` means entries never expire. */
     private ttl: number
+
+    /** User-supplied lifecycle hooks. */
     private hooks: CacheHooks<T>
+
+    /** Running counters for cache performance metrics. */
     private stats: Omit<CacheStats, 'size'> = {
         hits: 0,
         misses: 0,
@@ -168,11 +284,17 @@ export class MemoryCache<T> {
     /**
      * Creates a new MemoryCache instance.
      *
-     * @param {CacheOptions} options - Configuration options for the cache
-     * @param {number} [options.maxSize=100] - Maximum number of entries (default: 100)
-     * @param {number} [options.ttl=300000] - Time-to-live in milliseconds (default: 5 minutes)
-     * @param {CacheHooks} [options.hooks] - Optional lifecycle hooks
-     * @throws {CacheConfigError} If maxSize is negative or ttl is negative
+     * @param {CacheOptions<T>} options - Configuration options for the cache.
+     * @param {number} [options.maxSize=100] - Maximum number of entries (default: 100).
+     * @param {number} [options.ttl=300000] - Time-to-live in milliseconds (default: 5 minutes).
+     * @param {CacheHooks<T>} [options.hooks] - Optional lifecycle hooks.
+     * @throws {CacheConfigError} If `maxSize` is negative or `ttl` is negative.
+     *
+     * @example
+     * ```typescript
+     * // Throws CacheConfigError: maxSize must be a non-negative number
+     * new MemoryCache({ maxSize: -1 })
+     * ```
      */
     constructor(options: CacheOptions<T> = {}) {
         const maxSize = options.maxSize ?? 100
@@ -191,9 +313,16 @@ export class MemoryCache<T> {
     }
 
     /**
-     * Safely calls a hook function, catching any errors to prevent cache corruption.
+     * Safely calls a hook function, catching any errors to prevent cache
+     * corruption.
+     *
+     * @template C - The context type for the hook callback.
+     * @param {((context: C) => void) | undefined} hook - The hook function to
+     *   invoke, or `undefined` if no hook is registered.
+     * @param {C} context - The context object passed to the hook.
+     * @returns {void}
      */
-    // eslint-disable-next-line no-unused-vars
+    // trunk-ignore(eslint/no-unused-vars)
     private callHook<C>(hook: ((context: C) => void) | undefined, context: C): void {
         if (!hook) return
         try {
@@ -204,7 +333,13 @@ export class MemoryCache<T> {
     }
 
     /**
-     * Unwraps a stored value, converting sentinel values back to their original form.
+     * Unwraps a stored value, converting sentinel symbols back to their
+     * original `undefined` or `null` form.
+     *
+     * @param {T | typeof CACHED_UNDEFINED | typeof CACHED_NULL} storedValue -
+     *   The raw value from the internal cache map.
+     * @returns {T | undefined} The original value the caller stored, with
+     *   sentinels replaced by `undefined` or `null`.
      */
     private unwrapValue(
         storedValue: T | typeof CACHED_UNDEFINED | typeof CACHED_NULL
@@ -263,17 +398,32 @@ export class MemoryCache<T> {
 
     /**
      * Gets a value from cache, or fetches and caches it if not present.
-     * Implements single-flight pattern to prevent thundering herd.
+     * Implements the single-flight pattern to prevent thundering herd: if
+     * multiple callers request the same key concurrently, only one fetch
+     * executes and the rest share the same `Promise`.
      *
-     * @param {string} key - The key to look up or store
-     * @param {() => T | Promise<T>} fetcher - Function that returns the value to cache
-     * @returns {Promise<T>} The cached or fetched value
+     * @param {string} key - The key to look up or store.
+     * @param {() => T | Promise<T>} fetcher - Function that returns the value
+     *   to cache. Called at most once per cache miss per key.
+     * @returns {Promise<T>} Resolves to the cached value (on hit) or the
+     *   fetcher result (on miss). Concurrent callers for the same key receive
+     *   the same `Promise` instance.
      *
      * @example
      * ```typescript
      * const user = await cache.getOrSet('user:123', async () => {
      *     return await fetchUserFromDB(123)
      * })
+     * ```
+     *
+     * @example
+     * ```typescript
+     * // Thundering herd prevention — only one fetch executes
+     * const [a, b] = await Promise.all([
+     *     cache.getOrSet('key', expensiveFetch),
+     *     cache.getOrSet('key', expensiveFetch)
+     * ])
+     * // expensiveFetch was called only once; a === b
      * ```
      */
     async getOrSet(key: string, fetcher: () => T | Promise<T>): Promise<T> {
@@ -305,10 +455,20 @@ export class MemoryCache<T> {
 
     /**
      * Checks if a key exists in the cache (regardless of its value).
-     * This is useful for distinguishing between cache misses and cached undefined values.
+     * This is useful for distinguishing between cache misses and cached
+     * `undefined` values.
      *
-     * @param {string} key - The key to check
-     * @returns {boolean} True if the key exists in cache and hasn't expired, false otherwise
+     * @param {string} key - The key to check.
+     * @returns {boolean} `true` if the key exists in cache and hasn't expired,
+     *   `false` otherwise.
+     *
+     * @example
+     * ```typescript
+     * cache.set('nullable', undefined)
+     * cache.has('nullable')   // true  — entry exists
+     * cache.get('nullable')   // undefined
+     * cache.has('nonexistent') // false — no entry
+     * ```
      */
     has(key: string): boolean {
         const entry = this.cache.get(key)
@@ -405,8 +565,15 @@ export class MemoryCache<T> {
     /**
      * Asynchronously removes a specific entry from the cache.
      *
-     * @param {string} key - The key of the entry to remove
-     * @returns {Promise<boolean>} Promise resolving to true if removed, false otherwise
+     * @param {string} key - The key of the entry to remove.
+     * @returns {Promise<boolean>} Promise resolving to `true` if an entry was
+     *   removed, `false` if the key wasn't found.
+     *
+     * @example
+     * ```typescript
+     * cache.set('temp', 'data')
+     * const removed = await cache.deleteAsync('temp') // true
+     * ```
      */
     async deleteAsync(key: string): Promise<boolean> {
         const entry = this.cache.get(key)
@@ -690,9 +857,10 @@ export class MemoryCache<T> {
 /**
  * FNV-1a 32-bit hash function.
  * Pure JS implementation — no dependencies, works in browser and Node.
+ * Internal helper used by the {@link cached} decorator when `hashKeys` is enabled.
  *
- * @param str - The string to hash
- * @returns Hex string of the 32-bit hash
+ * @param {string} str - The string to hash (typically `JSON.stringify(args)`).
+ * @returns {string} An 8-character hex string of the unsigned 32-bit hash.
  */
 function fnv1aHash(str: string): string {
     let hash = 0x811c9dc5
@@ -706,12 +874,17 @@ function fnv1aHash(str: string): string {
 /**
  * Cache decorator factory for method-level caching.
  * Provides a way to cache method results based on their arguments.
+ * Each decorated method receives its own isolated {@link MemoryCache} instance.
  *
- * @template T - The return type of the decorated method
- * @param {CachedDecoratorOptions} options - Configuration options for the cache
- * @param {function} [options.keyGenerator] - Custom function to generate cache keys from method arguments. Takes precedence over `hashKeys`.
- * @param {boolean} [options.hashKeys] - When true, uses FNV-1a hashing on serialized arguments for shorter, fixed-length cache keys.
- * @returns A method decorator that caches the results
+ * @template T - The return type of the decorated method.
+ * @param {CachedDecoratorOptions<T>} options - Configuration options for the
+ *   cache and key generation strategy.
+ * @param {function} [options.keyGenerator] - Custom function to generate cache
+ *   keys from method arguments. Takes precedence over `hashKeys`.
+ * @param {boolean} [options.hashKeys] - When `true`, uses FNV-1a hashing on
+ *   serialised arguments for shorter, fixed-length cache keys.
+ * @returns {MethodDecorator} A legacy method decorator (`target, propertyKey,
+ *   descriptor`) that wraps the original method with cache-lookup logic.
  *
  * @example
  * ```typescript
@@ -738,11 +911,11 @@ export function cached<T>(options: CachedDecoratorOptions<T> = {}) {
     const { keyGenerator, hashKeys, ...cacheOptions } = options
     const cache = new MemoryCache<T>(cacheOptions)
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // trunk-ignore(eslint/@typescript-eslint/no-explicit-any)
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
         const originalMethod = descriptor.value
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // trunk-ignore(eslint/@typescript-eslint/no-explicit-any)
         descriptor.value = function (...args: any[]) {
             let argKey: string
             if (keyGenerator) {
