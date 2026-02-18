@@ -3,6 +3,7 @@ export type {
     CacheHooks,
     CacheOptions,
     CacheStats,
+    CachedDecoratorOptions,
     OnDeleteContext,
     OnEvictContext,
     OnExpireContext,

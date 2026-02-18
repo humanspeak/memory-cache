@@ -542,6 +542,392 @@ describe('cached decorator', () => {
     })
 
     // ==========================================
+    // KEY GENERATION TESTS
+    // ==========================================
+    describe('Key Generation', () => {
+        describe('keyGenerator option', () => {
+            it('should use custom key function for cache keys', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({ keyGenerator: (args) => `custom-${args[0]}` })
+                    getValue(id: string): string {
+                        this.callCount++
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                expect(instance.getValue('123')).toBe('value-123')
+                expect(instance.getValue('123')).toBe('value-123')
+                expect(instance.callCount).toBe(1)
+            })
+
+            it('should cache different args separately with keyGenerator', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({ keyGenerator: (args) => args[0] })
+                    getValue(id: string): string {
+                        this.callCount++
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                expect(instance.getValue('a')).toBe('value-a')
+                expect(instance.getValue('b')).toBe('value-b')
+                expect(instance.callCount).toBe(2)
+            })
+
+            it('should support extracting object properties in keyGenerator', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({ keyGenerator: (args) => args[0].id })
+                    getValue(user: { id: string; name: string }): string {
+                        this.callCount++
+                        return `value-${user.name}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                expect(instance.getValue({ id: '1', name: 'Alice' })).toBe('value-Alice')
+                // Same id but different name — should use cached result
+                expect(instance.getValue({ id: '1', name: 'Bob' })).toBe('value-Alice')
+                expect(instance.callCount).toBe(1)
+            })
+
+            it('should work with TTL and keyGenerator', () => {
+                vi.useFakeTimers()
+
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({ ttl: 100, keyGenerator: (args) => args[0] })
+                    getValue(id: string): string {
+                        this.callCount++
+                        return `value-${id}-${this.callCount}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                expect(instance.getValue('a')).toBe('value-a-1')
+                expect(instance.getValue('a')).toBe('value-a-1')
+
+                vi.advanceTimersByTime(101)
+
+                expect(instance.getValue('a')).toBe('value-a-2')
+                expect(instance.callCount).toBe(2)
+
+                vi.useRealTimers()
+            })
+
+            it('should work with maxSize and keyGenerator', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({ maxSize: 2, keyGenerator: (args) => args[0] })
+                    getValue(id: string): string {
+                        this.callCount++
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                instance.getValue('1')
+                instance.getValue('2')
+                instance.getValue('3') // evicts '1'
+
+                expect(instance.callCount).toBe(3)
+
+                instance.getValue('1') // must recompute
+                expect(instance.callCount).toBe(4)
+            })
+
+            it('should handle empty string from keyGenerator', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({ keyGenerator: () => '' })
+                    getValue(id: string): string {
+                        this.callCount++
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                expect(instance.getValue('a')).toBe('value-a')
+                // Same key (empty string) so returns cached
+                expect(instance.getValue('b')).toBe('value-a')
+                expect(instance.callCount).toBe(1)
+            })
+
+            it('should handle constant key from keyGenerator (ignoring args)', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({ keyGenerator: () => 'constant' })
+                    getValue(id: string): string {
+                        this.callCount++
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                expect(instance.getValue('a')).toBe('value-a')
+                expect(instance.getValue('b')).toBe('value-a')
+                expect(instance.getValue('c')).toBe('value-a')
+                expect(instance.callCount).toBe(1)
+            })
+
+            it('should work with hooks and keyGenerator', () => {
+                const hitKeys: string[] = []
+
+                class TestClass {
+                    @cached<string>({
+                        keyGenerator: (args) => `k-${args[0]}`,
+                        hooks: { onHit: ({ key }) => hitKeys.push(key) }
+                    })
+                    getValue(id: string): string {
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                instance.getValue('x')
+                instance.getValue('x') // hit
+
+                expect(hitKeys).toEqual(['getValue:k-x'])
+            })
+
+            it('should propagate errors when keyGenerator throws', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({
+                        keyGenerator: () => {
+                            throw new Error('key generation failed')
+                        }
+                    })
+                    getValue(id: string): string {
+                        this.callCount++
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                expect(() => instance.getValue('a')).toThrow('key generation failed')
+                expect(instance.callCount).toBe(0)
+            })
+        })
+
+        describe('hashKeys option', () => {
+            it('should cache correctly with hashed keys', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({ hashKeys: true })
+                    getValue(id: string): string {
+                        this.callCount++
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                expect(instance.getValue('123')).toBe('value-123')
+                expect(instance.getValue('123')).toBe('value-123')
+                expect(instance.callCount).toBe(1)
+            })
+
+            it('should cache different args separately with hashKeys', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({ hashKeys: true })
+                    getValue(id: string): string {
+                        this.callCount++
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                expect(instance.getValue('a')).toBe('value-a')
+                expect(instance.getValue('b')).toBe('value-b')
+                expect(instance.callCount).toBe(2)
+            })
+
+            it('should work with complex objects and hashKeys', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({ hashKeys: true })
+                    getValue(obj: { id: number; name: string }): string {
+                        this.callCount++
+                        return `value-${obj.id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                expect(instance.getValue({ id: 1, name: 'Alice' })).toBe('value-1')
+                expect(instance.getValue({ id: 1, name: 'Alice' })).toBe('value-1')
+                expect(instance.getValue({ id: 2, name: 'Bob' })).toBe('value-2')
+                expect(instance.callCount).toBe(2)
+            })
+
+            it('should work with TTL and hashKeys', () => {
+                vi.useFakeTimers()
+
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({ ttl: 100, hashKeys: true })
+                    getValue(id: string): string {
+                        this.callCount++
+                        return `value-${id}-${this.callCount}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                expect(instance.getValue('a')).toBe('value-a-1')
+                vi.advanceTimersByTime(101)
+                expect(instance.getValue('a')).toBe('value-a-2')
+                expect(instance.callCount).toBe(2)
+
+                vi.useRealTimers()
+            })
+
+            it('should work with maxSize and hashKeys', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({ maxSize: 2, hashKeys: true })
+                    getValue(id: string): string {
+                        this.callCount++
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                instance.getValue('1')
+                instance.getValue('2')
+                instance.getValue('3') // evicts '1'
+
+                expect(instance.callCount).toBe(3)
+
+                instance.getValue('1') // must recompute
+                expect(instance.callCount).toBe(4)
+            })
+
+            it('should work with hooks and hashKeys', () => {
+                const hitKeys: string[] = []
+
+                class TestClass {
+                    @cached<string>({
+                        hashKeys: true,
+                        hooks: { onHit: ({ key }) => hitKeys.push(key) }
+                    })
+                    getValue(id: string): string {
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                instance.getValue('test')
+                instance.getValue('test') // hit
+
+                // The key should be propertyKey:hash format
+                expect(hitKeys.length).toBe(1)
+                expect(hitKeys[0]).toMatch(/^getValue:[0-9a-f]+$/)
+            })
+
+            it('should treat undefined and null arguments as the same hash (known limitation)', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({ hashKeys: true })
+                    getValue(id: string | null | undefined): string {
+                        this.callCount++
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                // JSON.stringify([undefined]) === "[null]" === JSON.stringify([null])
+                // so hashed keys for undefined and null collide (same as default behavior)
+                expect(instance.getValue(undefined)).toBe('value-undefined')
+                expect(instance.getValue(null)).toBe('value-undefined')
+                expect(instance.callCount).toBe(1)
+            })
+        })
+
+        describe('Precedence', () => {
+            it('should use keyGenerator when both keyGenerator and hashKeys are set', () => {
+                const generatorCalls: any[][] = []
+
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({
+                        keyGenerator: (args) => {
+                            generatorCalls.push(args)
+                            return `gen-${args[0]}`
+                        },
+                        hashKeys: true
+                    })
+                    getValue(id: string): string {
+                        this.callCount++
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                expect(instance.getValue('a')).toBe('value-a')
+                expect(instance.getValue('a')).toBe('value-a')
+                expect(instance.callCount).toBe(1)
+                // keyGenerator was called, not hashKeys
+                expect(generatorCalls.length).toBe(2)
+                expect(generatorCalls[0]).toEqual(['a'])
+            })
+
+            it('should fall back to JSON.stringify when neither option is set', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>()
+                    getValue(id: string): string {
+                        this.callCount++
+                        return `value-${id}`
+                    }
+                }
+
+                const instance = new TestClass()
+
+                expect(instance.getValue('123')).toBe('value-123')
+                expect(instance.getValue('123')).toBe('value-123')
+                expect(instance.callCount).toBe(1)
+            })
+        })
+    })
+
+    // ==========================================
     // PERFORMANCE TESTS
     // ==========================================
     describe('Performance Tests', () => {
