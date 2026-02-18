@@ -308,8 +308,32 @@
                     <h2 class="mb-4 text-3xl font-bold text-foreground">Quick Example</h2>
                     <p class="text-muted-foreground">Get started in seconds with simple, intuitive APIs.</p>
                 </div>
-                <div class="rounded-xl border border-border bg-code-block-background p-6 font-mono text-sm">
-                    <pre class="text-code-block-foreground"><code><span class="text-brand-500">import</span> {'{'} MemoryCache, cached {'}'} <span class="text-brand-500">from</span> <span class="text-green-500">'@humanspeak/memory-cache'</span>
+                <div class="overflow-hidden rounded-xl border border-border">
+                    <!-- Toolbar -->
+                    <div
+                        class="flex items-center justify-between border-b border-border bg-card/80 px-4 py-2"
+                    >
+                        <div class="flex items-center gap-3">
+                            <div class="flex gap-1.5">
+                                <div class="h-3 w-3 rounded-full bg-red-400/60"></div>
+                                <div class="h-3 w-3 rounded-full bg-yellow-400/60"></div>
+                                <div class="h-3 w-3 rounded-full bg-green-400/60"></div>
+                            </div>
+                            <span class="text-xs font-medium text-muted-foreground"
+                                >example.ts</span
+                            >
+                        </div>
+                        <a
+                            href="/docs/getting-started"
+                            class="text-xs font-medium text-brand-600 transition-colors hover:text-brand-700"
+                        >
+                            Get Started
+                            <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                    <!-- Code -->
+                    <div class="bg-code-block-background p-6 font-mono text-sm">
+                        <pre class="text-code-block-foreground"><code><span class="text-brand-500">import</span> {'{'} MemoryCache, cached {'}'} <span class="text-brand-500">from</span> <span class="text-green-500">'@humanspeak/memory-cache'</span>
 
 <span class="text-muted-foreground">// Create a cache with 5 minute TTL and max 100 items</span>
 <span class="text-brand-500">const</span> cache = <span class="text-brand-500">new</span> MemoryCache&lt;<span class="text-yellow-500">User</span>&gt;({'{'}
@@ -328,6 +352,7 @@ cache.set(<span class="text-green-500">'user:123'</span>, {'{'} name: <span clas
         <span class="text-brand-500">return</span> <span class="text-brand-500">await</span> fetchUserFromDb(id)
     {'}'}
 {'}'}</code></pre>
+                    </div>
                 </div>
             </div>
         </section>
