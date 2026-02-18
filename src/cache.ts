@@ -134,8 +134,12 @@ export type CacheOptions<T = unknown> = {
  *   method's arguments array and returns a cache key string. When provided,
  *   this takes precedence over `hashKeys`.
  * @property {boolean} [hashKeys=false] - When `true`, the decorator serialises
- *   the arguments via `JSON.stringify` and produces an FNV-1a hash for a
+ *   the arguments via `JSON.stringify` and produces a 32-bit FNV-1a hash for a
  *   shorter, fixed-length cache key. Ignored when `keyGenerator` is set.
+ *
+ *   **Collision risk:** A 32-bit hash has ~50 % collision probability around
+ *   ~77 k unique keys (birthday bound). For high-cardinality caches, prefer a
+ *   custom `keyGenerator` or leave `hashKeys` disabled to avoid collisions.
  *
  * @example
  * ```typescript
