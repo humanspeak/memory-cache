@@ -235,7 +235,7 @@ deleteByPrefix(prefix: string): number
 
 ```typescript
 cache.set('user:123:name', 'John')
-cache.set('user:123:email', 'john@example.com')
+cache.set('user:123:email', 'john[at]example.com')
 cache.set('user:456:name', 'Jane')
 cache.set('post:789', 'Hello World')
 
@@ -264,7 +264,7 @@ deleteByMagicString(pattern: string): number
 ```typescript
 cache.set('user:123:name', 'John')
 cache.set('user:456:name', 'Jane')
-cache.set('user:123:email', 'john@example.com')
+cache.set('user:123:email', 'john[at]example.com')
 cache.set('post:789', 'Hello World')
 
 // Delete all entries matching user:*:name
