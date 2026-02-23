@@ -51,7 +51,7 @@
         "shiki": "^3.22.0",
         "svelte": "^5.51.3",
         "svelte-check": "^4.4.0",
-        "tailwind-merge": "^3.4.1",
+        "tailwind-merge": "^3.5.0",
         "tailwindcss": "^4.1.18",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.56.0",
