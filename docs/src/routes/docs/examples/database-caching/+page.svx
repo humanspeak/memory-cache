@@ -3,6 +3,19 @@ title: Database Query Caching
 description: Cache expensive database queries with the @cached decorator
 ---
 
+<script>
+  import { getSeoContext } from '@humanspeak/docs-kit'
+  const seo = getSeoContext()
+  if (seo) {
+      seo.title = 'Database Query Caching - Memory Cache'
+      seo.description = 'Cache expensive database queries with the @cached decorator in @humanspeak/memory-cache'
+      seo.ogTitle = 'Database Query Caching'
+      seo.ogTagline = 'Cache expensive DB queries with @cached.'
+      seo.ogFeatures = ['@cached Decorator', 'Query Monitoring', 'TTL Expiration', 'Type Safety']
+      seo.ogSlug = 'examples-database-caching'
+  }
+</script>
+
 # Database Query Caching
 
 Cache expensive database queries using the `@cached` decorator.

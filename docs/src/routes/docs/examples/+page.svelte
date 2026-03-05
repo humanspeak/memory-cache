@@ -1,23 +1,37 @@
 <script lang="ts">
-    import { getBreadcrumbContext } from '$lib/components/contexts/Breadcrumb/Breadcrumb.context'
-    import { getSeoContext } from '$lib/components/contexts/Seo/Seo.context'
+    import { getBreadcrumbContext, getSeoContext } from '@humanspeak/docs-kit'
+    import ArrowRight from '@lucide/svelte/icons/arrow-right'
+    import BarChart3 from '@lucide/svelte/icons/bar-chart-3'
+    import Building from '@lucide/svelte/icons/building'
+    import Calculator from '@lucide/svelte/icons/calculator'
+    import Clock from '@lucide/svelte/icons/clock'
+    import Cloud from '@lucide/svelte/icons/cloud'
+    import Code from '@lucide/svelte/icons/code'
+    import Database from '@lucide/svelte/icons/database'
+    import Eye from '@lucide/svelte/icons/eye'
+    import Gauge from '@lucide/svelte/icons/gauge'
+    import HardDrive from '@lucide/svelte/icons/hard-drive'
+    import Key from '@lucide/svelte/icons/key'
+    import RefreshCw from '@lucide/svelte/icons/refresh-cw'
+    import Shield from '@lucide/svelte/icons/shield'
+    import Sliders from '@lucide/svelte/icons/sliders'
+    import UserCheck from '@lucide/svelte/icons/user-check'
+    import type { Component } from 'svelte'
 
-    const breadcrumbs = $derived(getBreadcrumbContext())
-    const seo = $derived(getSeoContext())
-    $effect(() => {
-        if (breadcrumbs) {
-            breadcrumbs.breadcrumbs = [
-                { title: 'Docs', href: '/docs' },
-                { title: 'Examples' }
-            ]
-        }
-        if (seo) {
-            seo.title = 'Usage Examples | Memory Cache'
-            seo.description = 'Real-world usage examples for @humanspeak/memory-cache covering API caching, session storage, database queries, rate limiting, and the @cached decorator.'
-        }
-    })
+    const breadcrumbs = getBreadcrumbContext()
+    const seo = getSeoContext()
+    if (breadcrumbs) {
+        breadcrumbs.breadcrumbs = [
+            { title: 'Docs', href: '/docs' },
+            { title: 'Examples' }
+        ]
+    }
+    if (seo) {
+        seo.title = 'Usage Examples | Memory Cache'
+        seo.description = 'Real-world usage examples for @humanspeak/memory-cache covering API caching, session storage, database queries, rate limiting, and the @cached decorator.'
+    }
 
-    const examples = [
+    const examples: { category: string; items: { title: string; description: string; href: string; icon: Component }[] }[] = [
         {
             category: 'Basic Patterns',
             items: [
@@ -25,19 +39,19 @@
                     title: 'API Response Caching',
                     description: 'Cache API responses to reduce network requests and improve response times.',
                     href: '/docs/examples/api-caching',
-                    icon: 'fa-solid fa-cloud'
+                    icon: Cloud
                 },
                 {
                     title: 'Session Storage',
                     description: 'Store user sessions with automatic expiration for secure session management.',
                     href: '/docs/examples/sessions',
-                    icon: 'fa-solid fa-user-shield'
+                    icon: UserCheck
                 },
                 {
                     title: 'Configuration Cache',
                     description: 'Cache configuration that rarely changes for faster application startup.',
                     href: '/docs/examples/configuration',
-                    icon: 'fa-solid fa-sliders'
+                    icon: Sliders
                 }
             ]
         },
@@ -48,25 +62,25 @@
                     title: 'Database Query Caching',
                     description: 'Cache expensive database queries with the @cached decorator.',
                     href: '/docs/examples/database-caching',
-                    icon: 'fa-solid fa-database'
+                    icon: Database
                 },
                 {
                     title: 'Computed Value Caching',
                     description: 'Cache expensive computations to avoid redundant processing.',
                     href: '/docs/examples/computed-values',
-                    icon: 'fa-solid fa-calculator'
+                    icon: Calculator
                 },
                 {
                     title: 'Multi-Tenant Invalidation',
                     description: 'Use prefix and wildcard deletion for multi-tenant applications.',
                     href: '/docs/examples/multi-tenant',
-                    icon: 'fa-solid fa-building'
+                    icon: Building
                 },
                 {
                     title: 'Async Fetching',
                     description: 'Handle async data fetching with automatic caching.',
                     href: '/docs/examples/async-fetching',
-                    icon: 'fa-solid fa-rotate'
+                    icon: RefreshCw
                 }
             ]
         },
@@ -77,13 +91,13 @@
                     title: 'Monitoring with Hooks',
                     description: 'Integrate with metrics and logging systems for observability.',
                     href: '/docs/examples/monitoring',
-                    icon: 'fa-solid fa-chart-line'
+                    icon: BarChart3
                 },
                 {
                     title: 'Rate Limiting',
                     description: 'Implement simple rate limiting using the cache.',
                     href: '/docs/examples/rate-limiting',
-                    icon: 'fa-solid fa-gauge-high'
+                    icon: Gauge
                 }
             ]
         },
@@ -94,10 +108,18 @@
                     title: 'Service Class Pattern',
                     description: 'Complete service class example using the @cached decorator.',
                     href: '/docs/examples/service-class',
-                    icon: 'fa-solid fa-code'
+                    icon: Code
                 }
             ]
         }
+    ]
+
+    const practices: { icon: Component; title: string; description: string }[] = [
+        { icon: Clock, title: 'Choose appropriate TTLs', description: 'Balance freshness vs performance' },
+        { icon: Key, title: 'Use meaningful key patterns', description: 'Makes debugging and invalidation easier' },
+        { icon: HardDrive, title: 'Consider cache size', description: 'Monitor memory usage in production' },
+        { icon: Eye, title: 'Use hooks for observability', description: 'Track hit rates and performance' },
+        { icon: Shield, title: 'Handle cache misses', description: 'Always have a fallback strategy' }
     ]
 
     const quickReference = [
@@ -126,6 +148,7 @@
         <h2 class="mb-4 text-xl font-semibold text-foreground">{category.category}</h2>
         <div class="grid gap-4 sm:grid-cols-2">
             {#each category.items as example, itemIndex}
+                {@const ExampleIcon = example.icon}
                 <a
                     href={example.href}
                     class="example-card group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-brand-500/50 hover:shadow-lg hover:shadow-brand-500/10"
@@ -142,7 +165,7 @@
                         <div
                             class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 text-white transition-transform duration-300 group-hover:scale-110"
                         >
-                            <i class={example.icon}></i>
+                            <ExampleIcon size={18} />
                         </div>
 
                         <h3
@@ -160,9 +183,7 @@
                             class="flex items-center text-sm font-medium text-brand-600 group-hover:text-brand-700"
                         >
                             View Example
-                            <i
-                                class="fa-solid fa-arrow-right ml-2 transition-transform duration-200 group-hover:translate-x-1"
-                            ></i>
+                            <ArrowRight size={14} class="ml-2 transition-transform duration-200 group-hover:translate-x-1" />
                         </div>
                     </div>
 
@@ -209,16 +230,11 @@
 <div class="not-prose">
     <h2 class="mb-4 text-xl font-semibold text-foreground">Best Practices</h2>
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {#each [
-            { icon: 'fa-solid fa-clock', title: 'Choose appropriate TTLs', description: 'Balance freshness vs performance' },
-            { icon: 'fa-solid fa-key', title: 'Use meaningful key patterns', description: 'Makes debugging and invalidation easier' },
-            { icon: 'fa-solid fa-memory', title: 'Consider cache size', description: 'Monitor memory usage in production' },
-            { icon: 'fa-solid fa-eye', title: 'Use hooks for observability', description: 'Track hit rates and performance' },
-            { icon: 'fa-solid fa-shield', title: 'Handle cache misses', description: 'Always have a fallback strategy' }
-        ] as practice}
+        {#each practices as practice}
+            {@const PracticeIcon = practice.icon}
             <div class="flex items-start gap-3 rounded-lg border border-border bg-card p-4">
                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-brand-500/10 text-brand-600">
-                    <i class="{practice.icon} text-sm"></i>
+                    <PracticeIcon size={16} />
                 </div>
                 <div>
                     <h3 class="font-medium text-foreground">{practice.title}</h3>

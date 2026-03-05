@@ -22,3 +22,7 @@ junit-vitest.xml
 !.trunk/
 
 
+/docs/static/social-cards
+docs/static/og-default.png
+docs/static/twitter-default.png
+mprocs.log

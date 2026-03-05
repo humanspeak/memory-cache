@@ -40,7 +40,21 @@ const config = {
     ],
 
     kit: {
-        adapter: adapter()
+        adapter: adapter(),
+        csp: {
+            directives: {
+                'default-src': ['self'],
+                'script-src': ['self', 'https://analytics.ahrefs.com'],
+                'style-src': ['self', 'unsafe-inline'],
+                'img-src': ['self', 'data:'],
+                'font-src': ['self'],
+                'connect-src': ['self', 'https://analytics.ahrefs.com'],
+                'object-src': ['none'],
+                'base-uri': ['self'],
+                'form-action': ['self'],
+                'frame-ancestors': ['none']
+            }
+        }
     },
 
     extensions: ['.svelte', '.svx']

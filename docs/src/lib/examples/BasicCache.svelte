@@ -1,5 +1,6 @@
 <script lang="ts">
     import { MemoryCache } from '@humanspeak/memory-cache'
+    import Trash2 from '@lucide/svelte/icons/trash-2'
     import { onMount } from 'svelte'
 
     // Create a cache instance
@@ -168,7 +169,7 @@
                             class="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-600"
                             title="Delete entry"
                         >
-                            <i class="fa-solid fa-trash-can text-xs"></i>
+                            <Trash2 size={12} />
                         </button>
                     </div>
                 {/each}

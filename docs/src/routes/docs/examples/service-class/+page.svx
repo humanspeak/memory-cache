@@ -3,6 +3,19 @@ title: Service Class Pattern
 description: Full service class example using the decorator
 ---
 
+<script>
+  import { getSeoContext } from '@humanspeak/docs-kit'
+  const seo = getSeoContext()
+  if (seo) {
+      seo.title = 'Service Class Pattern - Memory Cache'
+      seo.description = 'Complete service class example using the @cached decorator with @humanspeak/memory-cache'
+      seo.ogTitle = 'Service Class Pattern'
+      seo.ogTagline = 'Full service class example with @cached.'
+      seo.ogFeatures = ['@cached Decorator', 'Multiple Methods', 'Hooks Monitoring', 'Type Safety']
+      seo.ogSlug = 'examples-service-class'
+  }
+</script>
+
 # Service Class Pattern
 
 A complete example of using the `@cached` decorator with a service class.

@@ -3,6 +3,19 @@ title: Rate Limiting
 description: Simple rate limiting using cache
 ---
 
+<script>
+  import { getSeoContext } from '@humanspeak/docs-kit'
+  const seo = getSeoContext()
+  if (seo) {
+      seo.title = 'Rate Limiting - Memory Cache'
+      seo.description = 'Implement simple rate limiting using cache TTL with @humanspeak/memory-cache'
+      seo.ogTitle = 'Rate Limiting'
+      seo.ogTagline = 'Simple rate limiting using cache TTL.'
+      seo.ogFeatures = ['TTL-Based', 'Express Middleware', 'Monitoring', 'Configurable']
+      seo.ogSlug = 'examples-rate-limiting'
+  }
+</script>
+
 # Rate Limiting
 
 Implement simple rate limiting using cache TTL.

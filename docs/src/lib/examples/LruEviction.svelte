@@ -1,5 +1,9 @@
 <script lang="ts">
     import { MemoryCache } from '@humanspeak/memory-cache'
+    import Lightbulb from '@lucide/svelte/icons/lightbulb'
+    import MousePointer from '@lucide/svelte/icons/mouse-pointer'
+    import Plus from '@lucide/svelte/icons/plus'
+    import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
     import { onMount } from 'svelte'
 
     // Create a small cache to demonstrate LRU eviction
@@ -115,7 +119,7 @@
                 onclick={addEntry}
                 class="w-full rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700"
             >
-                <i class="fa-solid fa-plus mr-2"></i>
+                <Plus size={14} class="mr-2 inline" />
                 Add New Entry
             </button>
 
@@ -123,7 +127,7 @@
                 onclick={resetCache}
                 class="w-full rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-500/50"
             >
-                <i class="fa-solid fa-rotate-left mr-2"></i>
+                <RotateCcw size={14} class="mr-2 inline" />
                 Reset Cache
             </button>
         </div>
@@ -220,7 +224,7 @@
                                     MRU
                                 </span>
                             {/if}
-                            <i class="fa-solid fa-hand-pointer text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"></i>
+                            <MousePointer size={14} class="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
                         </div>
                     </button>
                 {/each}
@@ -228,7 +232,7 @@
         {/if}
 
         <p class="mt-4 text-xs text-muted-foreground">
-            <i class="fa-solid fa-lightbulb mr-1 text-yellow-500"></i>
+            <Lightbulb size={14} class="mr-1 inline text-yellow-500" />
             When the cache is full, adding a new entry evicts the LRU item (position #1).
         </p>
     </div>

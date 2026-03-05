@@ -3,6 +3,19 @@ title: "@cached Decorator"
 description: API reference for the @cached method decorator
 ---
 
+<script>
+  import { getSeoContext } from '@humanspeak/docs-kit'
+  const seo = getSeoContext()
+  if (seo) {
+      seo.title = '@cached Decorator - Memory Cache'
+      seo.description = 'API reference for the @cached method decorator — automatic method-level caching with TTL, LRU eviction, custom key generators, and hashed keys'
+      seo.ogTitle = '@cached Decorator'
+      seo.ogTagline = 'Automatic method-level caching with a simple decorator.'
+      seo.ogFeatures = ['Method Caching', 'Custom Keys', 'TTL Support', 'Hashed Keys']
+      seo.ogSlug = 'api-cached-decorator'
+  }
+</script>
+
 # @cached Decorator
 
 The `@cached` decorator provides automatic method-level caching (memoization). It caches method results based on their arguments, so repeated calls with the same arguments return the cached result instantly.
