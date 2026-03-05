@@ -201,6 +201,57 @@ describe('MemoryCache LRU Eviction', () => {
     })
 
     // ==========================================
+    // DEFENSIVE BRANCH COVERAGE
+    // ==========================================
+    describe('Defensive guards in set()', () => {
+        it('should handle oldestKey being undefined during eviction', () => {
+            const cache = new MemoryCache<string>({ maxSize: 2 })
+            cache.set('key1', 'value1')
+            cache.set('key2', 'value2')
+
+            // trunk-ignore(eslint/@typescript-eslint/no-explicit-any)
+            const internalMap = (cache as any).cache as Map<string, unknown>
+            const originalKeys = internalMap.keys.bind(internalMap)
+            // trunk-ignore(eslint/@typescript-eslint/no-explicit-any)
+            internalMap.keys = (() => {
+                internalMap.keys = originalKeys
+                return {
+                    next: () => ({ value: undefined, done: false }),
+                    [Symbol.iterator]() {
+                        return this
+                    }
+                }
+            }) as any
+
+            // Should not throw when oldestKey is undefined
+            cache.set('key3', 'value3')
+            expect(cache.get('key3')).toBe('value3')
+        })
+
+        it('should handle evictedEntry being undefined during eviction', () => {
+            const cache = new MemoryCache<string>({ maxSize: 2 })
+            cache.set('key1', 'value1')
+            cache.set('key2', 'value2')
+
+            // trunk-ignore(eslint/@typescript-eslint/no-explicit-any)
+            const internalMap = (cache as any).cache as Map<string, unknown>
+            const originalGet = internalMap.get.bind(internalMap)
+            let interceptNext = true
+            internalMap.get = (key: string) => {
+                if (interceptNext && key === 'key1') {
+                    interceptNext = false
+                    return undefined
+                }
+                return originalGet(key)
+            }
+
+            // Should not throw when evictedEntry is undefined
+            cache.set('key3', 'value3')
+            expect(cache.get('key3')).toBe('value3')
+        })
+    })
+
+    // ==========================================
     // INTEGRATION WITH TTL
     // ==========================================
     describe('Integration with TTL', () => {
