@@ -19,13 +19,13 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "@humanspeak/docs-kit": "github:humanspeak/docs-kit#2026.3.11",
+        "@humanspeak/docs-kit": "github:humanspeak/docs-kit#2026.3.12",
         "@humanspeak/memory-cache": "workspace:*",
         "github-slugger": "^2.0.0",
         "runed": "^0.37.1"
     },
     "devDependencies": {
-        "@cloudflare/workers-types": "^4.20260301.1",
+        "@cloudflare/workers-types": "^4.20260305.1",
         "@eslint/compat": "^2.0.2",
         "@eslint/js": "^10.0.1",
         "@humanspeak/svelte-motion": "^0.1.31",

@@ -26,3 +26,4 @@ junit-vitest.xml
 docs/static/og-default.png
 docs/static/twitter-default.png
 mprocs.log
+docs/src/lib/github-stats.json
