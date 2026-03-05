@@ -3,6 +3,19 @@ title: Monitoring with Hooks
 description: Integrate with metrics and logging systems
 ---
 
+<script>
+  import { getSeoContext } from '@humanspeak/docs-kit'
+  const seo = getSeoContext()
+  if (seo) {
+      seo.title = 'Monitoring with Hooks - Memory Cache'
+      seo.description = 'Integrate @humanspeak/memory-cache with metrics and logging systems using hooks for observability'
+      seo.ogTitle = 'Monitoring with Hooks'
+      seo.ogTagline = 'Integrate with metrics and logging systems.'
+      seo.ogFeatures = ['DataDog', 'Prometheus', 'Debug Logging', 'Hit Rate Dashboard']
+      seo.ogSlug = 'examples-monitoring'
+  }
+</script>
+
 # Monitoring with Hooks
 
 Use cache hooks to integrate with metrics, logging, and monitoring systems.

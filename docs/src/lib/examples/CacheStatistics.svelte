@@ -1,5 +1,7 @@
 <script lang="ts">
     import { MemoryCache, type OnSetContext, type OnHitContext, type OnMissContext, type OnDeleteContext, type OnEvictContext } from '@humanspeak/memory-cache'
+    import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
+    import Zap from '@lucide/svelte/icons/zap'
     import { onMount } from 'svelte'
 
     // Statistics
@@ -238,7 +240,7 @@
                     onclick={simulateBurst}
                     class="flex-1 rounded-md border border-brand-500 px-3 py-2 text-sm font-medium text-brand-600 transition-colors hover:bg-brand-500/10"
                 >
-                    <i class="fa-solid fa-bolt mr-1"></i>
+                    <Zap size={14} class="mr-1 inline" />
                     Burst (10 ops)
                 </button>
                 <button
@@ -246,7 +248,7 @@
                     class="rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-500/50"
                     title="Reset statistics"
                 >
-                    <i class="fa-solid fa-rotate-left"></i>
+                    <RotateCcw size={14} />
                 </button>
             </div>
         </div>

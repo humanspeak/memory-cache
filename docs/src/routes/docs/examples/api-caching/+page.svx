@@ -3,6 +3,19 @@ title: API Response Caching
 description: Cache API responses to reduce network requests
 ---
 
+<script>
+  import { getSeoContext } from '@humanspeak/docs-kit'
+  const seo = getSeoContext()
+  if (seo) {
+      seo.title = 'API Response Caching - Memory Cache'
+      seo.description = 'Cache API responses to reduce network requests and improve response times with @humanspeak/memory-cache'
+      seo.ogTitle = 'API Response Caching'
+      seo.ogTagline = 'Reduce network requests with cached API responses.'
+      seo.ogFeatures = ['TTL Expiration', 'Hooks Monitoring', 'Type Safety', 'Zero Dependencies']
+      seo.ogSlug = 'examples-api-caching'
+  }
+</script>
+
 # API Response Caching
 
 Cache API responses to reduce network requests and improve response times.

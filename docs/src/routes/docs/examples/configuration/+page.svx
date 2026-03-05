@@ -3,6 +3,19 @@ title: Configuration Cache
 description: Cache configuration that rarely changes
 ---
 
+<script>
+  import { getSeoContext } from '@humanspeak/docs-kit'
+  const seo = getSeoContext()
+  if (seo) {
+      seo.title = 'Configuration Cache - Memory Cache'
+      seo.description = 'Cache configuration that rarely changes for faster application startup with @humanspeak/memory-cache'
+      seo.ogTitle = 'Configuration Cache'
+      seo.ogTagline = 'Cache config for faster startup.'
+      seo.ogFeatures = ['Force Refresh', 'Change Detection', 'TTL Support', 'Hooks']
+      seo.ogSlug = 'examples-configuration'
+  }
+</script>
+
 # Configuration Cache
 
 Cache configuration that rarely changes to avoid repeated fetches.

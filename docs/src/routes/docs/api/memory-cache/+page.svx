@@ -3,6 +3,19 @@ title: MemoryCache API
 description: Complete API reference for the MemoryCache class
 ---
 
+<script>
+  import { getSeoContext } from '@humanspeak/docs-kit'
+  const seo = getSeoContext()
+  if (seo) {
+      seo.title = 'MemoryCache API - Memory Cache'
+      seo.description = 'Complete API reference for the MemoryCache class — constructor options, get/set/delete methods, statistics, hooks, and type safety'
+      seo.ogTitle = 'MemoryCache API'
+      seo.ogTagline = 'Complete API reference for the MemoryCache class.'
+      seo.ogFeatures = ['Full Type Safety', 'TTL + LRU', 'Hooks System', 'Statistics']
+      seo.ogSlug = 'api-memory-cache'
+  }
+</script>
+
 # MemoryCache API
 
 The `MemoryCache` class is a generic in-memory cache with TTL expiration and LRU (Least Recently Used) eviction.

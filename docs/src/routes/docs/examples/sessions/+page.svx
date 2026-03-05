@@ -3,6 +3,19 @@ title: Session Storage
 description: Store user sessions with automatic expiration
 ---
 
+<script>
+  import { getSeoContext } from '@humanspeak/docs-kit'
+  const seo = getSeoContext()
+  if (seo) {
+      seo.title = 'Session Storage - Memory Cache'
+      seo.description = 'Store user sessions with automatic expiration using TTL in @humanspeak/memory-cache'
+      seo.ogTitle = 'Session Storage'
+      seo.ogTagline = 'Automatic session expiration with TTL.'
+      seo.ogFeatures = ['TTL Expiration', 'Audit Logging', 'Type Safety', 'Auto Cleanup']
+      seo.ogSlug = 'examples-sessions'
+  }
+</script>
+
 # Session Storage
 
 Store user sessions with automatic expiration using TTL.

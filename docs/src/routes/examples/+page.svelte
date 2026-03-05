@@ -1,43 +1,47 @@
 <script lang="ts">
-    import { getBreadcrumbContext } from '$lib/components/contexts/Breadcrumb/Breadcrumb.context'
-    import { getSeoContext } from '$lib/components/contexts/Seo/Seo.context'
+    import { getBreadcrumbContext, getSeoContext } from '@humanspeak/docs-kit'
+    import ArrowRight from '@lucide/svelte/icons/arrow-right'
+    import BarChart3 from '@lucide/svelte/icons/bar-chart-3'
+    import Box from '@lucide/svelte/icons/box'
+    import Clock from '@lucide/svelte/icons/clock'
+    import Layers from '@lucide/svelte/icons/layers'
+    import Rocket from '@lucide/svelte/icons/rocket'
+    import type { Component } from 'svelte'
 
-    const breadcrumbs = $derived(getBreadcrumbContext())
-    const seo = $derived(getSeoContext())
-    $effect(() => {
-        if (breadcrumbs) {
-            breadcrumbs.breadcrumbs = [{ title: 'Examples' }]
-        }
-        if (seo) {
-            seo.title = 'Interactive Examples | Memory Cache'
-            seo.description = 'Explore interactive examples of @humanspeak/memory-cache featuring live demos of cache operations, TTL expiration, LRU eviction, and performance stats.'
-        }
-    })
+    const breadcrumbs = getBreadcrumbContext()
+    const seo = getSeoContext()
+    if (breadcrumbs) {
+        breadcrumbs.breadcrumbs = [{ title: 'Examples' }]
+    }
+    if (seo) {
+        seo.title = 'Interactive Examples | Memory Cache'
+        seo.description = 'Explore interactive examples of @humanspeak/memory-cache featuring live demos of cache operations, TTL expiration, LRU eviction, and performance stats.'
+    }
 
-    const examples = [
+    const examples: { slug: string; title: string; description: string; icon: Component }[] = [
         {
             slug: 'basic-cache',
             title: 'Basic Cache',
             description: 'Interactive demo of get, set, and delete operations with visual cache state.',
-            icon: 'fa-solid fa-box'
+            icon: Box
         },
         {
             slug: 'ttl-expiration',
             title: 'TTL Expiration',
             description: 'Watch cache entries expire in real-time with countdown timers.',
-            icon: 'fa-solid fa-clock'
+            icon: Clock
         },
         {
             slug: 'lru-eviction',
             title: 'LRU Eviction',
             description: 'See how least recently used items are evicted when the cache is full.',
-            icon: 'fa-solid fa-layer-group'
+            icon: Layers
         },
         {
             slug: 'cache-statistics',
             title: 'Cache Statistics',
             description: 'Monitor hit rate, miss rate, and cache performance in real-time.',
-            icon: 'fa-solid fa-chart-line'
+            icon: BarChart3
         }
     ]
 </script>
@@ -56,6 +60,7 @@
     <!-- Examples Grid -->
     <div class="mx-auto grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-2">
         {#each examples as example, index}
+            {@const ExampleIcon = example.icon}
             <a
                 href="/examples/{example.slug}"
                 class="example-card group relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-500/50 hover:shadow-lg hover:shadow-brand-500/10"
@@ -67,7 +72,7 @@
                 <div class="relative z-10">
                     <!-- Icon -->
                     <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 text-white transition-transform duration-300 group-hover:scale-110">
-                        <i class="{example.icon} text-lg"></i>
+                        <ExampleIcon size={20} />
                     </div>
 
                     <h2 class="mb-2 text-xl font-semibold text-foreground transition-colors group-hover:text-brand-600">
@@ -80,7 +85,7 @@
 
                     <div class="flex items-center text-sm font-medium text-brand-600 group-hover:text-brand-700">
                         Try it
-                        <i class="fa-solid fa-arrow-right ml-2 transition-transform duration-200 group-hover:translate-x-1"></i>
+                        <ArrowRight size={14} class="ml-2 transition-transform duration-200 group-hover:translate-x-1" />
                     </div>
                 </div>
 
@@ -102,7 +107,7 @@
                 class="inline-flex items-center rounded-lg bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 font-medium text-white transition-all duration-200 hover:from-brand-600 hover:to-brand-700"
             >
                 Get Started
-                <i class="fa-solid fa-rocket ml-2"></i>
+                <Rocket size={14} class="ml-2" />
             </a>
         </div>
     </div>

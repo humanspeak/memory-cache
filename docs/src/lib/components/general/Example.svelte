@@ -1,4 +1,7 @@
 <script lang="ts">
+    import ExternalLink from '@lucide/svelte/icons/external-link'
+    import Grid2x2 from '@lucide/svelte/icons/grid-2x2'
+    import RotateCw from '@lucide/svelte/icons/rotate-cw'
     import type { Snippet } from 'svelte'
 
     type ExampleProps = {
@@ -27,7 +30,7 @@
                 href="/examples"
                 class="inline-flex items-center justify-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-brand-500/50 hover:text-foreground"
             >
-                <i class="fa-solid fa-grid-2 text-xs"></i>
+                <Grid2x2 size={12} />
                 Examples
             </a>
             {#if title}
@@ -43,7 +46,7 @@
                     rel="noopener noreferrer"
                     class="inline-flex items-center justify-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-brand-500/50 hover:text-foreground"
                 >
-                    <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    <ExternalLink size={12} />
                     Source
                 </a>
             {/if}
@@ -52,7 +55,7 @@
                 class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-brand-500/50 hover:text-foreground"
                 title="Reset example"
             >
-                <i class="fa-solid fa-rotate-right text-xs"></i>
+                <RotateCw size={12} />
             </button>
         </div>
     </div>

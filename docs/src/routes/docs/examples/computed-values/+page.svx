@@ -3,6 +3,19 @@ title: Computed Value Caching
 description: Cache expensive computations
 ---
 
+<script>
+  import { getSeoContext } from '@humanspeak/docs-kit'
+  const seo = getSeoContext()
+  if (seo) {
+      seo.title = 'Computed Value Caching - Memory Cache'
+      seo.description = 'Cache expensive computations to avoid redundant processing with @humanspeak/memory-cache'
+      seo.ogTitle = 'Computed Value Caching'
+      seo.ogTagline = 'Cache expensive computations efficiently.'
+      seo.ogFeatures = ['Deterministic Results', 'Performance Tracking', 'TTL Support', 'Hooks']
+      seo.ogSlug = 'examples-computed-values'
+  }
+</script>
+
 # Computed Value Caching
 
 Cache expensive computations where results are deterministic.

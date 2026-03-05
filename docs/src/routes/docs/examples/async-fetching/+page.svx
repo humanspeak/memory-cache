@@ -3,6 +3,19 @@ title: Async Fetching
 description: Cache expensive async operations with getOrSet
 ---
 
+<script>
+  import { getSeoContext } from '@humanspeak/docs-kit'
+  const seo = getSeoContext()
+  if (seo) {
+      seo.title = 'Async Fetching - Memory Cache'
+      seo.description = 'Cache expensive async operations with getOrSet in @humanspeak/memory-cache for thundering herd prevention'
+      seo.ogTitle = 'Async Fetching'
+      seo.ogTagline = 'Cache async operations with getOrSet.'
+      seo.ogFeatures = ['getOrSet', 'Thundering Herd', 'Error Handling', 'Sync Fetchers']
+      seo.ogSlug = 'examples-async-fetching'
+  }
+</script>
+
 # Async Fetching
 
 Use `getOrSet` to automatically cache the results of expensive async operations.

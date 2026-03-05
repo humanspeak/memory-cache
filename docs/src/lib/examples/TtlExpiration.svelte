@@ -1,5 +1,7 @@
 <script lang="ts">
     import { MemoryCache } from '@humanspeak/memory-cache'
+    import Clock from '@lucide/svelte/icons/clock'
+    import Shuffle from '@lucide/svelte/icons/shuffle'
     import { onMount } from 'svelte'
 
     type CachedItem = { value: string; createdAt: number }
@@ -168,7 +170,7 @@
                     class="rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-500/50"
                     title="Add random entry"
                 >
-                    <i class="fa-solid fa-shuffle"></i>
+                    <Shuffle size={14} />
                 </button>
             </div>
         </div>
@@ -197,7 +199,7 @@
 
         {#if entries.length === 0}
             <div class="flex h-64 flex-col items-center justify-center text-muted-foreground">
-                <i class="fa-solid fa-clock mb-3 text-3xl text-muted-foreground/50"></i>
+                <Clock size={32} class="mb-3 text-muted-foreground/50" />
                 <p>No active entries</p>
                 <p class="text-sm">Add some entries to see TTL in action</p>
             </div>

@@ -1,25 +1,28 @@
 <script lang="ts">
     import { page } from '$app/state'
-    import { afterNavigate } from '$app/navigation'
     import GithubSlugger from 'github-slugger'
     import Header from '$lib/components/general/Header.svelte'
     import Footer from '$lib/components/general/Footer.svelte'
-    import Sidebar from './Sidebar.svelte'
+    import { Sidebar, getBreadcrumbContext, getDocsTitleByPath, enhanceCodeBlocks } from '@humanspeak/docs-kit'
+    import { docsConfig } from '$lib/docs-config'
+    import { docsSections } from '$lib/docsNav'
     import TableOfContents from './TableOfContents.svelte'
-    import { getBreadcrumbContext } from '$lib/components/contexts/Breadcrumb/Breadcrumb.context'
 
-    const { children } = $props()
+    const { children, data } = $props()
+
+    const breadcrumbContext = getBreadcrumbContext()
+    $effect(() => {
+        if (breadcrumbContext) {
+            const title = getDocsTitleByPath(docsSections, page.url.pathname)
+            breadcrumbContext.breadcrumbs =
+                title && page.url.pathname !== '/docs'
+                    ? [{ title: 'Docs', href: '/docs' }, { title }]
+                    : [{ title: 'Docs' }]
+        }
+    })
 
     let contentElement: HTMLElement | undefined = $state(undefined)
     let headings: { id: string; text: string; level: number; element: HTMLElement }[] = $state([])
-
-    // Create breadcrumb store and context
-    const breadcrumbs = $derived(getBreadcrumbContext())
-    $effect(() => {
-        if (breadcrumbs) {
-            breadcrumbs.breadcrumbs = [{ title: 'Docs', href: '/docs' }, { title: 'Get Started' }]
-        }
-    })
 
     /**
      * Extract headings from content for table of contents
@@ -38,11 +41,9 @@
             // Use existing ID if present, otherwise generate slug
             let id = el.id
             if (!id) {
-                // Generate slug from text using github-slugger (handles uniqueness automatically)
                 id = text ? slugger.slug(text) : `heading-${index}`
             }
 
-            // Assign ID to the element if it doesn't have one
             if (!el.id) {
                 el.id = id
             }
@@ -56,14 +57,6 @@
         })
     }
 
-    // Re-extract headings when navigating between pages
-    afterNavigate(() => {
-        // Single rAF for initial navigation tick
-        requestAnimationFrame(() => {
-            extractHeadings()
-        })
-    })
-
     // Setup MutationObserver to watch for DOM changes and initial extraction
     $effect(() => {
         if (!contentElement) return
@@ -72,8 +65,13 @@
         extractHeadings()
 
         // Watch for DOM mutations (new content loaded via navigation)
+        let rafId: number | null = null
         const observer = new MutationObserver(() => {
-            extractHeadings()
+            if (rafId) cancelAnimationFrame(rafId)
+            rafId = requestAnimationFrame(() => {
+                rafId = null
+                extractHeadings()
+            })
         })
 
         observer.observe(contentElement, {
@@ -82,6 +80,7 @@
         })
 
         return () => {
+            if (rafId) cancelAnimationFrame(rafId)
             observer.disconnect()
         }
     })
@@ -95,14 +94,23 @@
         <aside
             class="hidden w-64 shrink-0 border-r border-sidebar-border bg-sidebar-background/95 shadow-sm lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto"
         >
-            <Sidebar currentPath={page.url.pathname} />
+            <Sidebar
+                config={docsConfig}
+                sections={docsSections}
+                currentPath={page.url.pathname}
+                otherProjects={data.otherProjects}
+            />
         </aside>
 
         <!-- Main content area -->
         <main class="flex-1">
             <div class="flex">
                 <!-- Content -->
-                <article bind:this={contentElement} class="flex-1 px-4 py-8 sm:px-6 lg:px-8">
+                <article
+                    bind:this={contentElement}
+                    use:enhanceCodeBlocks
+                    class="flex-1 px-4 py-8 sm:px-6 lg:px-8"
+                >
                     <div
                         class="prose max-w-none text-text-primary prose-slate dark:prose-invert prose-headings:scroll-mt-20"
                     >

@@ -1,18 +1,25 @@
 <script lang="ts">
     import Header from '$lib/components/general/Header.svelte'
     import Footer from '$lib/components/general/Footer.svelte'
-    import { type BreadcrumbContext } from '$lib/components/contexts/Breadcrumb/type'
-    import { getBreadcrumbContext } from '$lib/components/contexts/Breadcrumb/Breadcrumb.context'
+    import { getBreadcrumbContext } from '@humanspeak/docs-kit'
+    import ArrowRight from '@lucide/svelte/icons/arrow-right'
+    import AtSign from '@lucide/svelte/icons/at-sign'
+    import Book from '@lucide/svelte/icons/book'
+    import Clock from '@lucide/svelte/icons/clock'
+    import Feather from '@lucide/svelte/icons/feather'
+    import FileCode from '@lucide/svelte/icons/file-code'
+    import Layers from '@lucide/svelte/icons/layers'
+    import Play from '@lucide/svelte/icons/play'
+    import Rocket from '@lucide/svelte/icons/rocket'
+    import Zap from '@lucide/svelte/icons/zap'
+    import type { Component } from 'svelte'
 
-    // mounted no longer needed for CSS enter
     let headingContainer: HTMLDivElement | null = $state(null)
-    const breadcrumbContext = $state<BreadcrumbContext | undefined>(getBreadcrumbContext())
+    const breadcrumbContext = getBreadcrumbContext()
 
-    $effect(() => {
-        if (breadcrumbContext) {
-            breadcrumbContext.breadcrumbs = []
-        }
-    })
+    if (breadcrumbContext) {
+        breadcrumbContext.breadcrumbs = []
+    }
 
     // Simple spring-like tap animation using the Web Animations API
     function springTap(node: HTMLElement, options: { pressedScale?: number } = {}) {
@@ -74,42 +81,42 @@
         }
     }
 
-    const features = [
+    const features: { title: string; description: string; icon: Component }[] = [
         {
             title: 'Lightning Fast',
             description:
                 'In-memory storage with O(1) lookups. No network latency, no disk I/O—just pure speed.',
-            icon: 'fa-solid fa-bolt'
+            icon: Zap
         },
         {
             title: 'TTL Expiration',
             description:
                 'Set time-to-live for cache entries. Expired items are automatically cleaned up.',
-            icon: 'fa-solid fa-clock'
+            icon: Clock
         },
         {
             title: 'LRU Eviction',
             description:
                 'Smart eviction policy removes least recently used items when the cache reaches max size.',
-            icon: 'fa-solid fa-layer-group'
+            icon: Layers
         },
         {
             title: '@cached Decorator',
             description:
                 'Automatic method-level caching with a simple decorator. No boilerplate required.',
-            icon: 'fa-solid fa-at'
+            icon: AtSign
         },
         {
             title: 'TypeScript First',
             description:
                 'Full type safety with generics. Your cached values are properly typed.',
-            icon: 'fa-brands fa-js'
+            icon: FileCode
         },
         {
             title: 'Zero Dependencies',
             description:
                 'Lightweight and self-contained. No bloat, no supply chain risks.',
-            icon: 'fa-solid fa-feather'
+            icon: Feather
         }
     ]
 
@@ -138,7 +145,6 @@
     $effect(() => {
         if (typeof document === 'undefined') return
         if (!headingContainer) return
-        // hide until fonts are loaded and spans are built
         headingContainer.style.visibility = 'hidden'
         document.fonts?.ready
             .then(() => {
@@ -161,21 +167,19 @@
                 })
             })
             .catch(() => {
-                // Fallback: ensure visible
                 headingContainer!.style.visibility = 'visible'
             })
     })
 </script>
 
 <div class="flex min-h-svh flex-col">
-    <!-- Header with links -->
     <Header />
     <div class="relative flex flex-1 flex-col overflow-hidden">
         <!-- Layer: subtle grid -->
         <div class="bg-grid pointer-events-none absolute inset-0 -z-20"></div>
         <!-- Layer: soft radial glow -->
         <div class="bg-glow pointer-events-none absolute inset-0 -z-10"></div>
-        <!-- Layer: animated orbs via motion -->
+        <!-- Layer: animated orbs -->
         <div
             class="orb-a-bg pointer-events-none absolute bottom-[-80px] left-[-80px] h-[320px] w-[320px] rounded-full opacity-50 blur-[30px]"
             style="will-change: transform;"
@@ -215,7 +219,7 @@
                                 use:springTap
                             >
                                 Get Started
-                                <i class="fa-solid fa-rocket ml-2 text-xs"></i>
+                                <Rocket size={14} class="ml-2" />
                             </a>
                             <a
                                 href="/docs/api/memory-cache"
@@ -223,7 +227,7 @@
                                 use:springTap
                             >
                                 API Reference
-                                <i class="fa-solid fa-book ml-2 text-xs"></i>
+                                <Book size={14} class="ml-2" />
                             </a>
                             <a
                                 href="/examples"
@@ -231,7 +235,7 @@
                                 use:springTap
                             >
                                 Examples
-                                <i class="fa-solid fa-play ml-2 text-xs"></i>
+                                <Play size={14} class="ml-2" />
                             </a>
                         </div>
                         <ul
@@ -258,7 +262,6 @@
         <!-- Features Section -->
         <section class="relative px-6 py-10">
             <div class="container mx-auto max-w-7xl">
-                <!-- Section Header -->
                 <div class="mb-16 text-center">
                     <h2
                         class="mb-4 bg-gradient-to-r from-brand-500 to-brand-600 bg-clip-text text-4xl font-bold text-transparent md:text-5xl"
@@ -271,6 +274,7 @@
                 </div>
                 <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {#each features as feature}
+                        {@const FeatureIcon = feature.icon}
                         <div
                             class="group relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-500/50 hover:shadow-lg hover:shadow-brand-500/10"
                         >
@@ -281,7 +285,7 @@
                                 <div
                                     class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 text-white"
                                 >
-                                    <i class={feature.icon}></i>
+                                    <FeatureIcon size={20} />
                                 </div>
                                 <h3
                                     class="mb-2 text-xl font-semibold transition-colors group-hover:text-brand-600"
@@ -325,10 +329,10 @@
                         </div>
                         <a
                             href="/docs/getting-started"
-                            class="text-xs font-medium text-brand-600 transition-colors hover:text-brand-700"
+                            class="inline-flex items-center gap-1 text-xs font-medium text-brand-600 transition-colors hover:text-brand-700"
                         >
                             Get Started
-                            <i class="fa-solid fa-arrow-right ml-1"></i>
+                            <ArrowRight size={12} />
                         </a>
                     </div>
                     <!-- Code -->
@@ -376,7 +380,6 @@ cache.set(<span class="text-green-500">'user:123'</span>, {'{'} name: <span clas
         filter: blur(0.2px);
     }
 
-    /* Orb animations to replace motion components */
     .orb-a-bg {
         animation: orbA 28s ease-in-out infinite;
     }

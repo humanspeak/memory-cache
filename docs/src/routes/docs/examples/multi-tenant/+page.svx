@@ -3,6 +3,19 @@ title: Multi-Tenant Cache Invalidation
 description: Use prefix and wildcard deletion for multi-tenant applications
 ---
 
+<script>
+  import { getSeoContext } from '@humanspeak/docs-kit'
+  const seo = getSeoContext()
+  if (seo) {
+      seo.title = 'Multi-Tenant Cache Invalidation - Memory Cache'
+      seo.description = 'Use prefix and wildcard deletion for multi-tenant cache invalidation with @humanspeak/memory-cache'
+      seo.ogTitle = 'Multi-Tenant Invalidation'
+      seo.ogTagline = 'Prefix and wildcard deletion for multi-tenant apps.'
+      seo.ogFeatures = ['Prefix Deletion', 'Wildcard Patterns', 'Hierarchical Keys', 'Hooks']
+      seo.ogSlug = 'examples-multi-tenant'
+  }
+</script>
+
 # Multi-Tenant Cache Invalidation
 
 Use prefix and wildcard deletion for efficient cache invalidation in multi-tenant applications.

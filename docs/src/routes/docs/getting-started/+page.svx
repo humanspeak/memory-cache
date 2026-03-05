@@ -3,6 +3,19 @@ title: Getting Started
 description: Get started with @humanspeak/memory-cache
 ---
 
+<script>
+  import { getSeoContext } from '@humanspeak/docs-kit'
+  const seo = getSeoContext()
+  if (seo) {
+      seo.title = 'Getting Started - Memory Cache'
+      seo.description = 'Get started with @humanspeak/memory-cache — installation, basic usage, TTL expiration, LRU eviction, and the @cached decorator'
+      seo.ogTitle = 'Getting Started'
+      seo.ogTagline = 'Install and start caching in minutes.'
+      seo.ogFeatures = ['Zero Dependencies', 'TypeScript First', 'TTL + LRU', 'Decorator Support']
+      seo.ogSlug = 'getting-started'
+  }
+</script>
+
 # Getting Started
 
 @humanspeak/memory-cache is a lightweight, zero-dependency in-memory cache for TypeScript and JavaScript. It provides TTL expiration, true LRU (Least Recently Used) eviction, wildcard pattern deletion, and a powerful `@cached` decorator for method-level memoization.
