@@ -19,7 +19,7 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "@humanspeak/docs-kit": "github:humanspeak/docs-kit#2026.3.12",
+        "@humanspeak/docs-kit": "github:humanspeak/docs-kit#2026.3.13",
         "@humanspeak/memory-cache": "workspace:*",
         "github-slugger": "^2.0.0",
         "runed": "^0.37.1"
