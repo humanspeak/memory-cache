@@ -15,10 +15,7 @@
     const { children } = $props()
 
     // SEO state — owned here, passed to SeoContextProvider for child access
-    const seo = $state<SeoContext>({
-        title: `${docsConfig.name} - High-Performance In-Memory Caching for TypeScript`,
-        description: docsConfig.description
-    })
+    const seo = $state<SeoContext>({})
 
     const npmUrl = `https://www.npmjs.com/package/${docsConfig.npmPackage}`
     const repoUrl = `https://github.com/${docsConfig.repo}`
