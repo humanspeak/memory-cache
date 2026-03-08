@@ -1,8 +1,12 @@
 # CLAUDE.md
 
-## Project
+## Project Overview
 
-`@humanspeak/memory-cache` — a lightweight, zero-dependency in-memory cache for TypeScript/JavaScript.
+`@humanspeak/memory-cache` — A lightweight, zero-dependency in-memory cache for TypeScript with TTL expiration, LRU eviction, and @cached decorator for method-level memoization.
+
+- **Package**: `@humanspeak/memory-cache`
+- **Homepage**: <https://memory.svelte.page>
+- **Repository**: <https://github.com/humanspeak/memory-cache>
 
 ## Coding Style
 
