@@ -26,7 +26,7 @@
     },
     "devDependencies": {
         "@cloudflare/workers-types": "^4.20260305.1",
-        "@eslint/compat": "^2.0.2",
+        "@eslint/compat": "^2.0.3",
         "@eslint/js": "^10.0.1",
         "@humanspeak/svelte-motion": "^0.1.31",
         "@sveltejs/adapter-cloudflare": "^7.2.8",
