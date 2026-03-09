@@ -82,14 +82,14 @@
         "test:watch": "vitest"
     },
     "devDependencies": {
-        "@eslint/compat": "^2.0.2",
+        "@eslint/compat": "^2.0.3",
         "@eslint/js": "^10.0.1",
-        "@types/node": "^25.3.3",
+        "@types/node": "^25.3.5",
         "@typescript-eslint/eslint-plugin": "^8.56.1",
         "@typescript-eslint/parser": "^8.56.1",
         "@vitest/coverage-v8": "^4.0.18",
         "mprocs": "^0.8.3",
-        "eslint": "^10.0.2",
+        "eslint": "^10.0.3",
         "eslint-config-prettier": "10.1.8",
         "globals": "^17.4.0",
         "husky": "^9.1.7",
