@@ -217,6 +217,24 @@ describe('MemoryCache Statistics', () => {
             const pruned = ttlCache.prune()
             expect(pruned).toBe(0)
         })
+
+        it('should compact expiration queue when tombstones accumulate', async () => {
+            const ttlCache = new MemoryCache<string>({ ttl: 100 })
+
+            // Overwrite the same key many times to create tombstones in the queue
+            // Each set() pushes a new queue entry; only the last timestamp is live
+            for (let i = 0; i < 10; i++) {
+                ttlCache.set('key', `value${i}`)
+            }
+
+            // Cache has 1 entry, queue has 10 entries (> 2 * 1) → compaction triggers
+            const pruned = ttlCache.prune()
+            expect(pruned).toBe(0)
+            // Flush microtask so background compaction runs
+            await new Promise<void>((resolve) => queueMicrotask(resolve))
+            expect(ttlCache.size()).toBe(1)
+            expect(ttlCache.get('key')).toBe('value9')
+        })
     })
 
     // ==========================================
