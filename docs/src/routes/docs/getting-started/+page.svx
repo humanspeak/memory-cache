@@ -90,12 +90,26 @@ await service.getUser('123')
 await service.getUser('123')
 ```
 
+### Using getOrSet()
+
+The `getOrSet()` method combines lookup and population in a single call — ideal for async caching patterns:
+
+```typescript
+const cache = new MemoryCache<User>()
+
+// Returns cached value if it exists, otherwise calls the factory and caches the result
+const user = await cache.getOrSet('user:123', async () => {
+    return await database.findUser('123')
+})
+```
+
 ## Configuration Options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `maxSize` | `number` | `100` | Maximum number of entries before eviction. Set to `0` for unlimited. |
 | `ttl` | `number` | `300000` | Time-to-live in milliseconds. Set to `0` for no expiration. |
+| `hooks` | `object` | — | Lifecycle hooks (`onEvict`, `onExpire`, `onSet`, `onDelete`, `onClear`) for reacting to cache events. |
 
 ## Features
 
