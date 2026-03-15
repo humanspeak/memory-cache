@@ -547,11 +547,11 @@ export class MemoryCache<T> {
         })
 
         // Append to expiration queue (skip if TTL is disabled)
-        // Coalesce with tail entry if same key to prevent unbounded growth on rapid overwrites
+        // Coalesce with tail entry if same key — avoids duplicate entries on consecutive overwrites
         if (this.ttl > 0) {
             const queue = this.expirationQueue
-            const tail = queue.length > 0 ? queue[queue.length - 1] : undefined
-            if (tail && tail.key === key) {
+            const tail = queue[queue.length - 1]
+            if (tail?.key === key) {
                 tail.timestamp = timestamp
             } else {
                 queue.push({ key, timestamp })
