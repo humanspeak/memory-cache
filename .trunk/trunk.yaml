@@ -22,12 +22,13 @@ lint:
           paths:
               - '**/worker-configuration.d.ts'
               - convex/_generated/**
+              - '**/sitemap-manifest.json'
     enabled:
         - shellcheck@0.11.0
         - shfmt@3.6.0
         - actionlint@1.7.11
-        - checkov@3.2.506
-        - eslint@10.0.2
+        - checkov@3.2.508
+        - eslint@10.0.3
         - git-diff-check
         - markdownlint@0.48.0
         - osv-scanner@2.3.3

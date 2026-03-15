@@ -285,6 +285,12 @@ export class MemoryCache<T> {
         expirations: 0
     }
 
+    /** FIFO queue ordered by insertion timestamp for O(k) pruning. */
+    private expirationQueue: Array<{ key: string; timestamp: number }> = []
+
+    /** Prevents queuing duplicate compaction microtasks. */
+    private compactionScheduled = false
+
     /**
      * Creates a new MemoryCache instance.
      *
@@ -534,10 +540,23 @@ export class MemoryCache<T> {
             valueToStore = value
         }
 
+        const timestamp = Date.now()
         this.cache.set(key, {
             value: valueToStore,
-            timestamp: Date.now()
+            timestamp
         })
+
+        // Append to expiration queue (skip if TTL is disabled)
+        // Coalesce with tail entry if same key — avoids duplicate entries on consecutive overwrites
+        if (this.ttl > 0) {
+            const queue = this.expirationQueue
+            const tail = queue[queue.length - 1]
+            if (tail?.key === key) {
+                tail.timestamp = timestamp
+            } else {
+                queue.push({ key, timestamp })
+            }
+        }
 
         this.callHook(this.hooks.onSet, { key, value, isUpdate: !isNewKey })
     }
@@ -607,6 +626,8 @@ export class MemoryCache<T> {
             this.callHook(this.hooks.onDelete, { key, value, source: 'clear' })
         }
         this.cache.clear()
+        this.expirationQueue = []
+        this.compactionScheduled = false
     }
 
     /**
@@ -845,8 +866,18 @@ export class MemoryCache<T> {
 
         let count = 0
         const now = Date.now()
-        for (const [key, entry] of this.cache.entries()) {
-            if (now - entry.timestamp > this.ttl) {
+        const queue = this.expirationQueue
+
+        // Drain expired entries from the front of the queue
+        let head = 0
+        while (head < queue.length && now - queue[head].timestamp > this.ttl) {
+            const { key, timestamp } = queue[head]
+            head++
+
+            // Check if the cache entry still exists and matches the queued timestamp
+            // (mismatched timestamps mean the key was overwritten — this is a tombstone)
+            const entry = this.cache.get(key)
+            if (entry && entry.timestamp === timestamp) {
                 const value = this.unwrapValue(entry.value)
                 this.cache.delete(key)
                 this.stats.expirations++
@@ -854,6 +885,24 @@ export class MemoryCache<T> {
                 count++
             }
         }
+
+        // Remove processed entries from the front (in-place to avoid allocation)
+        if (head > 0) {
+            queue.splice(0, head)
+        }
+
+        // Defer tombstone compaction to a microtask to keep prune() non-blocking
+        if (!this.compactionScheduled && this.expirationQueue.length > 2 * this.cache.size) {
+            this.compactionScheduled = true
+            queueMicrotask(() => {
+                this.compactionScheduled = false
+                this.expirationQueue = this.expirationQueue.filter((item) => {
+                    const entry = this.cache.get(item.key)
+                    return entry !== undefined && entry.timestamp === item.timestamp
+                })
+            })
+        }
+
         return count
     }
 }

@@ -8,7 +8,7 @@ description: Simple rate limiting using cache
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Rate Limiting - Memory Cache'
-      seo.description = 'Implement simple rate limiting using cache TTL with @humanspeak/memory-cache'
+      seo.description = 'Implement simple rate limiting using cache TTL with @humanspeak/memory-cache. Includes Express middleware, configurable thresholds, and monitoring for API endpoint protection.'
       seo.ogTitle = 'Rate Limiting'
       seo.ogTagline = 'Simple rate limiting using cache TTL.'
       seo.ogFeatures = ['TTL-Based', 'Express Middleware', 'Monitoring', 'Configurable']

@@ -116,9 +116,8 @@ The decorator works seamlessly with async methods:
 
 ```typescript
 class DataService {
-    @cached<Promise<Data>>()
+    @cached<Data>()
     async loadData(id: string): Promise<Data> {
-        // The Promise is cached, not the resolved value
         return await expensiveOperation(id)
     }
 }
@@ -254,17 +253,19 @@ service.process({ id: '123' })  // Cached
 service.process({ id: '456' })
 ```
 
-### Class Instance Scope
+### Shared Cache Across Instances
 
-Each class instance has its own cache. Different instances don't share cached values:
+All instances of a class share the same cache for a given decorated method. The cache is created once per `@cached()` declaration, so calls with the same arguments return cached results regardless of which instance makes the call:
 
 ```typescript
 const service1 = new UserService()
 const service2 = new UserService()
 
-await service1.getUser('123')  // Cached in service1
-await service2.getUser('123')  // Executes again (different instance)
+await service1.getUser('123')  // Executes the method
+await service2.getUser('123')  // Returns cached result (shared cache)
 ```
+
+This provides cross-instance deduplication — if multiple instances call the same method with the same arguments, the underlying function only executes once. Note that cache keys are based solely on arguments, with no per-instance discrimination.
 
 ### TypeScript Decorators
 
