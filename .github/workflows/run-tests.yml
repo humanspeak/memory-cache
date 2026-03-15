@@ -47,7 +47,7 @@ jobs:
                   cache: pnpm
 
             - name: Install dependencies
-              run: pnpm install --filter . --frozen-lockfile
+              run: pnpm install --filter . --frozen-lockfile --config.engine-strict=false
 
             - name: Run build
               run: pnpm build
