@@ -8,7 +8,7 @@ description: Integrate with metrics and logging systems
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Monitoring with Hooks - Memory Cache'
-      seo.description = 'Integrate @humanspeak/memory-cache with metrics and logging systems using hooks for observability'
+      seo.description = 'Integrate @humanspeak/memory-cache with DataDog, Prometheus, and custom logging systems. Use hooks to track hit rates, evictions, and cache health for observability.'
       seo.ogTitle = 'Monitoring with Hooks'
       seo.ogTagline = 'Integrate with metrics and logging systems.'
       seo.ogFeatures = ['DataDog', 'Prometheus', 'Debug Logging', 'Hit Rate Dashboard']

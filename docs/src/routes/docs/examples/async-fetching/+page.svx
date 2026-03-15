@@ -8,7 +8,7 @@ description: Cache expensive async operations with getOrSet
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Async Fetching - Memory Cache'
-      seo.description = 'Cache expensive async operations with getOrSet in @humanspeak/memory-cache for thundering herd prevention'
+      seo.description = 'Cache expensive async operations with getOrSet for thundering herd prevention and request deduplication. Includes error handling patterns using @humanspeak/memory-cache.'
       seo.ogTitle = 'Async Fetching'
       seo.ogTagline = 'Cache async operations with getOrSet.'
       seo.ogFeatures = ['getOrSet', 'Thundering Herd', 'Error Handling', 'Sync Fetchers']

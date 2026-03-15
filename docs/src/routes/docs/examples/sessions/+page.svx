@@ -8,7 +8,7 @@ description: Store user sessions with automatic expiration
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Session Storage - Memory Cache'
-      seo.description = 'Store user sessions with automatic expiration using TTL in @humanspeak/memory-cache'
+      seo.description = 'Store user sessions with automatic TTL expiration and audit logging. A lightweight in-memory session store for TypeScript and Node.js using @humanspeak/memory-cache.'
       seo.ogTitle = 'Session Storage'
       seo.ogTagline = 'Automatic session expiration with TTL.'
       seo.ogFeatures = ['TTL Expiration', 'Audit Logging', 'Type Safety', 'Auto Cleanup']
