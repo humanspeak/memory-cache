@@ -26,7 +26,7 @@
         "runed": "^0.37.1"
     },
     "devDependencies": {
-        "@cloudflare/workers-types": "^4.20260313.1",
+        "@cloudflare/workers-types": "^4.20260316.1",
         "@eslint/compat": "^2.0.3",
         "@eslint/js": "^10.0.1",
         "@humanspeak/svelte-motion": "^0.1.32",
