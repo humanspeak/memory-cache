@@ -209,10 +209,8 @@ describe('MemoryCache LRU Eviction', () => {
             cache.set('key1', 'value1')
             cache.set('key2', 'value2')
 
-            // trunk-ignore(eslint/@typescript-eslint/no-explicit-any)
             const internalMap = (cache as any).cache as Map<string, unknown>
             const originalKeys = internalMap.keys.bind(internalMap)
-            // trunk-ignore(eslint/@typescript-eslint/no-explicit-any)
             internalMap.keys = (() => {
                 internalMap.keys = originalKeys
                 return {
@@ -233,7 +231,6 @@ describe('MemoryCache LRU Eviction', () => {
             cache.set('key1', 'value1')
             cache.set('key2', 'value2')
 
-            // trunk-ignore(eslint/@typescript-eslint/no-explicit-any)
             const internalMap = (cache as any).cache as Map<string, unknown>
             const originalGet = internalMap.get.bind(internalMap)
             let interceptNext = true
