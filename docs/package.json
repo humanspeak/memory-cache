@@ -37,7 +37,7 @@
         "@tailwindcss/typography": "^0.5.19",
         "@tailwindcss/vite": "^4.2.2",
         "@typescript-eslint/eslint-plugin": "^8.57.1",
-        "@typescript-eslint/parser": "^8.57.1",
+        "@typescript-eslint/parser": "^8.58.1",
         "autoprefixer": "^10.4.27",
         "chokidar-cli": "^3.0.0",
         "eslint": "^10.1.0",
