@@ -101,7 +101,7 @@
         "publint": "^0.3.18",
         "tslib": "^2.8.1",
         "typescript": "^5.9.3",
-        "typescript-eslint": "^8.57.1",
+        "typescript-eslint": "^8.58.1",
         "vite": "^8.0.1",
         "vite-plugin-dts": "^4.5.4",
         "vitest": "^4.1.0"
