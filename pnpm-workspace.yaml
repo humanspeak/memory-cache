@@ -3,3 +3,6 @@ packages:
     - docs
 onlyBuiltDependencies:
     - '@humanspeak/docs-kit'
+minimumReleaseAge: 2880
+minimumReleaseAgeExclude:
+    - '@humanspeak/*'
