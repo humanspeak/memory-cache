@@ -4,15 +4,13 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "tsx ./scripts/fetch-github-stats.ts && node ./scripts/generate-sitemap-manifest.mjs && tsx ./scripts/generate-social-cards.ts && vite build",
+        "build": "tsx ./scripts/fetch-github-stats.ts && tsx ./scripts/generate-social-cards.ts && vite build",
         "cf-typegen": "wrangler types && mv worker-configuration.d.ts src/",
         "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
         "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
         "deploy": "npm run build && wrangler deploy",
         "dev": "vite dev",
         "generate-social": "tsx ./scripts/generate-social-cards.ts",
-        "sitemap:manifest": "node ./scripts/generate-sitemap-manifest.mjs",
-        "sitemap:watch": "chokidar 'src/routes/**/*.svelte' 'src/routes/**/*.svx' 'src/routes/**/*.md' --ignore 'src/routes/examples/+page.ts' -c 'node ./scripts/generate-sitemap-manifest.mjs' --initial --silent",
         "social:watch": "chokidar 'src/lib/components/OG.svelte' 'scripts/generate-social-cards.ts' -c 'tsx ./scripts/generate-social-cards.ts' --initial --silent",
         "format": "prettier --write .",
         "lint": "prettier --check . && eslint .",
@@ -20,7 +18,7 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "@humanspeak/docs-kit": "github:humanspeak/docs-kit#2026.6.4",
+        "@humanspeak/docs-kit": "github:humanspeak/docs-kit#2026.6.5",
         "@humanspeak/memory-cache": "workspace:*",
         "@humanspeak/svelte-markdown": "^1.5.4",
         "github-slugger": "^2.0.0",

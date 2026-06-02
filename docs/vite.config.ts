@@ -1,4 +1,9 @@
-import { docMirrorsPlugin, llmsFullPlugin, llmsPlugin } from '@humanspeak/docs-kit/vite'
+import {
+    docMirrorsPlugin,
+    llmsFullPlugin,
+    llmsPlugin,
+    sitemapManifestPlugin
+} from '@humanspeak/docs-kit/vite'
 import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
@@ -7,6 +12,7 @@ import { docsConfig } from './src/lib/docs-config'
 
 export default defineConfig({
     plugins: [
+        sitemapManifestPlugin({ blogDir: false }),
         docMirrorsPlugin({ siteUrl: docsConfig.url }),
         llmsFullPlugin({
             siteUrl: docsConfig.url,
