@@ -1,100 +1,116 @@
 <script lang="ts">
+    import { afterNavigate } from '$app/navigation'
     import { page } from '$app/state'
-    import GithubSlugger from 'github-slugger'
-    import Header from '$lib/components/general/Header.svelte'
-    import Footer from '$lib/components/general/Footer.svelte'
-    import { Sidebar, getBreadcrumbContext, getDocsTitleByPath, enhanceCodeBlocks } from '@humanspeak/docs-kit'
+    import {
+        DocSlugStrip,
+        FooterV2,
+        HeaderV2,
+        SidebarV2,
+        TableOfContentsV2,
+        enhanceCodeBlocks,
+        extractHeadings,
+        getBreadcrumbContext,
+        type TocHeading
+    } from '@humanspeak/docs-kit'
+    import favicon from '$lib/assets/logo.svg'
     import { docsConfig } from '$lib/docs-config'
     import { docsSections } from '$lib/docsNav'
-    import TableOfContents from './TableOfContents.svelte'
+    import sitemapManifest from '$lib/sitemap-manifest.json'
+    import rootPkg from '../../../../package.json'
+
+    const BASE_URL = 'https://memory.svelte.page'
+    const PKG_VERSION = rootPkg.version
 
     const { children, data } = $props()
 
-    const breadcrumbContext = getBreadcrumbContext()
-    $effect(() => {
-        if (breadcrumbContext) {
-            const title = getDocsTitleByPath(docsSections, page.url.pathname)
-            breadcrumbContext.breadcrumbs =
-                title && page.url.pathname !== '/docs'
-                    ? [{ title: 'Docs', href: '/docs' }, { title }]
-                    : [{ title: 'Docs' }]
-        }
+    const docSlug = $derived.by(() => {
+        const path = page.url.pathname.replace(/\/+$/, '')
+        if (path === '/docs' || path === '') return 'index'
+        return path.replace('/docs/', '')
     })
 
     let contentElement: HTMLElement | undefined = $state(undefined)
-    let headings: { id: string; text: string; level: number; element: HTMLElement }[] = $state([])
+    let headings: TocHeading[] = $state([])
 
-    /**
-     * Extract headings from content for table of contents
-     * Generates descriptive, slugified IDs for better URL anchors using github-slugger
-     */
-    function extractHeadings() {
-        if (!contentElement) return
+    const breadcrumbContext = getBreadcrumbContext()
+    if (breadcrumbContext) {
+        const initialTitle = (page.data?.title as string | undefined) || 'Getting Started'
+        breadcrumbContext.breadcrumbs = [{ title: 'Docs', href: '/docs' }, { title: initialTitle }]
+    }
+    $effect(() => {
+        if (!breadcrumbContext) return
+        const title = (page.data?.title as string | undefined) || 'Getting Started'
+        breadcrumbContext.breadcrumbs = [{ title: 'Docs', href: '/docs' }, { title }]
+    })
 
-        const headingElements = contentElement.querySelectorAll('h1, h2, h3, h4, h5, h6')
-        const slugger = new GithubSlugger()
+    const techArticleJsonLd = $derived.by(() => {
+        const title = page.data?.title as string | undefined
+        const description = page.data?.description as string | undefined
+        if (!title) return ''
+        const pathname = page.url.pathname
+        const lastmod =
+            (sitemapManifest as Record<string, string>)[pathname] ??
+            new Date().toISOString().split('T')[0]
+        return `<${'script'} type="application/ld+json">${JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'TechArticle',
+            headline: title,
+            description: description || title,
+            url: `${BASE_URL}${pathname}`,
+            dateModified: lastmod,
+            author: {
+                '@type': 'Organization',
+                name: 'Humanspeak',
+                url: 'https://humanspeak.com'
+            },
+            publisher: {
+                '@type': 'Organization',
+                name: 'Humanspeak',
+                url: 'https://humanspeak.com'
+            },
+            proficiencyLevel: 'Beginner'
+        })}</${'script'}>`
+    })
 
-        headings = Array.from(headingElements).map((el, index) => {
-            const text = el.textContent?.trim() || ''
-            const level = parseInt(el.tagName.charAt(1))
-
-            // Use existing ID if present, otherwise generate slug
-            let id = el.id
-            if (!id) {
-                id = text ? slugger.slug(text) : `heading-${index}`
-            }
-
-            if (!el.id) {
-                el.id = id
-            }
-
-            return {
-                id,
-                text,
-                level,
-                element: el as HTMLElement
-            }
-        })
+    const refreshHeadings = () => {
+        if (contentElement) headings = extractHeadings(contentElement)
     }
 
-    // Setup MutationObserver to watch for DOM changes and initial extraction
     $effect(() => {
-        if (!contentElement) return
+        if (contentElement) refreshHeadings()
+    })
 
-        // Initial extraction
-        extractHeadings()
-
-        // Watch for DOM mutations (new content loaded via navigation)
-        let rafId: number | null = null
-        const observer = new MutationObserver(() => {
-            if (rafId) cancelAnimationFrame(rafId)
-            rafId = requestAnimationFrame(() => {
-                rafId = null
-                extractHeadings()
-            })
-        })
-
-        observer.observe(contentElement, {
-            childList: true,
-            subtree: true
-        })
-
-        return () => {
-            if (rafId) cancelAnimationFrame(rafId)
-            observer.disconnect()
-        }
+    afterNavigate(() => {
+        requestAnimationFrame(refreshHeadings)
     })
 </script>
 
+<svelte:head>
+    {#if techArticleJsonLd}
+        <!-- trunk-ignore(eslint/svelte/no-at-html-tags) -->
+        {@html techArticleJsonLd}
+    {/if}
+</svelte:head>
+
 <div class="flex min-h-screen flex-col justify-between bg-background">
-    <Header />
+    <HeaderV2
+        config={docsConfig}
+        {favicon}
+        version={PKG_VERSION}
+        nav={[
+            { label: 'docs', href: '/docs' },
+            { label: 'examples', href: '/examples' }
+        ]}
+    />
+
+    <DocSlugStrip slug={docSlug} />
 
     <div class="flex flex-1">
         <!-- Left sidebar - Navigation -->
         <aside
             class="hidden w-64 shrink-0 border-r border-sidebar-border bg-sidebar-background/95 shadow-sm lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto"
         >
-            <Sidebar
+            <SidebarV2
                 config={docsConfig}
                 sections={docsSections}
                 currentPath={page.url.pathname}
@@ -103,16 +119,16 @@
         </aside>
 
         <!-- Main content area -->
-        <main class="flex-1">
-            <div class="flex">
+        <main class="min-w-0 flex-1">
+            <div class="flex min-w-0">
                 <!-- Content -->
                 <article
                     bind:this={contentElement}
                     use:enhanceCodeBlocks
-                    class="flex-1 px-4 py-8 sm:px-6 lg:px-8"
+                    class="min-w-0 flex-1 px-4 py-8 sm:px-6 lg:px-8"
                 >
                     <div
-                        class="prose max-w-none text-text-primary prose-slate dark:prose-invert prose-headings:scroll-mt-20"
+                        class="prose-v2 prose max-w-none text-text-primary prose-slate dark:prose-invert prose-headings:scroll-mt-20"
                     >
                         {@render children()}
                     </div>
@@ -122,10 +138,10 @@
                 <aside
                     class="hidden w-56 shrink-0 border-l border-sidebar-border bg-sidebar-background/95 shadow-sm xl:sticky xl:top-0 xl:block xl:h-screen xl:overflow-y-auto"
                 >
-                    <TableOfContents {headings} />
+                    <TableOfContentsV2 {headings} />
                 </aside>
             </div>
         </main>
     </div>
-    <Footer />
+    <FooterV2 version={PKG_VERSION} />
 </div>
