@@ -1,9 +1,11 @@
 import {
+    demoManifestPlugin,
     docMirrorsPlugin,
     llmsFullPlugin,
     llmsPlugin,
     sitemapManifestPlugin
 } from '@humanspeak/docs-kit/vite'
+import { svelteMotionOptimize } from '@humanspeak/svelte-motion/vite'
 import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
@@ -13,6 +15,7 @@ import { docsConfig } from './src/lib/docs-config'
 export default defineConfig({
     plugins: [
         sitemapManifestPlugin({ blogDir: false }),
+        demoManifestPlugin(),
         docMirrorsPlugin({ siteUrl: docsConfig.url }),
         llmsFullPlugin({
             siteUrl: docsConfig.url,
@@ -25,9 +28,20 @@ export default defineConfig({
             prepend: 'static/llms-prepend.md',
             append: 'static/llms-append.md'
         }),
+        svelteMotionOptimize(),
         tailwindcss(),
         sveltekit()
     ],
+    optimizeDeps: {
+        exclude: [
+            '@humanspeak/docs-kit',
+            '@humanspeak/svelte-motion',
+            '@humanspeak/svelte-satori-fix',
+            '@resvg/resvg-js',
+            'satori',
+            'satori-html'
+        ]
+    },
     server: {
         port: 8288
     }
