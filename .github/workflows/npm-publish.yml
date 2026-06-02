@@ -44,17 +44,21 @@ jobs:
         runs-on: blacksmith-2vcpu-ubuntu-2404 # trunk-ignore(actionlint/runner-label)
         outputs:
             should_run: ${{ steps.check.outputs.should_run }}
+            has_skip_label: ${{ steps.check.outputs.has_skip_label }}
         steps:
             - id: check
               env:
                   EVENT_NAME: ${{ github.event_name }}
                   PR_MERGED: ${{ github.event.pull_request.merged }}
+                  HAS_SKIP_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'skip-publish') }}
               run: |
                   if [[ "$EVENT_NAME" == "pull_request" && "$PR_MERGED" != "true" ]]; then
                       echo "should_run=false" >> $GITHUB_OUTPUT
                   else
                       echo "should_run=true" >> $GITHUB_OUTPUT
                   fi
+
+                  echo "has_skip_label=$HAS_SKIP_LABEL" >> $GITHUB_OUTPUT
 
     debug-check:
         needs: check-if-merged
@@ -213,9 +217,7 @@ jobs:
                   persist-credentials: false
                   token: ${{ secrets.ACTIONS_KEY }}
 
-            - uses: pnpm/action-setup@v6 # zizmor: ignore[unpinned-uses]
-              with:
-                  version: 10
+            - uses: pnpm/action-setup@v4 # zizmor: ignore[unpinned-uses]
 
             - name: Use Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v6 # zizmor: ignore[unpinned-uses]
@@ -245,6 +247,7 @@ jobs:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   flag-name: node-${{ matrix.node-version }}
                   parallel: true
+                  fail-on-error: false
               if: matrix.node-version == '22'
 
             # Removed dependency caching to reduce cache-poisoning risk
@@ -252,7 +255,10 @@ jobs:
     # 4. Coverage reporting (depends on tests)
     coverage-report:
         needs: [check-if-merged, build]
-        if: needs.check-if-merged.outputs.should_run == 'true'
+        if: |
+            always() &&
+            needs.check-if-merged.outputs.should_run == 'true' &&
+            needs.build.result == 'success'
         runs-on: blacksmith-2vcpu-ubuntu-2404 # trunk-ignore(actionlint/runner-label)
         steps:
             - name: Coveralls Finished
@@ -260,11 +266,16 @@ jobs:
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   parallel-finished: true
+                  fail-on-error: false
 
     # 5. Publishing job (main deployment logic)
     publish-github-packages:
         needs: [check-if-merged, build, coverage-report]
-        if: needs.check-if-merged.outputs.should_run == 'true'
+        if: |
+            always() &&
+            needs.check-if-merged.outputs.should_run == 'true' &&
+            needs.build.result == 'success' &&
+            (needs.coverage-report.result == 'success' || needs.coverage-report.result == 'skipped')
         runs-on: ubuntu-latest
         environment: production
         permissions:
@@ -282,7 +293,7 @@ jobs:
                   token: ${{ secrets.GITHUB_TOKEN }}
                   fetch-depth: 0
 
-            - uses: pnpm/action-setup@v6 # zizmor: ignore[unpinned-uses]
+            - uses: pnpm/action-setup@v4 # zizmor: ignore[unpinned-uses]
 
             - name: Use Node.js - 24
               uses: actions/setup-node@v6 # zizmor: ignore[unpinned-uses,cache-poisoning]
@@ -418,9 +429,11 @@ jobs:
                       ;;
                   esac
 
-                  # Get the new version number
-                  NEW_VERSION=$(pnpm version "$BUMP_TYPE" --no-git-tag-version)
-                  echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+                  # Mutate package.json only — do NOT parse pnpm stdout (pnpm 11 prints multi-line text)
+                  pnpm version "$BUMP_TYPE" --no-git-tag-version
+                  PACKAGE_VERSION=$(node -p "require('./package.json').version")
+                  NEW_VERSION="v${PACKAGE_VERSION}"
+                  echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 
                   # Escape special characters in PR title and URL
                   ESCAPED_TITLE=$(echo "$PR_TITLE" | sed 's/[`$"\]/\\&/g')
