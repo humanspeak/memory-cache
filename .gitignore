@@ -25,5 +25,8 @@ junit-vitest.xml
 /docs/static/social-cards
 docs/static/og-default.png
 docs/static/twitter-default.png
+docs/static/docs/
+docs/static/llms-full.txt
+docs/static/llms.txt
 mprocs.log
 docs/src/lib/github-stats.json
