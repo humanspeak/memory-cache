@@ -22,6 +22,7 @@
     "dependencies": {
         "@humanspeak/docs-kit": "github:humanspeak/docs-kit#2026.6.4",
         "@humanspeak/memory-cache": "workspace:*",
+        "@humanspeak/svelte-markdown": "^1.5.4",
         "github-slugger": "^2.0.0",
         "runed": "^0.37.1"
     },
