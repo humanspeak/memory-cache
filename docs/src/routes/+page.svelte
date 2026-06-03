@@ -10,30 +10,60 @@
     import FileCode from '@lucide/svelte/icons/file-code'
     import Layers from '@lucide/svelte/icons/layers'
     import Zap from '@lucide/svelte/icons/zap'
-    import packageJson from '../../../package.json'
     import type { Component } from 'svelte'
+    import type { PageData } from './$types'
 
+    const { data }: { data: PageData } = $props()
+    const packageStats = $derived(data.packageStats)
     const breadcrumbContext = getBreadcrumbContext()
 
     if (breadcrumbContext) {
         breadcrumbContext.breadcrumbs = []
     }
 
-    const PKG_NAME = packageJson.name
-    const PKG_VERSION = packageJson.version
+    const PKG_NAME = $derived(packageStats.name)
+    const PKG_VERSION = $derived(packageStats.version)
+    const TARBALL_KB = $derived(
+        packageStats.tarballBytes !== null
+            ? Math.round(packageStats.tarballBytes / 102.4) / 10
+            : null
+    )
     const DEP_COUNT = 0
-    const installCmd = `npm i ${PKG_NAME}`
+    const installCmd = $derived(`npm i ${PKG_NAME}`)
     let copied = $state(false)
+
+    interface StatItem {
+        k: string
+        v: string
+        sup?: string
+        n: string
+        ac?: boolean
+    }
+
+    const stats: StatItem[] = $derived([
+        { k: 'exports', v: '3', n: 'MemoryCache · cached · types', ac: true },
+        { k: 'policies', v: '2', n: 'TTL · LRU eviction' },
+        { k: 'hooks', v: '6', n: 'hit · miss · set · evict · expire · delete', ac: true },
+        {
+            k: 'tarball',
+            v: TARBALL_KB !== null ? String(TARBALL_KB) : '—',
+            sup: TARBALL_KB !== null ? 'kB' : undefined,
+            n: 'packed (npm gz)'
+        },
+        { k: 'runtime deps', v: String(DEP_COUNT), n: 'zero-dependency runtime' },
+        { k: 'licence', v: 'MIT', n: 'on GitHub' }
+    ])
 
     const copyInstall = async () => {
         if (typeof navigator === 'undefined') return
         try {
-            await navigator.clipboard.writeText(installCmd)
-            copied = true
-            setTimeout(() => (copied = false), 1500)
+            await navigator.clipboard?.writeText(installCmd)
         } catch {
             /* clipboard blocked - fail quiet */
         }
+
+        copied = true
+        setTimeout(() => (copied = false), 1500)
     }
 
     const features: { title: string; description: string; icon: Component }[] = [
@@ -92,6 +122,10 @@
                 <aside class="meta">
                     <div><span class="k">pkg</span> · <span class="v">{PKG_NAME}</span></div>
                     <div><span class="k">version</span> · <span class="v">{PKG_VERSION}</span></div>
+                    <div>
+                        <span class="k">tarball</span> ·
+                        <span class="v">{TARBALL_KB !== null ? `${TARBALL_KB} kB gz` : '—'}</span>
+                    </div>
                     <div><span class="k">deps</span> · <span class="v">{DEP_COUNT}</span></div>
                     <div><span class="k">licence</span> · <span class="v">MIT</span></div>
                     <hr />
@@ -144,7 +178,7 @@
                                         exit={{ opacity: 0, y: -6 }}
                                         transition={{ duration: 0.18, ease: 'easeOut' }}
                                     >
-                                        {copied ? 'copied' : 'copy'}
+                                        {copied ? '✓ copied' : 'copy'}
                                     </MotionSpan>
                                 </AnimatePresence>
                             </span>
@@ -153,6 +187,20 @@
                 </div>
                 <div class="corner bl">FIG-001</div>
                 <div class="corner br">SHEET 01 / 03</div>
+            </section>
+
+            <section class="brut-stats">
+                {#each stats as s, i (s.k)}
+                    <div class="s {s.ac ? 'ac' : ''}" data-idx="/0{i + 1}">
+                        <div class="k">{s.k}</div>
+                        <div class="v">
+                            <span class="v-num">{s.v}</span>{#if s.sup}<span class="v-unit"
+                                    >{s.sup}</span
+                                >{/if}
+                        </div>
+                        <div class="note">{s.n}</div>
+                    </div>
+                {/each}
             </section>
         </main>
 
@@ -501,6 +549,74 @@ cache.set(<span class="text-green-500">'user:123'</span>, {'{'} name: <span clas
         bottom: 12px;
     }
 
+    .brut-stats {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        border-bottom: 1px solid var(--brut-rule);
+    }
+
+    .brut-stats .s {
+        position: relative;
+        display: flex;
+        min-height: 160px;
+        flex-direction: column;
+        justify-content: space-between;
+        border-right: 1px solid var(--brut-rule);
+        padding: 28px 24px;
+    }
+
+    .brut-stats .s:last-child {
+        border-right: 0;
+    }
+
+    .brut-stats .s .k {
+        color: var(--brut-ink-3);
+        font-size: 10.5px;
+        letter-spacing: 0.14em;
+    }
+
+    .brut-stats .s .v {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 4px;
+        color: var(--brut-ink);
+        font-size: 64px;
+        font-weight: 500;
+        line-height: 1;
+        letter-spacing: -0.04em;
+        white-space: nowrap;
+    }
+
+    .brut-stats .s .v-num {
+        line-height: 1;
+    }
+
+    .brut-stats .s .v-unit {
+        color: inherit;
+        font-size: 22px;
+        font-weight: 500;
+        line-height: 1;
+        letter-spacing: 0;
+    }
+
+    .brut-stats .s .note {
+        color: var(--brut-ink-2);
+        font-size: 11px;
+    }
+
+    .brut-stats .s.ac .v {
+        color: var(--brut-accent);
+    }
+
+    .brut-stats .s::after {
+        position: absolute;
+        top: 12px;
+        right: 14px;
+        color: var(--brut-ink-3);
+        font-size: 10px;
+        content: attr(data-idx);
+    }
+
     @media (max-width: 720px) {
         .brut-coord {
             display: none;
@@ -509,6 +625,19 @@ cache.set(<span class="text-green-500">'user:123'</span>, {'{'} name: <span clas
         .brut-hero {
             grid-template-columns: 1fr;
             padding: 56px 16px 32px;
+        }
+
+        .brut-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .brut-stats .s {
+            min-height: 130px;
+            padding: 20px 16px;
+        }
+
+        .brut-stats .s .v {
+            font-size: 44px;
         }
     }
 </style>
