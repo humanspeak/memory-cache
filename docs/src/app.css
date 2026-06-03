@@ -1,7 +1,33 @@
 @import 'tailwindcss';
 @source '../node_modules/@humanspeak/docs-kit/dist';
 @import '@humanspeak/docs-kit/styles/base.css';
+@import '@humanspeak/docs-kit/styles/brutalist.css';
+@import '@humanspeak/docs-kit/styles/prose-v2.css';
 @plugin '@tailwindcss/typography';
+
+/* Project-specific tokens */
+:root {
+    --color-success: #22c55e;
+}
+
+.dark {
+    --color-success: #4ade80;
+}
+
+@theme inline {
+    --color-success: var(--color-success);
+}
+
+/* Shiki theme switching outside .prose */
+@layer base {
+    html:not(.dark) .shiki-dark {
+        display: none;
+    }
+
+    html.dark .shiki-light {
+        display: none;
+    }
+}
 
 /* Project-specific: landing page decorative styles */
 .orb-a-bg {
@@ -33,4 +59,34 @@
 .sheen-gradient {
     background-size: 200% 100%;
     animation: sheen 6s ease-in-out infinite;
+}
+
+.shiny-button {
+    --radial-gradient-background: 250, 250, 250;
+    --solid-color-background: 15, 15, 15;
+    --overlay-color: 255, 255, 255;
+}
+
+/* Project-specific: ComponentSource dialog */
+.component-source-dialog {
+    @apply border-border bg-background fixed inset-4 z-50 flex flex-col overflow-hidden rounded-xl border shadow-2xl;
+    max-width: 1100px;
+    max-height: 80vh;
+    margin: auto;
+}
+
+.component-source-code pre.shiki {
+    @apply m-0 rounded-none bg-transparent! p-4;
+    counter-reset: line;
+}
+
+.component-source-code pre.shiki code {
+    @apply bg-transparent!;
+    counter-reset: line;
+}
+
+.component-source-code pre.shiki code .line::before {
+    counter-increment: line;
+    content: counter(line);
+    @apply text-muted-foreground/50 mr-6 inline-block w-4 text-right;
 }

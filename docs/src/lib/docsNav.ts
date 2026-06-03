@@ -20,6 +20,7 @@ import Timer from '@lucide/svelte/icons/timer'
 export const docsSections: NavSection[] = [
     {
         title: 'Get Started',
+        icon: Rocket,
         items: [
             {
                 title: 'Getting Started',
@@ -30,6 +31,7 @@ export const docsSections: NavSection[] = [
     },
     {
         title: 'Interactive Demos',
+        icon: Play,
         items: [
             { title: 'All Examples', href: '/examples', icon: Play, exact: true },
             { title: 'Basic Cache', href: '/examples/basic-cache', icon: Box },
@@ -40,6 +42,7 @@ export const docsSections: NavSection[] = [
     },
     {
         title: 'API Reference',
+        icon: Database,
         items: [
             { title: 'MemoryCache', href: '/docs/api/memory-cache', icon: Database },
             { title: '@cached Decorator', href: '/docs/api/cached-decorator', icon: AtSign }
@@ -47,6 +50,7 @@ export const docsSections: NavSection[] = [
     },
     {
         title: 'Examples',
+        icon: Code,
         items: [
             { title: 'Overview', href: '/docs/examples', icon: Code, exact: true },
             { title: 'Configuration', href: '/docs/examples/configuration', icon: Sliders },

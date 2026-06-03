@@ -47,9 +47,9 @@ jobs:
             - name: Build Package
               run: pnpm run build
 
-            - name: Generate sitemap manifest
-              working-directory: docs
-              run: pnpm run sitemap:manifest
+            # The sitemap manifest now emits from docs-kit's
+            # `sitemapManifestPlugin` in `docs/vite.config.ts`, which runs
+            # automatically during the Vite build inside `pnpm run deploy`.
 
             - name: Deploy Docs
               working-directory: docs

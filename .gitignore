@@ -30,3 +30,7 @@ docs/static/llms-full.txt
 docs/static/llms.txt
 mprocs.log
 docs/src/lib/github-stats.json
+docs/src/lib/demo-manifest.json
+docs/src/lib/demo-loaders.ts
+docs/src/lib/demo-virtual.d.ts
+docs/src/lib/sitemap-manifest.json

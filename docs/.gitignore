@@ -1,1 +1,3 @@
 .wrangler/
+src/lib/demo-loaders.ts
+src/lib/demo-virtual.d.ts

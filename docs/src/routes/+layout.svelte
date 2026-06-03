@@ -57,13 +57,12 @@
         '/script>'
 </script>
 
+<ModeWatcher />
 <svelte:head>
     <!-- JSON-LD structured data: SoftwareApplication -->
     <!-- trunk-ignore(eslint/svelte/no-at-html-tags) -->
     {@html softwareAppJsonLd}
 </svelte:head>
-
-<ModeWatcher />
 <SeoContextProvider {seo}>
     <SeoHead {seo} config={docsConfig} favicon="/logo.svg" />
     <BreadcrumbContextProvider>

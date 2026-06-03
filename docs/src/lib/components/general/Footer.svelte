@@ -1,5 +1,8 @@
 <script lang="ts">
-    import { Footer } from '@humanspeak/docs-kit'
+    import { FooterV2 } from '@humanspeak/docs-kit'
+    import rootPkg from '../../../../../package.json'
+
+    const PKG_VERSION = rootPkg.version
 </script>
 
-<Footer />
+<FooterV2 version={PKG_VERSION} />
