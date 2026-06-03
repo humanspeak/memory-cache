@@ -10,13 +10,6 @@
         type MotionTransition
     } from '@humanspeak/svelte-motion'
     import ArrowRight from '@lucide/svelte/icons/arrow-right'
-    import AtSign from '@lucide/svelte/icons/at-sign'
-    import Clock from '@lucide/svelte/icons/clock'
-    import Feather from '@lucide/svelte/icons/feather'
-    import FileCode from '@lucide/svelte/icons/file-code'
-    import Layers from '@lucide/svelte/icons/layers'
-    import Zap from '@lucide/svelte/icons/zap'
-    import type { Component } from 'svelte'
     import type { PageData } from './$types'
 
     const { data }: { data: PageData } = $props()
@@ -183,40 +176,30 @@
         setTimeout(() => (copied = false), 1500)
     }
 
-    const features: { title: string; description: string; icon: Component }[] = [
+    const features = [
         {
             title: 'Lightning Fast',
-            description:
-                'In-memory storage with O(1) lookups. No network latency, no disk I/O—just pure speed.',
-            icon: Zap
+            body: 'In-memory storage with O(1) lookups. No network latency, no disk I/O — just pure speed.'
         },
         {
             title: 'TTL Expiration',
-            description:
-                'Set time-to-live for cache entries. Expired items are automatically cleaned up.',
-            icon: Clock
+            body: 'Set time-to-live for cache entries. Expired items are automatically cleaned up when they age out.'
         },
         {
             title: 'LRU Eviction',
-            description:
-                'Smart eviction policy removes least recently used items when the cache reaches max size.',
-            icon: Layers
+            body: 'Smart eviction policy removes least recently used items when the cache reaches max size.'
         },
         {
             title: '@cached Decorator',
-            description:
-                'Automatic method-level caching with a simple decorator. No boilerplate required.',
-            icon: AtSign
+            body: 'Automatic method-level caching with a simple decorator. No boilerplate required.'
         },
         {
             title: 'TypeScript First',
-            description: 'Full type safety with generics. Your cached values are properly typed.',
-            icon: FileCode
+            body: 'Full type safety with generics. Cached values stay properly typed from write to read.'
         },
         {
             title: 'Zero Dependencies',
-            description: 'Lightweight and self-contained. No bloat, no supply chain risks.',
-            icon: Feather
+            body: 'Lightweight and self-contained. No bloat, no runtime dependency chain to audit.'
         }
     ]
 </script>
@@ -450,49 +433,27 @@
             </section>
         </main>
 
-        <!-- Features Section -->
-        <section class="relative px-6 py-10">
-            <div class="container mx-auto max-w-7xl">
-                <div class="mb-16 text-center">
-                    <h2
-                        class="mb-4 bg-gradient-to-r from-brand-500 to-brand-600 bg-clip-text text-4xl font-bold text-transparent md:text-5xl"
-                    >
-                        Why Memory Cache
-                    </h2>
-                    <p class="mx-auto max-w-2xl text-lg text-muted-foreground">
-                        Simple, fast, and reliable caching for your TypeScript applications.
-                    </p>
-                </div>
-                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {#each features as feature}
-                        {@const FeatureIcon = feature.icon}
-                        <div
-                            class="group relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-500/50 hover:shadow-lg hover:shadow-brand-500/10"
-                        >
-                            <div
-                                class="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                            ></div>
-                            <div class="relative z-10">
-                                <div
-                                    class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 text-white"
-                                >
-                                    <FeatureIcon size={20} />
-                                </div>
-                                <h3
-                                    class="mb-2 text-xl font-semibold transition-colors group-hover:text-brand-600"
-                                >
-                                    {feature.title}
-                                </h3>
-                                <p class="text-sm leading-relaxed text-muted-foreground">
-                                    {feature.description}
-                                </p>
-                            </div>
-                            <div
-                                class="absolute top-0 right-0 h-20 w-20 rounded-bl-full bg-gradient-to-bl from-brand-500/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                            ></div>
+        <section class="brut-feat">
+            <div class="lede">
+                <div class="k">FIG-003 / WHY US</div>
+                <h2>why <span>memory cache</span>.</h2>
+                <p>Simple, fast, and reliable caching for your TypeScript applications.</p>
+            </div>
+            <div class="grid">
+                {#each features as f, i (f.title)}
+                    <div class="cell">
+                        <div class="id">
+                            № {String(i + 1).padStart(2, '0')} / {String(features.length).padStart(
+                                2,
+                                '0'
+                            )}
                         </div>
-                    {/each}
-                </div>
+                        <div class="corner">▢</div>
+                        <h3>{f.title}</h3>
+                        <p>{f.body}</p>
+                        <div class="marker"></div>
+                    </div>
+                {/each}
             </div>
         </section>
 
@@ -1180,13 +1141,133 @@ cache.set(<span class="text-green-500">'user:123'</span>, {'{'} name: <span clas
         color: #dc2626;
     }
 
+    .brut-feat {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 24px;
+        border-bottom: 1px solid var(--brut-rule);
+        padding: 28px 24px;
+    }
+
+    .brut-feat .lede .k {
+        color: var(--brut-ink-3);
+        font-size: 10.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+
+    .brut-feat .lede h2 {
+        margin: 20px 0 18px;
+        color: var(--brut-ink);
+        font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+        font-size: clamp(30px, 4vw, 46px);
+        font-weight: 700;
+        line-height: 1.05;
+        letter-spacing: 0;
+    }
+
+    .brut-feat .lede h2 span {
+        color: var(--brut-accent);
+    }
+
+    .brut-feat .lede p {
+        margin: 0;
+        color: var(--brut-ink-2);
+        font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.5;
+    }
+
+    .brut-feat .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+        border-top: 1px solid var(--brut-rule);
+        border-left: 1px solid var(--brut-rule);
+    }
+
+    .brut-feat .cell {
+        position: relative;
+        min-height: 200px;
+        border-right: 1px solid var(--brut-rule);
+        border-bottom: 1px solid var(--brut-rule);
+        padding: 20px 22px;
+    }
+
+    .brut-feat .cell::after {
+        position: absolute;
+        inset: 8px;
+        border: 1px solid transparent;
+        content: '';
+        pointer-events: none;
+        transition: border-color 0.2s;
+    }
+
+    .brut-feat .cell:hover::after {
+        border-color: var(--brut-accent);
+    }
+
+    .brut-feat .cell .id {
+        color: var(--brut-ink-3);
+        font-size: 10.5px;
+        letter-spacing: 0.14em;
+    }
+
+    .brut-feat .cell h3 {
+        margin: 30px 0 8px;
+        color: var(--brut-ink);
+        font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+        font-size: 22px;
+        font-weight: 500;
+        line-height: 1.15;
+        letter-spacing: 0;
+    }
+
+    .brut-feat .cell p {
+        max-width: 320px;
+        margin: 0;
+        color: var(--brut-ink-2);
+        font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+        font-size: 13.5px;
+        line-height: 1.55;
+    }
+
+    .brut-feat .cell .corner {
+        position: absolute;
+        top: 14px;
+        right: 16px;
+        color: var(--brut-ink-3);
+        font-size: 10.5px;
+    }
+
+    .brut-feat .cell .marker {
+        position: absolute;
+        right: 16px;
+        bottom: 16px;
+        width: 14px;
+        height: 14px;
+        border: 1px solid var(--brut-ink-3);
+    }
+
+    .brut-feat .cell:nth-child(3n + 1) .marker {
+        border-color: var(--brut-accent);
+        background: var(--brut-accent);
+    }
+
+    @media (max-width: 1024px) {
+        .brut-feat .grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
     @media (max-width: 720px) {
         .brut-coord {
             display: none;
         }
 
         .brut-hero,
-        .brut-demo {
+        .brut-demo,
+        .brut-feat {
             grid-template-columns: 1fr;
             padding: 56px 16px 32px;
         }
@@ -1254,6 +1335,10 @@ cache.set(<span class="text-green-500">'user:123'</span>, {'{'} name: <span clas
 
         .brut-demo .panel .footer > div {
             border-bottom: 1px solid var(--brut-rule);
+        }
+
+        .brut-feat .grid {
+            grid-template-columns: 1fr;
         }
     }
 </style>
