@@ -6,6 +6,10 @@
         getBreadcrumbContext,
         getSeoContext
     } from '@humanspeak/docs-kit'
+    import Activity from '@lucide/svelte/icons/activity'
+    import Gauge from '@lucide/svelte/icons/gauge'
+    import ListRestart from '@lucide/svelte/icons/list-restart'
+    import Zap from '@lucide/svelte/icons/zap'
     import CacheStatistics from '$lib/examples/cache-statistics/demos/Default.svelte'
     import demoManifest from '$lib/demo-manifest.json'
 
@@ -45,16 +49,51 @@
     />
 {/snippet}
 
+{#snippet statisticsNotes()}
+    <ul>
+        <li>
+            <Activity />
+            <span>
+                The cache wires <code>hooks</code> for <code>onHit</code>,
+                <code>onMiss</code>, <code>onSet</code>, <code>onDelete</code>,
+                and <code>onEvict</code>.
+            </span>
+        </li>
+        <li>
+            <Gauge />
+            <span>
+                The <code>hit rate</code> is calculated from reads only:
+                <code>hits / (hits + misses)</code>.
+            </span>
+        </li>
+        <li>
+            <Zap />
+            <span>
+                <code>burst</code> runs ten mixed operations so the event stream
+                can show hits, misses, writes, deletes, and evictions together.
+            </span>
+        </li>
+        <li>
+            <ListRestart />
+            <span>
+                <code>reset</code> clears the counters and creates a fresh cache
+                with <code>maxSize: 5</code> and a <code>30s</code> TTL.
+            </span>
+        </li>
+    </ul>
+{/snippet}
+
 <ExampleV2
     figId="FIG-001"
-    tag="METRICS"
-    title={{ prefix: 'cache ', accent: 'statistics', end: '.' }}
-    description="Monitor hit rate, miss rate, evictions, and cache size as operations run against a live cache."
+    tag="OBSERVABILITY"
+    title={{ prefix: 'watch cache ', accent: 'hooks', end: '.' }}
+    description="Measure `hit`, `miss`, `set`, `delete`, and `evict` events as live traffic moves through a `MemoryCache`."
     sheetLabel="SHEET 01 / 01"
     barCells={[{ k: 'pattern', v: 'live metrics' }]}
     sourceUrl={`${SOURCE_URL}cache-statistics/demos/Default.svelte`}
     codeSnippet={defaultCode}
     codeLabel="show code"
+    notes={statisticsNotes}
 >
     <CacheStatistics />
 </ExampleV2>
