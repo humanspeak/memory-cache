@@ -42,9 +42,10 @@ const config = {
     kit: {
         adapter: adapter(),
         csp: {
+            mode: 'hash',
             directives: {
                 'default-src': ['self'],
-                'script-src': ['self', 'nonce-%sveltekit.nonce%', 'https://analytics.ahrefs.com'],
+                'script-src': ['self', 'https://analytics.ahrefs.com', 'unsafe-inline'],
                 'style-src': ['self', 'unsafe-inline'],
                 'img-src': ['self', 'data:'],
                 'font-src': ['self'],
