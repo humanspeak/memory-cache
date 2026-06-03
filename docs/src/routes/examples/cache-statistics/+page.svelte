@@ -9,6 +9,7 @@
     import Gauge from '@lucide/svelte/icons/gauge'
     import ListRestart from '@lucide/svelte/icons/list-restart'
     import Zap from '@lucide/svelte/icons/zap'
+    import { demoCodeSample } from '$lib/demo-loaders'
     import CacheStatistics from '$lib/examples/cache-statistics/demos/Default.svelte'
 
     const SOURCE_URL =
@@ -36,12 +37,11 @@
 {#snippet defaultCode()}
     <CodeReferenceV2
         samples={[
-            {
-                id: 'cache-statistics-default',
-                label: 'Default.svelte',
-                load: () =>
-                    import('virtual:docs-kit/demo/cache-statistics/demos/Default.svelte')
-            }
+            demoCodeSample(
+                'cache-statistics/demos/Default.svelte',
+                'cache-statistics-default',
+                'Default.svelte'
+            )
         ]}
         columns={1}
     />

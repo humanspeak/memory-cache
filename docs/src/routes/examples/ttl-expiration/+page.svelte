@@ -9,6 +9,7 @@
     import Hourglass from '@lucide/svelte/icons/hourglass'
     import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
     import TimerOff from '@lucide/svelte/icons/timer-off'
+    import { demoCodeSample } from '$lib/demo-loaders'
     import TtlExpiration from '$lib/examples/ttl-expiration/demos/Default.svelte'
 
     const SOURCE_URL =
@@ -36,11 +37,11 @@
 {#snippet defaultCode()}
     <CodeReferenceV2
         samples={[
-            {
-                id: 'ttl-expiration-default',
-                label: 'Default.svelte',
-                load: () => import('virtual:docs-kit/demo/ttl-expiration/demos/Default.svelte')
-            }
+            demoCodeSample(
+                'ttl-expiration/demos/Default.svelte',
+                'ttl-expiration-default',
+                'Default.svelte'
+            )
         ]}
         columns={1}
     />

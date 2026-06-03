@@ -9,6 +9,7 @@
     import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
     import SearchX from '@lucide/svelte/icons/search-x'
     import Sparkles from '@lucide/svelte/icons/sparkles'
+    import { demoCodeSample } from '$lib/demo-loaders'
     import BasicCache from '$lib/examples/basic-cache/demos/Default.svelte'
 
     const SOURCE_URL =
@@ -36,11 +37,7 @@
 {#snippet defaultCode()}
     <CodeReferenceV2
         samples={[
-            {
-                id: 'basic-cache-default',
-                label: 'Default.svelte',
-                load: () => import('virtual:docs-kit/demo/basic-cache/demos/Default.svelte')
-            }
+            demoCodeSample('basic-cache/demos/Default.svelte', 'basic-cache-default', 'Default.svelte')
         ]}
         columns={1}
     />
