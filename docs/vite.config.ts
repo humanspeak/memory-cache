@@ -42,6 +42,16 @@ export default defineConfig({
             'satori-html'
         ]
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('@humanspeak/svelte-motion')) return 'svelte-motion'
+                    if (id.includes('mode-watcher')) return 'mode-watcher'
+                }
+            }
+        }
+    },
     server: {
         port: 8288
     }
