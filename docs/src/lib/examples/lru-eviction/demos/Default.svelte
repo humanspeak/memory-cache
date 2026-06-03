@@ -1,10 +1,17 @@
 <script lang="ts">
     import { MemoryCache } from '@humanspeak/memory-cache'
+    import { motion, type MotionTransition } from '@humanspeak/svelte-motion'
     import MousePointer from '@lucide/svelte/icons/mouse-pointer'
     import Plus from '@lucide/svelte/icons/plus'
     import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
 
     const defaultMaxSize = 5
+    const capacitySpring: MotionTransition = {
+        type: 'spring',
+        stiffness: 180,
+        damping: 24,
+        mass: 0.7
+    }
 
     type EntryDisplay = {
         key: string
@@ -22,6 +29,7 @@
     let accessCounter = $state(0)
 
     let capacityRatio = $derived(entries.length / maxSize)
+    let capacityScale = $derived(Math.min(capacityRatio, 1))
     let lruKey = $derived(entries[0]?.key ?? 'none')
     let mruKey = $derived(entries.at(-1)?.key ?? 'none')
 
@@ -105,10 +113,14 @@
                 <div
                     class="capacity-meter"
                     aria-label="Capacity meter"
-                    style={`--capacity: ${(capacityRatio * 100).toFixed(1)}%`}
                     class:full={entries.length >= maxSize}
                 >
-                    <span></span>
+                    <motion.div
+                        class="capacity-meter-fill"
+                        initial={false}
+                        animate={{ scaleY: capacityScale }}
+                        transition={capacitySpring}
+                    />
                 </div>
             </div>
 
@@ -322,16 +334,17 @@
         padding: 6px;
     }
 
-    .capacity-meter span {
+    .capacity-meter :global(.capacity-meter-fill) {
         display: block;
         width: 100%;
-        height: var(--capacity);
+        height: 100%;
         min-height: 3px;
         background: var(--brut-accent);
-        transition: height 0.2s ease;
+        transform-origin: bottom;
+        will-change: transform;
     }
 
-    .capacity-meter.full span {
+    .capacity-meter.full :global(.capacity-meter-fill) {
         background: #dc2626;
     }
 
