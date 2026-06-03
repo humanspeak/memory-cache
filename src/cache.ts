@@ -507,8 +507,9 @@ export class MemoryCache<T> {
 
     /**
      * Stores a value in the cache. If the cache is full and this is a new key,
-     * the least recently used entry is evicted to make room. Setting a value
-     * (new or update) moves the entry to the most-recently-used position.
+     * expired entries are pruned before the least recently used entry is evicted
+     * to make room. Setting a value (new or update) moves the entry to the
+     * most-recently-used position.
      *
      * @param {string} key - The key under which to store the value
      * @param {T} value - The value to cache
@@ -522,7 +523,11 @@ export class MemoryCache<T> {
     set(key: string, value: T): void {
         const isNewKey = !this.cache.has(key)
 
-        // Remove LRU entry if cache is full and this is a new key (skip if maxSize is 0)
+        if (isNewKey && this.maxSize > 0 && this.cache.size >= this.maxSize) {
+            this.prune()
+        }
+
+        // Remove LRU entry if cache is still full and this is a new key (skip if maxSize is 0)
         if (isNewKey && this.maxSize > 0 && this.cache.size >= this.maxSize) {
             const oldestKey = this.cache.keys().next().value
             if (oldestKey) {

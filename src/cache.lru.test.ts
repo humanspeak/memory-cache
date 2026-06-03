@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryCache } from './cache.js'
 
 describe('MemoryCache LRU Eviction', () => {
@@ -6,6 +6,14 @@ describe('MemoryCache LRU Eviction', () => {
     // MAX SIZE EVICTION
     // ==========================================
     describe('Max Size Eviction', () => {
+        beforeEach(() => {
+            vi.useFakeTimers()
+        })
+
+        afterEach(() => {
+            vi.useRealTimers()
+        })
+
         it('should evict oldest entry when max size is reached', () => {
             const sizeCache = new MemoryCache<string>({ maxSize: 2 })
 
@@ -87,6 +95,43 @@ describe('MemoryCache LRU Eviction', () => {
             // NaN > 0 is false, so no eviction occurs
             expect(nanCache.get('key0')).toBe('value0')
             expect(nanCache.get('key199')).toBe('value199')
+        })
+
+        it('should prune expired entries before evicting valid LRU entries', () => {
+            const onEvict = vi.fn()
+            const onExpire = vi.fn()
+            const sizeCache = new MemoryCache<string>({
+                maxSize: 2,
+                ttl: 100,
+                hooks: { onEvict, onExpire }
+            })
+
+            sizeCache.set('expires-first', 'old')
+            vi.advanceTimersByTime(50)
+            sizeCache.set('valid-lru', 'fresh')
+
+            // Make the older entry most-recently-used while it is still valid.
+            // Without pruning, adding a new key would evict valid-lru because
+            // it is now the LRU entry even though expires-first has expired.
+            expect(sizeCache.get('expires-first')).toBe('old')
+
+            vi.advanceTimersByTime(51)
+            sizeCache.set('new-entry', 'new')
+
+            expect(sizeCache.get('valid-lru')).toBe('fresh')
+            expect(sizeCache.get('new-entry')).toBe('new')
+            expect(sizeCache.has('expires-first')).toBe(false)
+
+            expect(onEvict).not.toHaveBeenCalled()
+            expect(onExpire).toHaveBeenCalledTimes(1)
+            expect(onExpire).toHaveBeenCalledWith({
+                key: 'expires-first',
+                value: 'old',
+                source: 'prune'
+            })
+            expect(sizeCache.getStats().evictions).toBe(0)
+            expect(sizeCache.getStats().expirations).toBe(1)
+            expect(sizeCache.size()).toBe(2)
         })
     })
 
