@@ -457,6 +457,69 @@
             </div>
         </section>
 
+        <section class="brut-ai" id="ai-ready">
+            <div class="lede">
+                <div class="k">FIG-004 / AI-READY</div>
+                <h2>built for <span>llm-assisted</span> code.</h2>
+                <p>
+                    Point Cursor, Claude Code, or any LLM at the manifests below and they know the
+                    Memory Cache API — constructor options, TTL behavior, LRU semantics, decorators,
+                    and examples.
+                </p>
+            </div>
+            <div class="ai-panel">
+                <div class="ai-head">
+                    <span class="ai-tab on">llms.txt</span>
+                    <span class="ai-tab">llms-full.txt</span>
+                    <span class="grow"></span>
+                    <span class="ai-meta">/llmstxt.org</span>
+                </div>
+                <div class="ai-grid">
+                    <a class="ai-cell" href="/llms.txt" target="_blank" rel="noopener">
+                        <div class="ai-cell-k">01 · index</div>
+                        <h3>
+                            <code>/llms.txt</code>
+                        </h3>
+                        <p>
+                            Compact map. Project blurb, feature list, API links, examples, and
+                            install commands. Drop into any agent for ground-truth lookup.
+                        </p>
+                        <div class="ai-cell-foot">~3.8 kB · open ↗</div>
+                    </a>
+                    <a class="ai-cell" href="/llms-full.txt" target="_blank" rel="noopener">
+                        <div class="ai-cell-k">02 · full</div>
+                        <h3>
+                            <code>/llms-full.txt</code>
+                        </h3>
+                        <p>
+                            Full reference. Every guide, API page, example, decorator note, TTL
+                            option, and LRU behavior — optimized for LLM context windows.
+                        </p>
+                        <div class="ai-cell-foot">~54.5 kB · open ↗</div>
+                    </a>
+                    <a class="ai-cell" href="/docs" target="_blank" rel="noopener">
+                        <div class="ai-cell-k">03 · per-page mirrors</div>
+                        <h3>
+                            <code>/docs/&lt;slug&gt;.md</code>
+                        </h3>
+                        <p>
+                            Every doc page mirrored as raw markdown. Append <code>.md</code> to any doc
+                            URL to fetch the source an agent can quote verbatim.
+                        </p>
+                        <div class="ai-cell-foot">14 docs · open ↗</div>
+                    </a>
+                </div>
+                <div class="ai-prompt">
+                    <span class="ai-prompt-k">// example prompt</span>
+                    <code
+                        >Use https://memory.svelte.page/llms.txt as the source for Memory Cache APIs.
+                        Add a <em>MemoryCache&lt;User&gt;</em> with five minute TTL, max size 100, and
+                        method-level caching with <em>@cached</em>.</code
+                    >
+                </div>
+            </div>
+        </section>
+
         <!-- Code Example Section -->
         <section class="relative px-6 py-10">
             <div class="container mx-auto max-w-4xl">
@@ -1254,9 +1317,203 @@ cache.set(<span class="text-green-500">'user:123'</span>, {'{'} name: <span clas
         background: var(--brut-accent);
     }
 
+    .brut-ai {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 24px;
+        border-bottom: 1px solid var(--brut-rule);
+        padding: 28px 24px;
+    }
+
+    .brut-ai .lede .k {
+        color: var(--brut-ink-3);
+        font-size: 10.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+
+    .brut-ai .lede h2 {
+        margin: 20px 0 18px;
+        color: var(--brut-ink);
+        font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+        font-size: clamp(30px, 4vw, 46px);
+        font-weight: 700;
+        line-height: 1.05;
+        letter-spacing: 0;
+    }
+
+    .brut-ai .lede h2 span {
+        color: var(--brut-accent);
+    }
+
+    .brut-ai .lede p {
+        margin: 0;
+        color: var(--brut-ink-2);
+        font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.5;
+    }
+
+    .brut-ai .ai-panel {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--brut-rule);
+        background: var(--brut-bg);
+    }
+
+    .brut-ai .ai-head {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        border-bottom: 1px solid var(--brut-rule);
+        background: var(--brut-bg-2);
+        color: var(--brut-ink-3);
+        font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+
+    .brut-ai .ai-tab {
+        border-right: 1px solid var(--brut-rule);
+        padding: 9px 14px;
+    }
+
+    .brut-ai .ai-tab.on {
+        background: var(--brut-bg);
+        color: var(--brut-ink);
+    }
+
+    .brut-ai .grow {
+        flex: 1;
+    }
+
+    .brut-ai .ai-meta {
+        border-left: 1px solid var(--brut-rule);
+        padding: 9px 14px;
+    }
+
+    .brut-ai .ai-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .brut-ai .ai-cell {
+        position: relative;
+        min-height: 200px;
+        border-right: 1px solid var(--brut-rule);
+        color: var(--brut-ink);
+        padding: 20px 22px 56px;
+        text-decoration: none;
+        transition: background-color 0.15s;
+    }
+
+    .brut-ai .ai-cell:last-child {
+        border-right: 0;
+    }
+
+    .brut-ai .ai-cell:hover {
+        background: color-mix(in oklab, var(--brut-accent) 6%, transparent);
+    }
+
+    .brut-ai .ai-cell-k {
+        color: var(--brut-ink-3);
+        font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 10.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+
+    .brut-ai .ai-cell h3 {
+        margin: 22px 0 10px;
+        color: var(--brut-ink);
+        font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+        font-size: 22px;
+        font-weight: 500;
+        line-height: 1.15;
+        letter-spacing: 0;
+    }
+
+    .brut-ai .ai-cell h3 code {
+        background: transparent;
+        color: var(--brut-accent);
+        padding: 0;
+        font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.85em;
+    }
+
+    .brut-ai .ai-cell p {
+        margin: 0;
+        color: var(--brut-ink-2);
+        font-size: 13.5px;
+        line-height: 1.55;
+    }
+
+    .brut-ai .ai-cell p code {
+        border-radius: 2px;
+        background: var(--brut-bg-2);
+        padding: 1px 4px;
+        font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 0.92em;
+    }
+
+    .brut-ai .ai-cell-foot {
+        position: absolute;
+        bottom: 18px;
+        left: 22px;
+        color: var(--brut-ink-3);
+        font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .brut-ai .ai-prompt {
+        border-top: 1px solid var(--brut-rule);
+        background: var(--brut-bg-2);
+        color: var(--brut-ink-2);
+        padding: 16px 22px;
+        font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .brut-ai .ai-prompt-k {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--brut-ink-3);
+        font-size: 10.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+
+    .brut-ai .ai-prompt code {
+        background: transparent;
+        color: var(--brut-ink);
+        padding: 0;
+    }
+
+    .brut-ai .ai-prompt em {
+        color: var(--brut-accent);
+        font-style: normal;
+    }
+
     @media (max-width: 1024px) {
         .brut-feat .grid {
             grid-template-columns: repeat(2, 1fr);
+        }
+
+        .brut-ai .ai-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .brut-ai .ai-cell {
+            border-right: 0;
+            border-bottom: 1px solid var(--brut-rule);
+        }
+
+        .brut-ai .ai-cell:last-child {
+            border-bottom: 0;
         }
     }
 
@@ -1267,7 +1524,8 @@ cache.set(<span class="text-green-500">'user:123'</span>, {'{'} name: <span clas
 
         .brut-hero,
         .brut-demo,
-        .brut-feat {
+        .brut-feat,
+        .brut-ai {
             grid-template-columns: 1fr;
             padding: 56px 16px 32px;
         }
@@ -1339,6 +1597,17 @@ cache.set(<span class="text-green-500">'user:123'</span>, {'{'} name: <span clas
 
         .brut-feat .grid {
             grid-template-columns: 1fr;
+        }
+
+        .brut-ai .ai-head {
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+
+        .brut-ai .ai-meta {
+            width: 100%;
+            border-top: 1px solid var(--brut-rule);
+            border-left: 0;
         }
     }
 </style>
