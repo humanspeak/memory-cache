@@ -226,6 +226,12 @@ type CacheEntry<T> = {
     timestamp: number
 }
 
+type CacheReadSource = 'get' | 'has'
+
+type CacheReadResult<T> =
+    | { found: true; value: T | undefined }
+    | { found: false; reason: 'not_found' | 'expired' }
+
 /**
  * Sentinel value stored in place of a cached `undefined`.
  * Allows the cache to distinguish "no entry" from "entry whose value is undefined".
@@ -360,6 +366,49 @@ export class MemoryCache<T> {
     }
 
     /**
+     * Internal cache read primitive used by public lookup APIs. It handles
+     * sentinel unwrapping, lazy expiration cleanup, optional LRU promotion,
+     * and optional stats/hook emission from a single Map lookup.
+     */
+    private read(key: string, source: CacheReadSource, trackAccess: boolean): CacheReadResult<T> {
+        const entry = this.cache.get(key)
+        if (!entry) {
+            if (trackAccess) {
+                this.stats.misses++
+                this.callHook(this.hooks.onMiss, { key, reason: 'not_found' })
+            }
+            return { found: false, reason: 'not_found' }
+        }
+
+        if (this.ttl > 0 && Date.now() - entry.timestamp > this.ttl) {
+            const expiredValue = this.unwrapValue(entry.value)
+            this.cache.delete(key)
+            this.stats.expirations++
+            this.callHook(this.hooks.onExpire, { key, value: expiredValue, source })
+            if (trackAccess) {
+                this.stats.misses++
+                this.callHook(this.hooks.onMiss, { key, reason: 'expired' })
+            }
+            return { found: false, reason: 'expired' }
+        }
+
+        if (trackAccess) {
+            // Move entry to end of Map for LRU ordering (most recently used).
+            this.cache.delete(key)
+            this.cache.set(key, entry)
+
+            this.stats.hits++
+        }
+
+        const value = this.unwrapValue(entry.value)
+        if (trackAccess) {
+            this.callHook(this.hooks.onHit, { key, value })
+        }
+
+        return { found: true, value }
+    }
+
+    /**
      * Retrieves a value from the cache if it exists and hasn't expired.
      * Accessing an entry moves it to the most-recently-used position (LRU behavior).
      *
@@ -375,35 +424,8 @@ export class MemoryCache<T> {
      * ```
      */
     get(key: string): T | undefined {
-        const entry = this.cache.get(key)
-        if (!entry) {
-            this.stats.misses++
-            this.callHook(this.hooks.onMiss, { key, reason: 'not_found' })
-            return undefined
-        }
-
-        // Check if entry has expired (skip check if TTL is 0 or negative)
-        if (this.ttl > 0 && Date.now() - entry.timestamp > this.ttl) {
-            const expiredValue = this.unwrapValue(entry.value)
-            this.cache.delete(key)
-            this.stats.expirations++
-            this.stats.misses++
-            this.callHook(this.hooks.onExpire, { key, value: expiredValue, source: 'get' })
-            this.callHook(this.hooks.onMiss, { key, reason: 'expired' })
-            return undefined
-        }
-
-        // Move entry to end of Map for LRU ordering (most recently used)
-        this.cache.delete(key)
-        this.cache.set(key, entry)
-
-        this.stats.hits++
-
-        // Handle the special sentinel values for cached undefined/null
-        const value = this.unwrapValue(entry.value)
-        this.callHook(this.hooks.onHit, { key, value })
-
-        return value
+        const result = this.read(key, 'get', true)
+        return result.found ? result.value : undefined
     }
 
     /**
@@ -437,20 +459,19 @@ export class MemoryCache<T> {
      * ```
      */
     async getOrSet(key: string, fetcher: () => T | Promise<T>): Promise<T> {
-        // 1. Check cache (calls onHit if found)
-        if (this.has(key)) {
-            return this.get(key) as T
-        }
-
-        // 2. Check in-flight (join existing fetch)
+        // 1. Check in-flight (join existing fetch)
         const existing = this.inFlight.get(key)
         if (existing) return existing
+
+        // 2. Check cache (calls onHit if found)
+        const cached = this.read(key, 'get', true)
+        if (cached.found) {
+            return cached.value as T
+        }
 
         // 3. Create fetch promise with single-flight
         const fetchPromise = (async () => {
             try {
-                this.stats.misses++
-                this.callHook(this.hooks.onMiss, { key, reason: 'not_found' })
                 const value = await fetcher()
                 this.set(key, value)
                 return value
@@ -481,18 +502,7 @@ export class MemoryCache<T> {
      * ```
      */
     has(key: string): boolean {
-        const entry = this.cache.get(key)
-        if (!entry) return false
-
-        // Check if entry has expired (skip check if TTL is 0 or negative)
-        if (this.ttl > 0 && Date.now() - entry.timestamp > this.ttl) {
-            const expiredValue = this.unwrapValue(entry.value)
-            this.cache.delete(key)
-            this.callHook(this.hooks.onExpire, { key, value: expiredValue, source: 'has' })
-            return false
-        }
-
-        return true
+        return this.read(key, 'has', false).found
     }
 
     /**
@@ -980,10 +990,9 @@ export function cached<T>(options: CachedDecoratorOptions<T> = {}) {
             }
             const key = `${propertyKey}:${argKey}`
 
-            // Use has() to check if key exists, then get() to retrieve value
-            // This allows us to distinguish between cache miss and cached undefined
-            if (cache.has(key)) {
-                return cache.get(key)
+            const cached = cache['read'](key, 'get', true)
+            if (cached.found) {
+                return cached.value
             }
 
             const result = originalMethod.apply(this, args)
