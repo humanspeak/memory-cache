@@ -44,7 +44,7 @@ const config = {
         csp: {
             directives: {
                 'default-src': ['self'],
-                'script-src': ['self', 'https://analytics.ahrefs.com'],
+                'script-src': ['self', 'nonce-%sveltekit.nonce%', 'https://analytics.ahrefs.com'],
                 'style-src': ['self', 'unsafe-inline'],
                 'img-src': ['self', 'data:'],
                 'font-src': ['self'],
