@@ -15,7 +15,7 @@ import { docsConfig } from './src/lib/docs-config'
 export default defineConfig({
     plugins: [
         sitemapManifestPlugin({ blogDir: false }),
-        demoManifestPlugin(),
+        demoManifestPlugin({ split: true }),
         docMirrorsPlugin({ siteUrl: docsConfig.url }),
         llmsFullPlugin({
             siteUrl: docsConfig.url,

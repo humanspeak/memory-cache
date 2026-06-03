@@ -1,7 +1,6 @@
 <script lang="ts">
     import {
         CodeReferenceV2,
-        type DemoManifestEntry,
         ExampleV2,
         getBreadcrumbContext,
         getSeoContext
@@ -11,11 +10,9 @@
     import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
     import TimerOff from '@lucide/svelte/icons/timer-off'
     import TtlExpiration from '$lib/examples/ttl-expiration/demos/Default.svelte'
-    import demoManifest from '$lib/demo-manifest.json'
 
     const SOURCE_URL =
         'https://github.com/humanspeak/memory-cache/blob/main/docs/src/lib/examples/'
-    const manifest = demoManifest as Record<string, DemoManifestEntry>
 
     const breadcrumbs = getBreadcrumbContext()
     const seo = getSeoContext()
@@ -42,7 +39,7 @@
             {
                 id: 'ttl-expiration-default',
                 label: 'Default.svelte',
-                ...manifest['ttl-expiration/demos/Default.svelte']
+                load: () => import('virtual:docs-kit/demo/ttl-expiration/demos/Default.svelte')
             }
         ]}
         columns={1}

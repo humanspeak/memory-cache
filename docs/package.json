@@ -18,7 +18,7 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "@humanspeak/docs-kit": "github:humanspeak/docs-kit#2026.6.5",
+        "@humanspeak/docs-kit": "github:humanspeak/docs-kit#2026.6.7",
         "@humanspeak/memory-cache": "workspace:*",
         "@humanspeak/svelte-markdown": "^1.5.4",
         "github-slugger": "^2.0.0",

@@ -1,7 +1,6 @@
 <script lang="ts">
     import {
         CodeReferenceV2,
-        type DemoManifestEntry,
         ExampleV2,
         getBreadcrumbContext,
         getSeoContext
@@ -11,11 +10,9 @@
     import ListRestart from '@lucide/svelte/icons/list-restart'
     import Zap from '@lucide/svelte/icons/zap'
     import CacheStatistics from '$lib/examples/cache-statistics/demos/Default.svelte'
-    import demoManifest from '$lib/demo-manifest.json'
 
     const SOURCE_URL =
         'https://github.com/humanspeak/memory-cache/blob/main/docs/src/lib/examples/'
-    const manifest = demoManifest as Record<string, DemoManifestEntry>
 
     const breadcrumbs = getBreadcrumbContext()
     const seo = getSeoContext()
@@ -42,7 +39,8 @@
             {
                 id: 'cache-statistics-default',
                 label: 'Default.svelte',
-                ...manifest['cache-statistics/demos/Default.svelte']
+                load: () =>
+                    import('virtual:docs-kit/demo/cache-statistics/demos/Default.svelte')
             }
         ]}
         columns={1}
