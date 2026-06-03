@@ -77,6 +77,24 @@ describe('MemoryCache.getOrSet()', () => {
             expect(fetchCount).toBe(1)
         })
 
+        it('should count cached undefined getOrSet hits once', async () => {
+            const onHit = vi.fn()
+            const anyCache = new MemoryCache<string | undefined>({
+                ttl: 60000,
+                hooks: { onHit }
+            })
+
+            anyCache.set('key', undefined)
+
+            const result = await anyCache.getOrSet('key', () => 'should-not-be-called')
+
+            expect(result).toBeUndefined()
+            expect(onHit).toHaveBeenCalledTimes(1)
+            expect(onHit).toHaveBeenCalledWith({ key: 'key', value: undefined })
+            expect(anyCache.getStats().hits).toBe(1)
+            expect(anyCache.getStats().misses).toBe(0)
+        })
+
         it('should cache null from fetcher', async () => {
             const anyCache = new MemoryCache<string | null>({ ttl: 60000 })
             let fetchCount = 0
@@ -393,6 +411,28 @@ describe('MemoryCache.getOrSet()', () => {
             const result2 = await ttlCache.getOrSet('key', fetcher)
             expect(result2).toBe('value-2')
             expect(fetchCount).toBe(2)
+        })
+
+        it('should report a single expired miss when getOrSet re-fetches', async () => {
+            const onExpire = vi.fn()
+            const onMiss = vi.fn()
+            const ttlCache = new MemoryCache<string>({
+                ttl: 100,
+                hooks: { onExpire, onMiss }
+            })
+
+            ttlCache.set('key', 'value-1')
+            vi.advanceTimersByTime(101)
+
+            const result = await ttlCache.getOrSet('key', () => 'value-2')
+
+            expect(result).toBe('value-2')
+            expect(onExpire).toHaveBeenCalledTimes(1)
+            expect(onExpire).toHaveBeenCalledWith({ key: 'key', value: 'value-1', source: 'get' })
+            expect(onMiss).toHaveBeenCalledTimes(1)
+            expect(onMiss).toHaveBeenCalledWith({ key: 'key', reason: 'expired' })
+            expect(ttlCache.getStats().misses).toBe(1)
+            expect(ttlCache.getStats().expirations).toBe(1)
         })
     })
 

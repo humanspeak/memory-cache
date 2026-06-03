@@ -67,6 +67,21 @@ describe('MemoryCache Statistics', () => {
             vi.useRealTimers()
         })
 
+        it('should track expirations discovered by has() without tracking misses', () => {
+            vi.useFakeTimers()
+            const shortTtlCache = new MemoryCache<string>({ ttl: 10 })
+            shortTtlCache.set('key', 'value')
+
+            vi.advanceTimersByTime(20)
+
+            expect(shortTtlCache.has('key')).toBe(false)
+
+            const stats = shortTtlCache.getStats()
+            expect(stats.expirations).toBe(1)
+            expect(stats.misses).toBe(0)
+            vi.useRealTimers()
+        })
+
         it('should return current size', () => {
             cache.set('key1', 'value1')
             cache.set('key2', 'value2')
