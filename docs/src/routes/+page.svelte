@@ -9,7 +9,6 @@
         MotionSpan,
         type MotionTransition
     } from '@humanspeak/svelte-motion'
-    import ArrowRight from '@lucide/svelte/icons/arrow-right'
     import type { PageData } from './$types'
 
     const { data }: { data: PageData } = $props()
@@ -204,7 +203,7 @@
     ]
 </script>
 
-<div class="brut-wrap flex min-h-svh flex-col">
+<div id="top" class="brut-wrap flex min-h-svh flex-col">
     <Header />
     <div class="relative flex flex-1 flex-col overflow-hidden">
         <main class="brut">
@@ -520,74 +519,42 @@
             </div>
         </section>
 
-        <!-- Code Example Section -->
-        <section class="relative px-6 py-10">
-            <div class="container mx-auto max-w-4xl">
-                <div class="mb-8 text-center">
-                    <h2 class="mb-4 text-3xl font-bold text-foreground">Quick Example</h2>
-                    <p class="text-muted-foreground">
-                        Get started in seconds with simple, intuitive APIs.
-                    </p>
-                </div>
-                <div class="overflow-hidden rounded-xl border border-border">
-                    <!-- Toolbar -->
-                    <div
-                        class="flex items-center justify-between border-b border-border bg-card/80 px-4 py-2"
-                    >
-                        <div class="flex items-center gap-3">
-                            <div class="flex gap-1.5">
-                                <div class="h-3 w-3 rounded-full bg-red-400/60"></div>
-                                <div class="h-3 w-3 rounded-full bg-yellow-400/60"></div>
-                                <div class="h-3 w-3 rounded-full bg-green-400/60"></div>
-                            </div>
-                            <span class="text-xs font-medium text-muted-foreground">example.ts</span
-                            >
-                        </div>
-                        <a
-                            href="/docs/getting-started"
-                            class="inline-flex items-center gap-1 text-xs font-medium text-brand-600 transition-colors hover:text-brand-700"
+        <section class="brut-foot">
+            <div class="info">
+                <div>SET / JETBRAINS MONO + INTER</div>
+                <div>HUMANSPEAK · 2026</div>
+                <div>MIT LICENCE</div>
+                <div class="v">● {PKG_VERSION}</div>
+            </div>
+            <MotionButton
+                class="big"
+                type="button"
+                onclick={copyInstall}
+                aria-label="Copy install command"
+                whileTap={{ scale: 0.985 }}
+                whileHover={{ scale: 1.005 }}
+                transition={{ type: 'spring', stiffness: 280, damping: 22 }}
+            >
+                npm&nbsp;i<br /><span>@humanspeak/</span><br />memory-cache
+                <span class="copy-hint">
+                    <AnimatePresence initial={false}>
+                        <MotionSpan
+                            key={copied ? 'copied' : 'idle'}
+                            class="copy-hint-label"
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            transition={{ duration: 0.22, ease: 'easeOut' }}
                         >
-                            Get Started
-                            <ArrowRight size={12} />
-                        </a>
-                    </div>
-                    <!-- Code -->
-                    <div class="bg-code-block-background p-6 font-mono text-sm">
-                        <pre class="text-code-block-foreground"><code
-                                ><span class="text-brand-500">import</span
-                                > {'{'} MemoryCache, cached {'}'} <span class="text-brand-500"
-                                    >from</span
-                                > <span class="text-green-500">'@humanspeak/memory-cache'</span>
-
-<span class="text-muted-foreground">// Create a cache with 5 minute TTL and max 100 items</span>
-<span class="text-brand-500">const</span> cache = <span class="text-brand-500">new</span
-                                > MemoryCache&lt;<span class="text-yellow-500">User</span>&gt;({'{'}
-    ttl: <span class="text-orange-500">300000</span>,
-    maxSize: <span class="text-orange-500">100</span>
-{'}'})
-
-<span class="text-muted-foreground">// Simple get/set operations</span>
-cache.set(<span class="text-green-500">'user:123'</span>, {'{'} name: <span class="text-green-500"
-                                    >'Alice'</span
-                                > {'}'})
-<span class="text-brand-500">const</span> user = cache.get(<span class="text-green-500"
-                                    >'user:123'</span
-                                >)
-
-<span class="text-muted-foreground">// Or use the @cached decorator</span>
-<span class="text-brand-500">class</span> <span class="text-yellow-500">UserService</span> {'{'}
-    <span class="text-purple-500">@cached</span>({'{'} ttl: <span class="text-orange-500"
-                                    >60000</span
-                                > {'}'})
-    <span class="text-brand-500">async</span> getUser(id: <span class="text-yellow-500">string</span
-                                >) {'{'}
-        <span class="text-brand-500">return</span> <span class="text-brand-500">await</span
-                                > fetchUserFromDb(id)
-    {'}'}
-{'}'}</code
-                            ></pre>
-                    </div>
-                </div>
+                            {copied ? '✓ copied to clipboard' : 'click to copy'}
+                        </MotionSpan>
+                    </AnimatePresence>
+                </span>
+            </MotionButton>
+            <div class="info right">
+                <div>SHEET 04 / 04</div>
+                <div>END OF DOCUMENT</div>
+                <a class="v" href="#top">↩ TO TOP</a>
             </div>
         </section>
     </div>
@@ -1498,6 +1465,82 @@ cache.set(<span class="text-green-500">'user:123'</span>, {'{'} name: <span clas
         font-style: normal;
     }
 
+    .brut-foot {
+        display: grid;
+        grid-template-columns: 200px 1fr 200px;
+        align-items: end;
+        gap: 24px;
+        border-top: 1px solid var(--brut-rule);
+        padding: 60px 24px 36px;
+    }
+
+    .brut-foot :global(.big) {
+        position: relative;
+        border: 0;
+        background: transparent;
+        color: var(--brut-ink);
+        padding: 0;
+        font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+        font-size: clamp(40px, 7vw, 96px);
+        line-height: 0.9;
+        letter-spacing: 0;
+        text-align: left;
+        text-transform: lowercase;
+        cursor: pointer;
+    }
+
+    .brut-foot :global(.big span) {
+        color: var(--brut-accent);
+    }
+
+    .brut-foot :global(.big .copy-hint) {
+        display: inline-grid;
+        align-items: center;
+        justify-items: start;
+        min-width: 200px;
+        height: 16px;
+        margin-top: 16px;
+        overflow: hidden;
+        color: var(--brut-ink-3);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+
+    .brut-foot :global(.big .copy-hint-label) {
+        display: inline-block;
+        grid-area: 1 / 1;
+        white-space: nowrap;
+        will-change: transform, opacity;
+    }
+
+    .brut-foot :global(.big:hover .copy-hint) {
+        color: var(--brut-accent);
+    }
+
+    .brut-foot .info {
+        color: var(--brut-ink-3);
+        font-size: 11px;
+        line-height: 1.8;
+        letter-spacing: 0.12em;
+    }
+
+    .brut-foot .info.right {
+        text-align: right;
+    }
+
+    .brut-foot .info .v,
+    .brut-foot .info a.v {
+        display: block;
+        margin-top: 12px;
+        color: var(--brut-ink);
+        text-decoration: none;
+    }
+
+    .brut-foot .info a.v:hover {
+        color: var(--brut-accent);
+    }
+
     @media (max-width: 1024px) {
         .brut-feat .grid {
             grid-template-columns: repeat(2, 1fr);
@@ -1608,6 +1651,15 @@ cache.set(<span class="text-green-500">'user:123'</span>, {'{'} name: <span clas
             width: 100%;
             border-top: 1px solid var(--brut-rule);
             border-left: 0;
+        }
+
+        .brut-foot {
+            grid-template-columns: 1fr;
+            padding: 44px 16px 28px;
+        }
+
+        .brut-foot .info.right {
+            text-align: left;
         }
     }
 </style>
