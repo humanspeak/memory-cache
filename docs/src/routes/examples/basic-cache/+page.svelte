@@ -6,6 +6,10 @@
         getBreadcrumbContext,
         getSeoContext
     } from '@humanspeak/docs-kit'
+    import ArrowLeftRight from '@lucide/svelte/icons/arrow-left-right'
+    import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
+    import SearchX from '@lucide/svelte/icons/search-x'
+    import Sparkles from '@lucide/svelte/icons/sparkles'
     import BasicCache from '$lib/examples/basic-cache/demos/Default.svelte'
     import demoManifest from '$lib/demo-manifest.json'
 
@@ -45,16 +49,50 @@
     />
 {/snippet}
 
+{#snippet cacheNotes()}
+    <ul>
+        <li>
+            <Sparkles />
+            <span>
+                The demo starts with <code>user:1</code>, <code>user:2</code>, and
+                <code>config</code>, then mirrors every operation into the live table.
+            </span>
+        </li>
+        <li>
+            <ArrowLeftRight />
+            <span>
+                <code>set(key, value)</code> writes a value; <code>get(key)</code>
+                returns the cached value without changing the store.
+            </span>
+        </li>
+        <li>
+            <SearchX />
+            <span>
+                A missing <code>get</code> returns <code>undefined</code> and marks
+                the <code>lookup</code> telemetry plus <code>result</code> row red.
+            </span>
+        </li>
+        <li>
+            <RotateCcw />
+            <span>
+                Use <code>delete</code>, <code>clear()</code>, and <code>reset</code>
+                to compare one-key removal, an empty cache, and the seeded baseline.
+            </span>
+        </li>
+    </ul>
+{/snippet}
+
 <ExampleV2
     figId="FIG-001"
-    tag="CACHE"
-    title={{ prefix: 'basic ', accent: 'cache', end: '.' }}
-    description="Try `get`, `set`, and `delete` against a live `MemoryCache` instance and watch the cache state update."
+    tag="CACHE-BASICS"
+    title={{ prefix: 'set + get with ', accent: 'memorycache', end: '.' }}
+    description="Create a `MemoryCache` and drive the core `set`, `get`, and `delete` methods against live state."
     sheetLabel="SHEET 01 / 01"
     barCells={[{ k: 'pattern', v: 'basic operations' }]}
     sourceUrl={`${SOURCE_URL}basic-cache/demos/Default.svelte`}
     codeSnippet={defaultCode}
     codeLabel="show code"
+    notes={cacheNotes}
 >
     <BasicCache />
 </ExampleV2>
