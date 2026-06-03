@@ -2,82 +2,37 @@
     import Header from '$lib/components/general/Header.svelte'
     import Footer from '$lib/components/general/Footer.svelte'
     import { getBreadcrumbContext } from '@humanspeak/docs-kit'
+    import { AnimatePresence, MotionButton, MotionSpan } from '@humanspeak/svelte-motion'
     import ArrowRight from '@lucide/svelte/icons/arrow-right'
     import AtSign from '@lucide/svelte/icons/at-sign'
-    import Book from '@lucide/svelte/icons/book'
     import Clock from '@lucide/svelte/icons/clock'
     import Feather from '@lucide/svelte/icons/feather'
     import FileCode from '@lucide/svelte/icons/file-code'
     import Layers from '@lucide/svelte/icons/layers'
-    import Play from '@lucide/svelte/icons/play'
-    import Rocket from '@lucide/svelte/icons/rocket'
     import Zap from '@lucide/svelte/icons/zap'
+    import packageJson from '../../../package.json'
     import type { Component } from 'svelte'
 
-    let headingContainer: HTMLDivElement | null = $state(null)
     const breadcrumbContext = getBreadcrumbContext()
 
     if (breadcrumbContext) {
         breadcrumbContext.breadcrumbs = []
     }
 
-    // Simple spring-like tap animation using the Web Animations API
-    function springTap(node: HTMLElement, options: { pressedScale?: number } = {}) {
-        const pressedScale = options.pressedScale ?? 0.96
-        let downAnim: Animation | null = null
-        let upAnim: Animation | null = null
+    const PKG_NAME = packageJson.name
+    const PKG_VERSION = packageJson.version
+    const DEP_COUNT = 0
+    const installCmd = `npm i ${PKG_NAME}`
+    let copied = $state(false)
 
-        const press = () => {
-            upAnim?.cancel()
-            downAnim?.cancel()
-            downAnim = node.animate(
-                [{ transform: 'scale(1)' }, { transform: `scale(${pressedScale})` }],
-                {
-                    duration: 120,
-                    easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
-                    fill: 'forwards'
-                }
-            )
-        }
-
-        const release = () => {
-            downAnim?.cancel()
-            upAnim?.cancel()
-            upAnim = node.animate(
-                [
-                    { transform: `scale(${pressedScale})` },
-                    { transform: 'scale(1.03)' },
-                    { transform: 'scale(1)' }
-                ],
-                {
-                    duration: 220,
-                    easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
-                    fill: 'forwards'
-                }
-            )
-        }
-
-        const onPointerDown = () => press()
-        const onPointerUp = () => release()
-        const onPointerLeave = () => release()
-        const onBlur = () => release()
-
-        node.addEventListener('pointerdown', onPointerDown)
-        node.addEventListener('pointerup', onPointerUp)
-        node.addEventListener('pointerleave', onPointerLeave)
-        node.addEventListener('blur', onBlur)
-
-        node.style.touchAction = 'manipulation'
-
-        return {
-            destroy() {
-                node.removeEventListener('pointerdown', onPointerDown)
-                node.removeEventListener('pointerup', onPointerUp)
-                node.removeEventListener('pointerleave', onPointerLeave)
-                node.removeEventListener('blur', onBlur)
-                downAnim?.cancel()
-                upAnim?.cancel()
-            }
+    const copyInstall = async () => {
+        if (typeof navigator === 'undefined') return
+        try {
+            await navigator.clipboard.writeText(installCmd)
+            copied = true
+            setTimeout(() => (copied = false), 1500)
+        } catch {
+            /* clipboard blocked - fail quiet */
         }
     }
 
@@ -120,144 +75,86 @@
         }
     ]
 
-    function splitHeadingWords(root: HTMLElement) {
-        const lines = root.querySelectorAll('h1 span')
-        const words: HTMLElement[] = []
-        lines.forEach((line) => {
-            const text = line.textContent ?? ''
-            line.textContent = ''
-            const tokens = text.split(/(\s+)/)
-            for (const t of tokens) {
-                if (t.trim().length === 0) {
-                    line.appendChild(document.createTextNode(t))
-                } else {
-                    const w = document.createElement('span')
-                    w.className = 'split-word'
-                    w.textContent = t
-                    line.appendChild(w)
-                    words.push(w)
-                }
-            }
-        })
-        return words
-    }
-
-    $effect(() => {
-        if (typeof document === 'undefined') return
-        if (!headingContainer) return
-        headingContainer.style.visibility = 'hidden'
-        document.fonts?.ready
-            .then(() => {
-                if (!headingContainer) return
-                const words = splitHeadingWords(headingContainer)
-                headingContainer.style.visibility = 'visible'
-                words.forEach((el, i) => {
-                    el.animate(
-                        [
-                            { opacity: 0, transform: 'translateY(10px)' },
-                            { opacity: 1, transform: 'translateY(0)' }
-                        ],
-                        {
-                            duration: 800,
-                            easing: 'ease-out',
-                            delay: i * 50,
-                            fill: 'forwards'
-                        }
-                    )
-                })
-            })
-            .catch(() => {
-                headingContainer!.style.visibility = 'visible'
-            })
-    })
 </script>
 
-<div class="flex min-h-svh flex-col">
+<div class="brut-wrap flex min-h-svh flex-col">
     <Header />
     <div class="relative flex flex-1 flex-col overflow-hidden">
-        <!-- Layer: subtle grid -->
-        <div class="bg-grid pointer-events-none absolute inset-0 -z-20"></div>
-        <!-- Layer: soft radial glow -->
-        <div class="bg-glow pointer-events-none absolute inset-0 -z-10"></div>
-        <!-- Layer: animated orbs -->
-        <div
-            class="orb-a-bg pointer-events-none absolute bottom-[-80px] left-[-80px] h-[320px] w-[320px] rounded-full opacity-50 blur-[30px]"
-            style="will-change: transform;"
-        ></div>
-        <div
-            class="orb-b-bg pointer-events-none absolute top-[20%] right-[-60px] h-[260px] w-[260px] rounded-full opacity-50 blur-[30px]"
-            style="will-change: transform;"
-        ></div>
+        <main class="brut">
+            <div class="brut-coord" aria-hidden="true">
+                {#each Array.from({ length: 12 }, (_, i) => i) as i (i)}
+                    <div>{String(i + 1).padStart(2, '0')}</div>
+                {/each}
+            </div>
 
-        <!-- Hero Section -->
-        <section class="relative flex flex-1">
-            <div
-                class="relative mx-auto flex w-full max-w-7xl items-center justify-center px-6 py-8 md:py-12"
-            >
-                <div class="mx-auto max-w-4xl text-center">
-                    <div bind:this={headingContainer} class="mx-auto max-w-4xl text-center">
-                        <h1
-                            class="text-5xl leading-tight font-semibold text-balance text-foreground md:text-7xl"
-                        >
-                            <span class="block">Memory</span>
-                            <span
-                                class="sheen-gradient block bg-gradient-to-r from-foreground via-brand-500 to-foreground bg-clip-text text-transparent"
+            <section class="brut-hero">
+                <div class="corner tr">FIG-001 · MASTHEAD</div>
+                <aside class="meta">
+                    <div><span class="k">pkg</span> · <span class="v">{PKG_NAME}</span></div>
+                    <div><span class="k">version</span> · <span class="v">{PKG_VERSION}</span></div>
+                    <div><span class="k">deps</span> · <span class="v">{DEP_COUNT}</span></div>
+                    <div><span class="k">licence</span> · <span class="v">MIT</span></div>
+                    <hr />
+                    <div><span class="k">ttl</span> · <span class="v accent">expiration</span></div>
+                    <div><span class="k">lru</span> · <span class="v">eviction</span></div>
+                    <div><span class="k">decorator</span> · <span class="v">@cached</span></div>
+                    <hr />
+                    <div class="k">// scroll for full spec</div>
+                </aside>
+                <div class="hero-body">
+                    <h1>
+                        <span class="mark" aria-hidden="true">
+                            <span>memory</span><span class="slash">/</span><span>cache</span><span
+                                class="end">.</span
                             >
-                                Cache
+                        </span>
+                        <span class="sr-only"
+                            >Memory Cache - a lightweight TypeScript in-memory caching library</span
+                        >
+                    </h1>
+                    <p class="sub">
+                        <b>Zero-dependency caching for TypeScript.</b> In-memory
+                        <code>MemoryCache</code> storage with TTL expiration, LRU eviction, wildcard
+                        pattern deletion, and a powerful <code>@cached</code> decorator for method-level
+                        memoization. Built for API responses, sessions, computed values, and fast local
+                        data reuse.
+                    </p>
+                    <div class="cta-row">
+                        <a class="pri" href="/docs/getting-started">get started ↗</a>
+                        <a href="/docs/api/memory-cache">api reference</a>
+                        <a href="/examples">examples</a>
+                        <MotionButton
+                            class="inst"
+                            type="button"
+                            onclick={copyInstall}
+                            aria-label="Copy install command"
+                            whileTap={{ scale: 0.97 }}
+                            whileHover={{ scale: 1.01 }}
+                            transition={{ type: 'spring', stiffness: 360, damping: 26 }}
+                        >
+                            <span class="inst-prompt">$</span>
+                            <span class="inst-cmd">npm i <span class="pkg">{PKG_NAME}</span></span>
+                            <span class="inst-copy {copied ? 'is-copied' : ''}">
+                                <AnimatePresence initial={false}>
+                                    <MotionSpan
+                                        key={copied ? 'copied' : 'idle'}
+                                        class="inst-copy-label"
+                                        initial={{ opacity: 0, y: 6 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -6 }}
+                                        transition={{ duration: 0.18, ease: 'easeOut' }}
+                                    >
+                                        {copied ? 'copied' : 'copy'}
+                                    </MotionSpan>
+                                </AnimatePresence>
                             </span>
-                        </h1>
-                        <p
-                            class="mt-6 text-base leading-7 text-pretty text-muted-foreground md:text-lg"
-                        >
-                            A high-performance, in-memory caching library for TypeScript. TTL expiration,
-                            LRU eviction, and a powerful @cached decorator—all in a zero-dependency package.
-                        </p>
-                        <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-                            <a
-                                href="/docs/getting-started"
-                                class="inline-flex items-center justify-center rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow transition-colors hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/30"
-                                use:springTap
-                            >
-                                Get Started
-                                <Rocket size={14} class="ml-2" />
-                            </a>
-                            <a
-                                href="/docs/api/memory-cache"
-                                class="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-500/50 hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/20"
-                                use:springTap
-                            >
-                                API Reference
-                                <Book size={14} class="ml-2" />
-                            </a>
-                            <a
-                                href="/examples"
-                                class="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-500/50 hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/20"
-                                use:springTap
-                            >
-                                Examples
-                                <Play size={14} class="ml-2" />
-                            </a>
-                        </div>
-                        <ul
-                            class="mt-10 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground"
-                        >
-                            <li class="rounded-full border border-border-muted px-3 py-1">
-                                Zero Dependencies
-                            </li>
-                            <li class="rounded-full border border-border-muted px-3 py-1">
-                                TypeScript
-                            </li>
-                            <li class="rounded-full border border-border-muted px-3 py-1">
-                                TTL + LRU
-                            </li>
-                            <li class="rounded-full border border-border-muted px-3 py-1">
-                                Decorator Support
-                            </li>
-                        </ul>
+                        </MotionButton>
                     </div>
                 </div>
-            </div>
-        </section>
+                <div class="corner bl">FIG-001</div>
+                <div class="corner br">SHEET 01 / 03</div>
+            </section>
+        </main>
 
         <!-- Features Section -->
         <section class="relative px-6 py-10">
@@ -365,62 +262,253 @@ cache.set(<span class="text-green-500">'user:123'</span>, {'{'} name: <span clas
 </div>
 
 <style>
-    /* Decorative layers */
-    .bg-grid {
-        background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-        background-size: 24px 24px;
-        background-position: 50% 0;
-        mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 0) 70%);
-    }
-    .bg-glow {
-        background:
-            radial-gradient(60% 50% at 50% 0%, rgba(84, 219, 188, 0.18), transparent 60%),
-            radial-gradient(40% 40% at 90% 20%, rgba(84, 219, 188, 0.12), transparent 60%),
-            radial-gradient(40% 40% at 10% 15%, rgba(84, 219, 188, 0.12), transparent 60%);
-        filter: blur(0.2px);
+    .brut-coord {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        border-bottom: 1px solid var(--brut-rule);
+        color: var(--brut-ink-3);
+        font-size: 10px;
+        letter-spacing: 0.14em;
     }
 
-    .orb-a-bg {
-        animation: orbA 28s ease-in-out infinite;
-    }
-    .orb-b-bg {
-        animation: orbB 24s ease-in-out infinite;
-        animation-delay: 3s;
+    .brut-coord div {
+        border-right: 1px solid var(--brut-rule);
+        padding: 6px 8px;
     }
 
-    @keyframes orbA {
-        0% {
-            transform: translate(0, 0);
-        }
-        25% {
-            transform: translate(8vw, -10vh);
-        }
-        50% {
-            transform: translate(-4vw, 6vh);
-        }
-        75% {
-            transform: translate(2vw, -4vh);
-        }
-        100% {
-            transform: translate(0, 0);
-        }
+    .brut-coord div:last-child {
+        border-right: 0;
     }
 
-    @keyframes orbB {
-        0% {
-            transform: translate(0, 0);
+    .brut-hero {
+        position: relative;
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 24px;
+        border-bottom: 1px solid var(--brut-rule);
+        padding: 80px 24px 32px;
+    }
+
+    .brut-hero .meta {
+        display: flex;
+        margin: 0;
+        flex-direction: column;
+        gap: 8px;
+        color: var(--brut-ink-3);
+        font-size: 11px;
+    }
+
+    .brut-hero .meta .k {
+        color: var(--brut-ink-3);
+    }
+
+    .brut-hero .meta .v {
+        color: var(--brut-ink);
+    }
+
+    .brut-hero .meta .v.accent {
+        color: var(--brut-accent);
+    }
+
+    .brut-hero .meta hr {
+        margin: 8px 0;
+        border: 0;
+        border-top: 1px dashed var(--brut-rule);
+    }
+
+    .brut-hero h1 {
+        margin: 0;
+        font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+        font-size: clamp(56px, 11vw, 152px);
+        font-weight: 500;
+        line-height: 0.88;
+        letter-spacing: -0.06em;
+        text-transform: lowercase;
+    }
+
+    .brut-hero h1 .slash {
+        color: var(--brut-accent);
+    }
+
+    .brut-hero h1 .end {
+        color: var(--brut-ink-3);
+    }
+
+    .brut-hero .sub {
+        max-width: 720px;
+        margin: 28px 0 0;
+        color: var(--brut-ink-2);
+        font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+        font-size: 17px;
+        line-height: 1.5;
+        letter-spacing: -0.01em;
+    }
+
+    .brut-hero .sub b {
+        color: var(--brut-ink);
+        font-weight: 600;
+    }
+
+    .brut-hero .sub code {
+        border: 1px solid var(--brut-rule);
+        background: var(--brut-bg-2);
+        color: var(--brut-ink);
+        padding: 0 5px;
+        font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 14.5px;
+    }
+
+    .brut-hero .cta-row {
+        display: flex;
+        width: fit-content;
+        max-width: 100%;
+        align-items: stretch;
+        flex-wrap: wrap;
+        gap: 0;
+        margin-top: 28px;
+    }
+
+    .brut-hero .cta-row > * {
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--brut-rule);
+        background: var(--brut-bg);
+        color: var(--brut-ink);
+        padding: 10px 14px;
+        font-family: inherit;
+        font-size: 13px;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            background 0.15s,
+            border-color 0.15s;
+    }
+
+    .brut-hero .cta-row > * + * {
+        margin-left: -1px;
+    }
+
+    .brut-hero .cta-row > *:hover {
+        z-index: 2;
+    }
+
+    .brut-hero .cta-row .pri {
+        border-color: var(--brut-accent);
+        background: var(--brut-accent);
+        color: var(--brut-accent-ink);
+        font-weight: 600;
+    }
+
+    .brut-hero .cta-row .pri:hover {
+        border-color: var(--brut-accent-hover);
+        background: var(--brut-accent-hover);
+    }
+
+    .brut-hero .cta-row a:not(.pri):hover,
+    .brut-hero .cta-row :global(.inst:hover) {
+        border-color: var(--brut-rule-2);
+        background: var(--brut-bg-2);
+    }
+
+    .brut-hero .cta-row :global(.inst) {
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: -1px;
+        border: 1px solid var(--brut-rule);
+        background: var(--brut-bg-2);
+        color: var(--brut-ink-2);
+        padding: 10px 18px;
+        font-family: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        transition:
+            background 0.15s,
+            border-color 0.15s;
+    }
+
+    .brut-hero .cta-row :global(.inst:hover) {
+        z-index: 2;
+    }
+
+    .brut-hero .cta-row :global(.inst .inst-prompt) {
+        color: var(--brut-ink-3);
+    }
+
+    .brut-hero .cta-row :global(.inst .inst-cmd) {
+        color: var(--brut-ink-2);
+    }
+
+    .brut-hero .cta-row :global(.inst .inst-cmd .pkg) {
+        color: var(--brut-ink);
+    }
+
+    .brut-hero .cta-row :global(.inst .inst-copy) {
+        display: inline-grid;
+        width: 84px;
+        height: 20px;
+        align-items: center;
+        justify-items: center;
+        margin-left: 4px;
+        overflow: hidden;
+        border: 1px solid var(--brut-rule);
+        color: var(--brut-accent);
+        padding: 2px 8px;
+        font-size: 10.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        transition:
+            border-color 0.2s,
+            background 0.2s;
+    }
+
+    .brut-hero .cta-row :global(.inst .inst-copy.is-copied) {
+        border-color: var(--brut-accent);
+        background: var(--brut-accent-soft);
+    }
+
+    .brut-hero .cta-row :global(.inst .inst-copy-label) {
+        grid-area: 1 / 1;
+        display: inline-block;
+        white-space: nowrap;
+        will-change: transform, opacity;
+    }
+
+    .brut-hero .corner {
+        position: absolute;
+        color: var(--brut-ink-3);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+    }
+
+    .brut-hero .corner.tr {
+        top: 12px;
+        right: 24px;
+    }
+
+    .brut-hero .corner.bl {
+        bottom: 12px;
+        left: 24px;
+    }
+
+    .brut-hero .corner.br {
+        right: 24px;
+        bottom: 12px;
+    }
+
+    @media (max-width: 720px) {
+        .brut-coord {
+            display: none;
         }
-        25% {
-            transform: translate(-6vw, -8vh);
-        }
-        50% {
-            transform: translate(3vw, 4vh);
-        }
-        75% {
-            transform: translate(-2vw, -6vh);
-        }
-        100% {
-            transform: translate(0, 0);
+
+        .brut-hero {
+            grid-template-columns: 1fr;
+            padding: 56px 16px 32px;
         }
     }
 </style>
