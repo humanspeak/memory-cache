@@ -6,6 +6,10 @@
         getBreadcrumbContext,
         getSeoContext
     } from '@humanspeak/docs-kit'
+    import Lightbulb from '@lucide/svelte/icons/lightbulb'
+    import MousePointer from '@lucide/svelte/icons/mouse-pointer'
+    import Plus from '@lucide/svelte/icons/plus'
+    import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
     import LruEviction from '$lib/examples/lru-eviction/demos/Default.svelte'
     import demoManifest from '$lib/demo-manifest.json'
 
@@ -45,16 +49,50 @@
     />
 {/snippet}
 
+{#snippet lruNotes()}
+    <ul>
+        <li>
+            <Lightbulb />
+            <span>
+                LRU means <code>least recently used</code>: the oldest untouched
+                key is the first candidate when the cache reaches capacity.
+            </span>
+        </li>
+        <li>
+            <MousePointer />
+            <span>
+                Clicking an entry calls <code>get(key)</code>, moving that key to
+                the MRU end of the list.
+            </span>
+        </li>
+        <li>
+            <Plus />
+            <span>
+                <code>add entry</code> writes a new item. If <code>size === maxSize</code>,
+                the current LRU key is evicted before the new key lands.
+            </span>
+        </li>
+        <li>
+            <RotateCcw />
+            <span>
+                Changing <code>maxSize</code> resets the demo so capacity,
+                rank, and eviction behavior stay easy to compare.
+            </span>
+        </li>
+    </ul>
+{/snippet}
+
 <ExampleV2
     figId="FIG-001"
-    tag="EVICTION"
-    title={{ prefix: 'lru ', accent: 'eviction', end: '.' }}
-    description="Fill a bounded cache and watch the least recently used entry get evicted when capacity is reached."
+    tag="EVICTION-POLICY"
+    title={{ prefix: 'trace lru ', accent: 'eviction', end: '.' }}
+    description="Fill a bounded `MemoryCache`, access entries, and watch the least recently used key leave when capacity is reached."
     sheetLabel="SHEET 01 / 01"
     barCells={[{ k: 'pattern', v: 'least recently used' }]}
     sourceUrl={`${SOURCE_URL}lru-eviction/demos/Default.svelte`}
     codeSnippet={defaultCode}
     codeLabel="show code"
+    notes={lruNotes}
 >
     <LruEviction />
 </ExampleV2>
