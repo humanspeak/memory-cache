@@ -270,9 +270,12 @@ before evicting the least recently used valid entry:
 const cache = new MemoryCache<string>({ maxSize: 2, ttl: 1000 })
 
 cache.set('stale', 'old')
+
+// ... 750ms pass ...
+
 cache.set('fresh', 'new')
 
-// ... time passes and stale expires ...
+// ... another 300ms pass; stale expires, fresh is still valid ...
 
 cache.set('next', 'value') // prunes stale; fresh remains cached
 ```
