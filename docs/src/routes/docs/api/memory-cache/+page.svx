@@ -134,7 +134,7 @@ await Promise.all(promises) // fetchExpensiveData called only once
 
 ### set(key, value)
 
-Stores a value in the cache. If the cache is full and this is a new key, the least recently used entry is evicted. Setting a value (new or update) moves the entry to the most-recently-used position.
+Stores a value in the cache. If the cache is full and this is a new key, expired entries are pruned before the least recently used entry is evicted. Setting a value (new or update) moves the entry to the most-recently-used position.
 
 ```typescript
 set(key: string, value: T): void
@@ -150,6 +150,22 @@ set(key: string, value: T): void
 cache.set('greeting', 'Hello, World!')
 cache.set('count', 42)
 cache.set('user', { name: 'John', age: 30 })
+```
+
+When `ttl` and `maxSize` are both active, expired entries are reclaimed first:
+
+```typescript
+const cache = new MemoryCache<string>({ maxSize: 2, ttl: 1000 })
+
+cache.set('a', 'expires')
+
+// ... 750ms pass ...
+
+cache.set('b', 'valid')
+
+// ... another 300ms pass; a expires, b is still valid ...
+
+cache.set('c', 'new') // removes expired a instead of evicting valid b
 ```
 
 ### has(key)
@@ -567,6 +583,4 @@ const cache = new MemoryCache<string>({
 - **Error handling**: Errors thrown in hooks are silently caught to prevent cache corruption.
 - **Performance**: Keep hooks lightweight to avoid impacting cache performance.
 - **Batch operations**: `clear()`, `deleteByPrefix()`, and `deleteByMagicString()` call `onDelete` once per deleted entry.
-
-
 

@@ -5,6 +5,7 @@
         getBreadcrumbContext,
         getSeoContext
     } from '@humanspeak/docs-kit'
+    import Clock from '@lucide/svelte/icons/clock'
     import Lightbulb from '@lucide/svelte/icons/lightbulb'
     import MousePointer from '@lucide/svelte/icons/mouse-pointer'
     import Plus from '@lucide/svelte/icons/plus'
@@ -12,8 +13,7 @@
     import { demoCodeSample } from '$lib/demo-loaders'
     import LruEviction from '$lib/examples/lru-eviction/demos/Default.svelte'
 
-    const SOURCE_URL =
-        'https://github.com/humanspeak/memory-cache/blob/main/docs/src/lib/examples/'
+    const SOURCE_URL = 'https://github.com/humanspeak/memory-cache/blob/main/docs/src/lib/examples/'
 
     const breadcrumbs = getBreadcrumbContext()
     const seo = getSeoContext()
@@ -26,10 +26,10 @@
     if (seo) {
         seo.title = 'LRU Eviction | Examples | Memory Cache'
         seo.description =
-            'See how least recently used items are evicted when the cache reaches capacity. Interactive demo of LRU eviction in @humanspeak/memory-cache for TypeScript.'
+            'See how least recently used items are evicted when the cache reaches capacity, and how expired entries are pruned first. Interactive demo of LRU eviction in @humanspeak/memory-cache for TypeScript.'
         seo.ogTitle = 'LRU Eviction'
         seo.ogTagline = 'Watch least recently used entries leave the cache'
-        seo.ogFeatures = ['Max Size', 'Access Order', 'Eviction', 'Live State']
+        seo.ogFeatures = ['Max Size', 'Access Order', 'TTL Pruning', 'Live State']
         seo.ogSlug = 'examples-lru-eviction'
     }
 </script>
@@ -52,29 +52,36 @@
         <li>
             <Lightbulb />
             <span>
-                LRU means <code>least recently used</code>: the oldest untouched
-                key is the first candidate when the cache reaches capacity.
+                LRU means <code>least recently used</code>: the oldest untouched key is the first
+                candidate when the cache reaches capacity.
             </span>
         </li>
         <li>
             <MousePointer />
             <span>
-                Clicking an entry calls <code>get(key)</code>, moving that key to
-                the MRU end of the list.
+                Clicking an entry calls <code>get(key)</code>, moving that key to the MRU end of the
+                list.
             </span>
         </li>
         <li>
             <Plus />
             <span>
-                <code>add entry</code> writes a new item. If <code>size === maxSize</code>,
-                the current LRU key is evicted before the new key lands.
+                <code>add entry</code> writes a new item. If <code>size === maxSize</code>
+                after expired entries are pruned, the current LRU key is evicted.
+            </span>
+        </li>
+        <li>
+            <Clock />
+            <span>
+                When <code>ttl</code> and <code>maxSize</code> are both configured, expired entries are
+                removed before any valid LRU entry is evicted.
             </span>
         </li>
         <li>
             <RotateCcw />
             <span>
-                Changing <code>maxSize</code> resets the demo so capacity,
-                rank, and eviction behavior stay easy to compare.
+                Changing <code>maxSize</code> resets the demo so capacity, rank, and eviction behavior
+                stay easy to compare.
             </span>
         </li>
     </ul>
@@ -84,7 +91,7 @@
     figId="FIG-001"
     tag="EVICTION-POLICY"
     title={{ prefix: 'trace lru ', accent: 'eviction', end: '.' }}
-    description="Fill a bounded `MemoryCache`, access entries, and watch the least recently used key leave when capacity is reached."
+    description="Fill a bounded `MemoryCache`, access entries, and watch how expired entries are reclaimed before least recently used valid keys leave."
     sheetLabel="SHEET 01 / 01"
     barCells={[{ k: 'pattern', v: 'least recently used' }]}
     sourceUrl={`${SOURCE_URL}lru-eviction/demos/Default.svelte`}

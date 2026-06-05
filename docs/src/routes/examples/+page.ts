@@ -16,7 +16,8 @@ const EXAMPLES: Record<string, ExampleEntry> = {
     },
     'lru-eviction': {
         title: 'LRU Eviction',
-        description: 'See how least recently used items are evicted when the cache is full.'
+        description:
+            'See how expired entries are pruned before least recently used items are evicted.'
     },
     'cache-statistics': {
         title: 'Cache Statistics',

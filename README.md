@@ -186,24 +186,24 @@ await Promise.all(promises) // fetchExpensiveData called only once
 
 #### Methods
 
-| Method                         | Description                                          |
-| ------------------------------ | ---------------------------------------------------- |
-| `get(key)`                     | Retrieves a value from the cache                     |
-| `set(key, value)`              | Stores a value in the cache                          |
-| `getOrSet(key, fetcher)`       | Gets cached value or fetches and caches on miss      |
-| `has(key)`                     | Checks if a key exists (useful for cached undefined) |
-| `delete(key)`                  | Removes a specific entry                             |
-| `deleteAsync(key)`             | Async version of delete                              |
-| `clear()`                      | Removes all entries                                  |
-| `deleteByPrefix(prefix)`       | Removes entries starting with prefix                 |
-| `deleteByMagicString(pattern)` | Removes entries matching wildcard pattern            |
-| `size()`                       | Returns the number of entries in cache               |
-| `keys()`                       | Returns array of all cache keys                      |
-| `values()`                     | Returns array of all cached values                   |
-| `entries()`                    | Returns array of [key, value] pairs                  |
-| `getStats()`                   | Returns cache statistics (hits, misses, etc.)        |
-| `resetStats()`                 | Resets statistics counters to zero                   |
-| `prune()`                      | Removes all expired entries, returns count           |
+| Method                         | Description                                             |
+| ------------------------------ | ------------------------------------------------------- |
+| `get(key)`                     | Retrieves a value from the cache                        |
+| `set(key, value)`              | Stores a value, pruning expired entries before eviction |
+| `getOrSet(key, fetcher)`       | Gets cached value or fetches and caches on miss         |
+| `has(key)`                     | Checks if a key exists (useful for cached undefined)    |
+| `delete(key)`                  | Removes a specific entry                                |
+| `deleteAsync(key)`             | Async version of delete                                 |
+| `clear()`                      | Removes all entries                                     |
+| `deleteByPrefix(prefix)`       | Removes entries starting with prefix                    |
+| `deleteByMagicString(pattern)` | Removes entries matching wildcard pattern               |
+| `size()`                       | Returns the number of entries in cache                  |
+| `keys()`                       | Returns array of all cache keys                         |
+| `values()`                     | Returns array of all cached values                      |
+| `entries()`                    | Returns array of [key, value] pairs                     |
+| `getStats()`                   | Returns cache statistics (hits, misses, etc.)           |
+| `resetStats()`                 | Resets statistics counters to zero                      |
+| `prune()`                      | Removes all expired entries, returns count              |
 
 ### `@cached<T>(options?)`
 
@@ -261,6 +261,23 @@ cache.resetStats()
 
 // Proactively remove expired entries
 const prunedCount = cache.prune()
+```
+
+When `ttl` and `maxSize` are both configured, writes reclaim expired entries
+before evicting the least recently used valid entry:
+
+```typescript
+const cache = new MemoryCache<string>({ maxSize: 2, ttl: 1000 })
+
+cache.set('stale', 'old')
+
+// ... 750ms pass ...
+
+cache.set('fresh', 'new')
+
+// ... another 300ms pass; stale expires, fresh is still valid ...
+
+cache.set('next', 'value') // prunes stale; fresh remains cached
 ```
 
 ## Cache Hooks
