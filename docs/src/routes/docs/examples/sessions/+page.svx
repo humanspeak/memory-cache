@@ -8,7 +8,7 @@ description: Store user sessions with automatic expiration
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Session Storage - Memory Cache'
-      seo.description = 'Store user sessions with automatic TTL expiration and audit logging. A lightweight in-memory session store for TypeScript and Node.js using @humanspeak/memory-cache.'
+      seo.description = 'Store user sessions with automatic TTL expiration and audit logging. Build a lightweight in-memory session store for TypeScript and Node.js.'
       seo.ogTitle = 'Session Storage'
       seo.ogTagline = 'Automatic session expiration with TTL.'
       seo.ogFeatures = ['TTL Expiration', 'Audit Logging', 'Type Safety', 'Auto Cleanup']
@@ -96,5 +96,4 @@ const sessionCache = new MemoryCache<Session>({
 - **TTL**: 30-60 minutes is typical for web sessions
 - **Security**: Don't store sensitive data; use session ID as reference
 - **Max Size**: Plan for concurrent users plus some buffer
-
 

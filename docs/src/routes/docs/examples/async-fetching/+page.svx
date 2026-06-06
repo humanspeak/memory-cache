@@ -8,7 +8,7 @@ description: Cache expensive async operations with getOrSet
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Async Fetching - Memory Cache'
-      seo.description = 'Cache expensive async operations with getOrSet for thundering herd prevention and request deduplication. Includes error handling patterns using @humanspeak/memory-cache.'
+      seo.description = 'Cache expensive async operations with getOrSet for thundering herd prevention, request deduplication, and practical error handling.'
       seo.ogTitle = 'Async Fetching'
       seo.ogTagline = 'Cache async operations with getOrSet.'
       seo.ogFeatures = ['getOrSet', 'Thundering Herd', 'Error Handling', 'Sync Fetchers']
@@ -112,5 +112,4 @@ const config = await cache.getOrSet('config', () => {
 - **Single-flight** - Concurrent requests for the same key share one fetch
 - **Uses instance TTL** - Cached values expire based on cache configuration
 - **Supports sync fetchers** - Function can return `T` or `Promise<T>`
-
 

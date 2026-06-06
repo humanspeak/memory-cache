@@ -8,7 +8,7 @@ description: Full service class example using the decorator
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Service Class Pattern - Memory Cache'
-      seo.description = 'Complete service class example using the @cached decorator for automatic method-level memoization. Covers multiple methods and hooks monitoring with @humanspeak/memory-cache.'
+      seo.description = 'Complete service class example using @cached for method-level memoization, multiple cached methods, and hooks-based cache monitoring.'
       seo.ogTitle = 'Service Class Pattern'
       seo.ogTagline = 'Full service class example with @cached.'
       seo.ogFeatures = ['@cached Decorator', 'Multiple Methods', 'Hooks Monitoring', 'Type Safety']
@@ -123,5 +123,4 @@ class ProductService {
 - **Max Size**: Limit based on expected unique argument combinations
 - **Write Operations**: Don't cache write operations
 - **Cache Invalidation**: Consider how updates affect cached data
-
 

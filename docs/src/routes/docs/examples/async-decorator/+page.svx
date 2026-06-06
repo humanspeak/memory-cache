@@ -1,0 +1,117 @@
+---
+title: Async Decorator
+description: Async method memoization with @cached
+---
+
+<script>
+  import { getSeoContext } from '@humanspeak/docs-kit'
+  const seo = getSeoContext()
+  if (seo) {
+      seo.title = 'Async Decorator - Memory Cache'
+      seo.description = 'Use the @cached decorator with async methods for single-flight request deduplication, retry-safe errors, TTL caching, and nullish results.'
+      seo.ogTitle = 'Async Decorator'
+      seo.ogTagline = 'Deduplicate concurrent async method calls.'
+      seo.ogFeatures = ['@cached Decorator', 'Single-Flight', 'Retry-Safe Errors', 'TTL Support']
+      seo.ogSlug = 'examples-async-decorator'
+  }
+</script>
+
+# Async Decorator
+
+Use `@cached` on async service methods when callers should share work for identical arguments.
+
+## Single-Flight Requests
+
+Concurrent calls with the same arguments share one in-flight method execution. Once the first call resolves, the resolved value is cached for later calls.
+
+```typescript
+import { cached } from '@humanspeak/memory-cache'
+
+interface User {
+    id: string
+    name: string
+}
+
+class UserService {
+    private fetchCount = 0
+
+    @cached<User>({ ttl: 60_000 })
+    async getUser(id: string): Promise<User> {
+        this.fetchCount++
+        return await database.users.findById(id)
+    }
+
+    getFetchCount(): number {
+        return this.fetchCount
+    }
+}
+
+const service = new UserService()
+
+const [first, second, third] = await Promise.all([
+    service.getUser('user-123'),
+    service.getUser('user-123'),
+    service.getUser('user-123')
+])
+
+console.log(first === second) // true if the database returns the same object
+console.log(second === third) // true
+console.log(service.getFetchCount()) // 1
+```
+
+## Rejections Retry
+
+Rejected promises are not cached by default. All concurrent callers see the same rejection, and the next call starts a new method execution.
+
+```typescript
+class ProfileService {
+    private attempts = 0
+
+    @cached<Profile>({ ttl: 30_000 })
+    async getProfile(userId: string): Promise<Profile> {
+        this.attempts++
+
+        const response = await fetch(`/api/profiles/${userId}`)
+        if (!response.ok) {
+            throw new Error('Profile fetch failed')
+        }
+
+        return await response.json()
+    }
+}
+
+const service = new ProfileService()
+
+await Promise.allSettled([
+    service.getProfile('user-123'),
+    service.getProfile('user-123')
+])
+
+// A later call retries instead of reusing the rejected promise.
+const profile = await service.getProfile('user-123')
+```
+
+## TTL and Nullish Results
+
+Resolved `undefined` and `null` values are cached just like other results. TTL still controls when the next method execution can happen.
+
+```typescript
+class FeatureFlagService {
+    @cached<boolean | undefined>({ ttl: 5_000 })
+    async getFlag(name: string): Promise<boolean | undefined> {
+        const flag = await database.flags.findByName(name)
+        return flag?.enabled
+    }
+
+    @cached<User | null>({ ttl: 60_000 })
+    async findUser(id: string): Promise<User | null> {
+        return (await database.users.findById(id)) ?? null
+    }
+}
+```
+
+## When to Use It
+
+- Use `@cached` for service methods that naturally derive a result from their arguments.
+- Use `getOrSet()` when the cache key is already explicit or shared outside a class method.
+- Avoid caching write operations or methods whose result depends on hidden mutable instance state.

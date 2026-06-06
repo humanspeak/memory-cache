@@ -8,7 +8,7 @@ description: Cache API responses to reduce network requests
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'API Response Caching - Memory Cache'
-      seo.description = 'Cache API responses to reduce network requests and improve response times. Learn TTL-based expiration and cache invalidation patterns with @humanspeak/memory-cache.'
+      seo.description = 'Cache API responses to reduce network requests and improve response times. Learn TTL expiration and invalidation patterns with memory-cache.'
       seo.ogTitle = 'API Response Caching'
       seo.ogTagline = 'Reduce network requests with cached API responses.'
       seo.ogFeatures = ['TTL Expiration', 'Hooks Monitoring', 'Type Safety', 'Zero Dependencies']
@@ -91,5 +91,4 @@ const apiCache = new MemoryCache<ApiResponse<unknown>>({
 - **Max Size**: Consider memory constraints and number of unique endpoints
 - **Cache Key**: Use the full URL including query parameters
 - **Error Handling**: Don't cache error responses
-
 

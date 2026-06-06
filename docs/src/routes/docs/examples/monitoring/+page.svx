@@ -8,7 +8,7 @@ description: Integrate with metrics and logging systems
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Monitoring with Hooks - Memory Cache'
-      seo.description = 'Integrate @humanspeak/memory-cache with DataDog, Prometheus, and custom logging systems. Use hooks to track hit rates, evictions, and cache health for observability.'
+      seo.description = 'Integrate memory-cache with DataDog, Prometheus, and custom logging. Use hooks to track hit rates, evictions, and cache health.'
       seo.ogTitle = 'Monitoring with Hooks'
       seo.ogTagline = 'Integrate with metrics and logging systems.'
       seo.ogFeatures = ['DataDog', 'Prometheus', 'Debug Logging', 'Hit Rate Dashboard']
@@ -235,5 +235,4 @@ setInterval(() => {
 - **Error Handling**: Hooks errors are silently caught, but avoid throwing
 - **Sampling**: For high-traffic caches, consider sampling instead of logging every event
 - **Async Operations**: Hooks are synchronous; queue async work if needed
-
 

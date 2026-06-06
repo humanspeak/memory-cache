@@ -125,6 +125,15 @@ await service.getUser('123')
 await service.getUser('123')
 ```
 
+Async decorated methods use single-flight behavior: concurrent calls with the
+same arguments share one in-flight method execution. Resolved values are cached,
+while rejected promises are not cached by default, so a later call can retry.
+
+```typescript
+const [a, b] = await Promise.all([service.getUser('popular-user'), service.getUser('popular-user')])
+// database.findUser ran once; both callers received the same result
+```
+
 #### Custom Key Generator
 
 Use `keyGenerator` to control how cache keys are derived from arguments:

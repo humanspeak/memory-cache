@@ -1,6 +1,7 @@
 <script lang="ts">
     import { getBreadcrumbContext, getSeoContext } from '@humanspeak/docs-kit'
     import ArrowRight from '@lucide/svelte/icons/arrow-right'
+    import AtSign from '@lucide/svelte/icons/at-sign'
     import BarChart3 from '@lucide/svelte/icons/bar-chart-3'
     import Building from '@lucide/svelte/icons/building'
     import Calculator from '@lucide/svelte/icons/calculator'
@@ -21,35 +22,39 @@
     const breadcrumbs = getBreadcrumbContext()
     const seo = getSeoContext()
     if (breadcrumbs) {
-        breadcrumbs.breadcrumbs = [
-            { title: 'Docs', href: '/docs' },
-            { title: 'Examples' }
-        ]
+        breadcrumbs.breadcrumbs = [{ title: 'Docs', href: '/docs' }, { title: 'Examples' }]
     }
     if (seo) {
         seo.title = 'Usage Examples | Memory Cache'
-        seo.description = 'Real-world usage examples for @humanspeak/memory-cache covering API caching, session storage, database queries, rate limiting, and the @cached decorator.'
+        seo.description =
+            'Real-world usage examples for @humanspeak/memory-cache covering API caching, session storage, database queries, rate limiting, and the @cached decorator.'
     }
 
-    const examples: { category: string; items: { title: string; description: string; href: string; icon: Component }[] }[] = [
+    const examples: {
+        category: string
+        items: { title: string; description: string; href: string; icon: Component }[]
+    }[] = [
         {
             category: 'Basic Patterns',
             items: [
                 {
                     title: 'API Response Caching',
-                    description: 'Cache API responses to reduce network requests and improve response times.',
+                    description:
+                        'Cache API responses to reduce network requests and improve response times.',
                     href: '/docs/examples/api-caching',
                     icon: Cloud
                 },
                 {
                     title: 'Session Storage',
-                    description: 'Store user sessions with automatic expiration for secure session management.',
+                    description:
+                        'Store user sessions with automatic expiration for secure session management.',
                     href: '/docs/examples/sessions',
                     icon: UserCheck
                 },
                 {
                     title: 'Configuration Cache',
-                    description: 'Cache configuration that rarely changes for faster application startup.',
+                    description:
+                        'Cache configuration that rarely changes for faster application startup.',
                     href: '/docs/examples/configuration',
                     icon: Sliders
                 }
@@ -81,6 +86,13 @@
                     description: 'Handle async data fetching with automatic caching.',
                     href: '/docs/examples/async-fetching',
                     icon: RefreshCw
+                },
+                {
+                    title: 'Async Decorator',
+                    description:
+                        'Use @cached for async methods with single-flight calls and retry-safe errors.',
+                    href: '/docs/examples/async-decorator',
+                    icon: AtSign
                 }
             ]
         },
@@ -115,28 +127,76 @@
     ]
 
     const practices: { icon: Component; title: string; description: string }[] = [
-        { icon: Clock, title: 'Choose appropriate TTLs', description: 'Balance freshness vs performance' },
-        { icon: Key, title: 'Use meaningful key patterns', description: 'Makes debugging and invalidation easier' },
-        { icon: HardDrive, title: 'Consider cache size', description: 'Monitor memory usage in production' },
-        { icon: Eye, title: 'Use hooks for observability', description: 'Track hit rates and performance' },
-        { icon: Shield, title: 'Handle cache misses', description: 'Always have a fallback strategy' }
+        {
+            icon: Clock,
+            title: 'Choose appropriate TTLs',
+            description: 'Balance freshness vs performance'
+        },
+        {
+            icon: Key,
+            title: 'Use meaningful key patterns',
+            description: 'Makes debugging and invalidation easier'
+        },
+        {
+            icon: HardDrive,
+            title: 'Consider cache size',
+            description: 'Monitor memory usage in production'
+        },
+        {
+            icon: Eye,
+            title: 'Use hooks for observability',
+            description: 'Track hit rates and performance'
+        },
+        {
+            icon: Shield,
+            title: 'Handle cache misses',
+            description: 'Always have a fallback strategy'
+        }
     ]
 
     const quickReference = [
-        { useCase: 'API responses', ttl: '1-5 minutes', maxSize: '500-1000', keyPattern: 'api:{endpoint}' },
-        { useCase: 'User sessions', ttl: '30-60 minutes', maxSize: '10000+', keyPattern: 'session:{id}' },
-        { useCase: 'Database queries', ttl: '30s-5 minutes', maxSize: '100-500', keyPattern: 'query:{table}:{id}' },
-        { useCase: 'Computed values', ttl: '0 (no expiration)', maxSize: '1000+', keyPattern: 'compute:{input}' },
-        { useCase: 'Rate limiting', ttl: '1 minute', maxSize: '100000+', keyPattern: 'ratelimit:{clientId}' },
-        { useCase: 'Configuration', ttl: '5-10 minutes', maxSize: '100', keyPattern: 'config:{env}' }
+        {
+            useCase: 'API responses',
+            ttl: '1-5 minutes',
+            maxSize: '500-1000',
+            keyPattern: 'api:{endpoint}'
+        },
+        {
+            useCase: 'User sessions',
+            ttl: '30-60 minutes',
+            maxSize: '10000+',
+            keyPattern: 'session:{id}'
+        },
+        {
+            useCase: 'Database queries',
+            ttl: '30s-5 minutes',
+            maxSize: '100-500',
+            keyPattern: 'query:{table}:{id}'
+        },
+        {
+            useCase: 'Computed values',
+            ttl: '0 (no expiration)',
+            maxSize: '1000+',
+            keyPattern: 'compute:{input}'
+        },
+        {
+            useCase: 'Rate limiting',
+            ttl: '1 minute',
+            maxSize: '100000+',
+            keyPattern: 'ratelimit:{clientId}'
+        },
+        {
+            useCase: 'Configuration',
+            ttl: '5-10 minutes',
+            maxSize: '100',
+            keyPattern: 'config:{env}'
+        }
     ]
 </script>
 
 <!-- Hero Section -->
 <div class="not-prose mb-10">
-    <h1 class="mb-3 text-4xl font-bold text-foreground">
-        Usage Examples
-    </h1>
+    <h1 class="mb-3 text-4xl font-bold text-foreground">Usage Examples</h1>
     <p class="max-w-2xl text-lg text-muted-foreground">
         Explore practical examples of how to use @humanspeak/memory-cache in real-world scenarios.
     </p>
@@ -183,7 +243,10 @@
                             class="flex items-center text-sm font-medium text-brand-600 group-hover:text-brand-700"
                         >
                             View Example
-                            <ArrowRight size={14} class="ml-2 transition-transform duration-200 group-hover:translate-x-1" />
+                            <ArrowRight
+                                size={14}
+                                class="ml-2 transition-transform duration-200 group-hover:translate-x-1"
+                            />
                         </div>
                     </div>
 
@@ -217,7 +280,9 @@
                         <td class="px-4 py-3 text-muted-foreground">{row.ttl}</td>
                         <td class="px-4 py-3 text-muted-foreground">{row.maxSize}</td>
                         <td class="px-4 py-3">
-                            <code class="rounded bg-muted px-1.5 py-0.5 text-xs text-brand-600">{row.keyPattern}</code>
+                            <code class="rounded bg-muted px-1.5 py-0.5 text-xs text-brand-600"
+                                >{row.keyPattern}</code
+                            >
                         </td>
                     </tr>
                 {/each}
@@ -233,7 +298,9 @@
         {#each practices as practice}
             {@const PracticeIcon = practice.icon}
             <div class="flex items-start gap-3 rounded-lg border border-border bg-card p-4">
-                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-brand-500/10 text-brand-600">
+                <div
+                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-brand-500/10 text-brand-600"
+                >
                     <PracticeIcon size={16} />
                 </div>
                 <div>

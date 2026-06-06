@@ -8,7 +8,7 @@ description: Cache expensive computations
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Computed Value Caching - Memory Cache'
-      seo.description = 'Cache expensive computations to avoid redundant processing and speed up repeated calculations. Includes performance tracking and hooks monitoring with @humanspeak/memory-cache.'
+      seo.description = 'Cache expensive computations to avoid redundant processing and speed repeated calculations. Includes performance tracking and hooks monitoring.'
       seo.ogTitle = 'Computed Value Caching'
       seo.ogTagline = 'Cache expensive computations efficiently.'
       seo.ogFeatures = ['Deterministic Results', 'Performance Tracking', 'TTL Support', 'Hooks']
@@ -93,5 +93,4 @@ const computeCache = new MemoryCache<ComputeResult>({
 - **TTL**: Use `0` for deterministic computations
 - **Max Size**: Limit by memory, not time
 - **Key Design**: Include all inputs that affect the result
-
 
