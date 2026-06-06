@@ -158,8 +158,6 @@ export type CachedDecoratorOptions<T = unknown> = CacheOptions<T> & {
     hashKeys?: boolean
 }
 
-type PromiseLikeValue<T> = PromiseLike<T>
-
 /**
  * Statistics about cache usage and performance.
  *
@@ -246,7 +244,7 @@ const CACHED_UNDEFINED = Symbol('CACHED_UNDEFINED')
  */
 const CACHED_NULL = Symbol('CACHED_NULL')
 
-function isPromiseLike<T>(value: T | PromiseLikeValue<T>): value is PromiseLikeValue<T> {
+function isPromiseLike<T>(value: T | PromiseLike<T>): value is PromiseLike<T> {
     return (
         typeof value === 'object' &&
         value !== null &&
