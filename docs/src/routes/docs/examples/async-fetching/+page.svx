@@ -8,6 +8,7 @@ description: Cache async fetch results with getOrSet in @humanspeak/memory-cache
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Async Fetching - Memory Cache'
+      seo.h1 = { title: 'Async Fetching' }
       seo.description = 'Cache async fetch results with getOrSet in @humanspeak/memory-cache, preventing thundering herds and redundant network requests in TypeScript apps.'
       seo.ogTitle = 'Async Fetching'
       seo.ogTagline = 'Cache async operations with getOrSet.'

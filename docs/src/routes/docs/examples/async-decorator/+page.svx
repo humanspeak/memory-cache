@@ -8,6 +8,7 @@ description: Use @cached with async methods for single-flight request deduplicat
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Async Decorator - Memory Cache'
+      seo.h1 = { title: 'Async Decorator' }
       seo.description = 'Use @cached with async methods for single-flight request deduplication, retry-safe errors, TTL caching, and nullish result handling in apps.'
       seo.ogTitle = 'Async Decorator'
       seo.ogTagline = 'Deduplicate concurrent async method calls.'
