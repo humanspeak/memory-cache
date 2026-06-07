@@ -8,6 +8,7 @@ description: Cache expensive database queries with @cached to reduce latency and
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Database Query Caching - Memory Cache'
+      seo.h1 = { title: 'Database Query Caching' }
       seo.description = 'Cache expensive database queries with @cached to reduce latency and database load, including query monitoring and practical TTL examples for apps.'
       seo.ogTitle = 'Database Query Caching'
       seo.ogTagline = 'Cache expensive DB queries with @cached.'

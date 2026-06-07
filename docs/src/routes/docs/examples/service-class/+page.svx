@@ -8,6 +8,7 @@ description: Build a cache-backed service class with @cached method memoization,
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Service Class Pattern - Memory Cache'
+      seo.h1 = { title: 'Service Class Pattern' }
       seo.description = 'Build a cache-backed service class with @cached method memoization, multiple cached methods, hooks monitoring, and clean TypeScript app design.'
       seo.ogTitle = 'Service Class Pattern'
       seo.ogTagline = 'Full service class example with @cached.'

@@ -8,6 +8,7 @@ description: Implement in-memory session storage with automatic TTL expiration u
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Session Storage - Memory Cache'
+      seo.h1 = { title: 'Session Storage' }
       seo.description = 'Implement in-memory session storage with automatic TTL expiration using @humanspeak/memory-cache for simple per-process TypeScript and Node.js apps.'
       seo.ogTitle = 'Session Storage'
       seo.ogTagline = 'Automatic session expiration with TTL.'

@@ -8,6 +8,7 @@ description: Cache API responses with @humanspeak/memory-cache to reduce latency
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'API Response Caching - Memory Cache'
+      seo.h1 = { title: 'API Response Caching' }
       seo.description = 'Cache API responses with @humanspeak/memory-cache to reduce latency and external calls using TTL expiration and invalidation patterns in apps.'
       seo.ogTitle = 'API Response Caching'
       seo.ogTagline = 'Reduce network requests with cached API responses.'

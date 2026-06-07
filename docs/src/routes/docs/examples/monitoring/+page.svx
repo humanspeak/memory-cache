@@ -8,6 +8,7 @@ description: Monitor cache health with hit rates, eviction counts, and performan
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Monitoring with Hooks - Memory Cache'
+      seo.h1 = { title: 'Monitoring with Hooks' }
       seo.description = 'Monitor cache health with hit rates, eviction counts, and performance metrics by integrating hooks with dashboards and logging systems in apps.'
       seo.ogTitle = 'Monitoring with Hooks'
       seo.ogTagline = 'Integrate with metrics and logging systems.'

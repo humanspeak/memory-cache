@@ -8,6 +8,7 @@ description: Cache expensive computed values and derived data with @humanspeak/m
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Computed Value Caching - Memory Cache'
+      seo.h1 = { title: 'Computed Value Caching' }
       seo.description = 'Cache expensive computed values and derived data with @humanspeak/memory-cache, avoiding redundant TypeScript calculations and repeat work in apps.'
       seo.ogTitle = 'Computed Value Caching'
       seo.ogTagline = 'Cache expensive computations efficiently.'

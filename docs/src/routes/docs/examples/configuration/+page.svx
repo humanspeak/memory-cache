@@ -8,6 +8,7 @@ description: Cache rarely changing configuration with @humanspeak/memory-cache, 
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Configuration Cache - Memory Cache'
+      seo.h1 = { title: 'Configuration Cache' }
       seo.description = 'Cache rarely changing configuration with @humanspeak/memory-cache, covering force refresh, change detection, TTL strategy, and startup speed.'
       seo.ogTitle = 'Configuration Cache'
       seo.ogTagline = 'Cache config for faster startup.'

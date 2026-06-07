@@ -8,6 +8,7 @@ description: Implement rate limiting with @humanspeak/memory-cache TTL windows t
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Rate Limiting - Memory Cache'
+      seo.h1 = { title: 'Rate Limiting' }
       seo.description = 'Implement rate limiting with @humanspeak/memory-cache TTL windows to protect API endpoints without Redis or external dependencies in production.'
       seo.ogTitle = 'Rate Limiting'
       seo.ogTagline = 'Simple rate limiting using cache TTL.'
