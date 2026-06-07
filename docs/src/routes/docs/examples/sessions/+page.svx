@@ -1,6 +1,6 @@
 ---
 title: Session Storage
-description: Implement in-memory session storage with automatic TTL expiration using @humanspeak/memory-cache, a lightweight Redis alternative for Node.js.
+description: Implement in-memory session storage with automatic TTL expiration using @humanspeak/memory-cache for simple per-process TypeScript and Node.js apps.
 ---
 
 <script>
@@ -8,7 +8,7 @@ description: Implement in-memory session storage with automatic TTL expiration u
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Session Storage - Memory Cache'
-      seo.description = 'Implement in-memory session storage with automatic TTL expiration using @humanspeak/memory-cache, a lightweight Redis alternative for Node.js.'
+      seo.description = 'Implement in-memory session storage with automatic TTL expiration using @humanspeak/memory-cache for simple per-process TypeScript and Node.js apps.'
       seo.ogTitle = 'Session Storage'
       seo.ogTagline = 'Automatic session expiration with TTL.'
       seo.ogFeatures = ['TTL Expiration', 'Audit Logging', 'Type Safety', 'Auto Cleanup']
