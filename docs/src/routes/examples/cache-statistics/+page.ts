@@ -1,5 +1,5 @@
 export const load = () => ({
     title: 'Cache Statistics | Examples | Memory Cache',
     description:
-        'Monitor cache performance with built-in statistics tracking hits, misses, and evictions. Interactive demo of real-time Memory Cache metrics.'
+        'Monitor @humanspeak/memory-cache performance with built-in statistics for hits, misses, and evictions in a real-time interactive TypeScript demo app.'
 })

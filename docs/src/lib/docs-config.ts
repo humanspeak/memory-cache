@@ -7,7 +7,7 @@ export const docsConfig: DocsKitConfig = {
     repo: 'humanspeak/memory-cache',
     url: 'https://memory.svelte.page',
     description:
-        'A lightweight, zero-dependency in-memory cache for TypeScript with TTL expiration, LRU eviction, and @cached decorator for method-level memoization.',
+        'A zero-dependency TypeScript in-memory cache with TTL expiration, true LRU eviction, wildcard deletion, hooks, and @cached method decorators.',
     keywords: [
         'cache',
         'memory-cache',

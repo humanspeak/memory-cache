@@ -56,6 +56,7 @@ export const docsSections: NavSection[] = [
             { title: 'Configuration', href: '/docs/examples/configuration', icon: Sliders },
             { title: 'API Caching', href: '/docs/examples/api-caching', icon: Cloud },
             { title: 'Async Fetching', href: '/docs/examples/async-fetching', icon: RefreshCw },
+            { title: 'Async Decorator', href: '/docs/examples/async-decorator', icon: AtSign },
             { title: 'Computed Values', href: '/docs/examples/computed-values', icon: Calculator },
             { title: 'Database Caching', href: '/docs/examples/database-caching', icon: Database },
             { title: 'Monitoring', href: '/docs/examples/monitoring', icon: BarChart3 },

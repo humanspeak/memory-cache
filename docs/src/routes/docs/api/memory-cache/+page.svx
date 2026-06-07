@@ -1,6 +1,6 @@
 ---
 title: MemoryCache API
-description: Complete API reference for the MemoryCache class
+description: Complete MemoryCache API reference covering constructor options, get/set/delete methods, stats, hooks, TTL, LRU eviction, and type-safe usage.
 ---
 
 <script>
@@ -8,7 +8,7 @@ description: Complete API reference for the MemoryCache class
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'MemoryCache API - Memory Cache'
-      seo.description = 'Complete API reference for the MemoryCache class — constructor options, get/set/delete methods, statistics, hooks, and type safety'
+      seo.description = 'Complete MemoryCache API reference covering constructor options, get/set/delete methods, stats, hooks, TTL, LRU eviction, and type-safe usage.'
       seo.ogTitle = 'MemoryCache API'
       seo.ogTagline = 'Complete API reference for the MemoryCache class.'
       seo.ogFeatures = ['Full Type Safety', 'TTL + LRU', 'Hooks System', 'Statistics']
@@ -583,4 +583,3 @@ const cache = new MemoryCache<string>({
 - **Error handling**: Errors thrown in hooks are silently caught to prevent cache corruption.
 - **Performance**: Keep hooks lightweight to avoid impacting cache performance.
 - **Batch operations**: `clear()`, `deleteByPrefix()`, and `deleteByMagicString()` call `onDelete` once per deleted entry.
-

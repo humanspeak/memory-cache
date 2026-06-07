@@ -1,6 +1,6 @@
 ---
 title: Configuration Cache
-description: Cache configuration that rarely changes
+description: Cache rarely changing configuration with @humanspeak/memory-cache, covering force refresh, change detection, TTL strategy, and startup speed.
 ---
 
 <script>
@@ -8,7 +8,7 @@ description: Cache configuration that rarely changes
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Configuration Cache - Memory Cache'
-      seo.description = 'Cache configuration that rarely changes for faster application startup. Covers force refresh, change detection, and TTL strategies with @humanspeak/memory-cache.'
+      seo.description = 'Cache rarely changing configuration with @humanspeak/memory-cache, covering force refresh, change detection, TTL strategy, and startup speed.'
       seo.ogTitle = 'Configuration Cache'
       seo.ogTagline = 'Cache config for faster startup.'
       seo.ogFeatures = ['Force Refresh', 'Change Detection', 'TTL Support', 'Hooks']
@@ -88,5 +88,3 @@ const configCache = new MemoryCache<Config>({
 - **TTL**: 5-10 minutes balances freshness and performance
 - **Force Refresh**: Provide a way to manually invalidate
 - **Versioning**: Include version in config for change detection
-
-

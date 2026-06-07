@@ -1,5 +1,5 @@
 export const load = () => ({
     title: 'Async Fetching | Examples | Memory Cache',
     description:
-        'Cache async fetch results with request deduplication and thundering herd prevention using Memory Cache. Prevent redundant network calls.'
+        'Cache async fetch results with getOrSet in @humanspeak/memory-cache, preventing thundering herds and redundant network requests in TypeScript apps.'
 })

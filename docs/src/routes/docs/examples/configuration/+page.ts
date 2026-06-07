@@ -1,5 +1,5 @@
 export const load = () => ({
     title: 'Configuration | Examples | Memory Cache',
     description:
-        'Configure Memory Cache with custom TTL durations, max size limits, LRU eviction policies, and advanced options for your application.'
+        'Cache rarely changing configuration with @humanspeak/memory-cache, covering force refresh, change detection, TTL strategy, and startup speed.'
 })

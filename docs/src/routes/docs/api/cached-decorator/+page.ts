@@ -1,5 +1,5 @@
 export const load = () => ({
     title: '@cached Decorator API - Memory Cache',
     description:
-        'API reference for the @cached decorator for automatic class method caching. Covers cache key strategies, TTL settings, and TypeScript examples.'
+        'API reference for the @cached decorator with sync and async method caching, TTL, LRU eviction, custom key generators, and hashed key support.'
 })

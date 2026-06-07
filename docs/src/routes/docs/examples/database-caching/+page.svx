@@ -1,6 +1,6 @@
 ---
 title: Database Query Caching
-description: Cache expensive database queries with the @cached decorator
+description: Cache expensive database queries with @cached to reduce latency and database load, including query monitoring and practical TTL examples for apps.
 ---
 
 <script>
@@ -8,7 +8,7 @@ description: Cache expensive database queries with the @cached decorator
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Database Query Caching - Memory Cache'
-      seo.description = 'Cache expensive database queries with the @cached decorator to reduce latency and database load. Includes query monitoring and TTL examples with @humanspeak/memory-cache.'
+      seo.description = 'Cache expensive database queries with @cached to reduce latency and database load, including query monitoring and practical TTL examples for apps.'
       seo.ogTitle = 'Database Query Caching'
       seo.ogTagline = 'Cache expensive DB queries with @cached.'
       seo.ogFeatures = ['@cached Decorator', 'Query Monitoring', 'TTL Expiration', 'Type Safety']
@@ -83,5 +83,3 @@ class UserRepository {
 - **TTL**: Short TTLs (30s-2min) for frequently changing data
 - **Invalidation**: Clear cache after writes to the same data
 - **Key Generation**: The decorator uses `JSON.stringify(args)` for keys
-
-

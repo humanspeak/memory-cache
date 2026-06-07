@@ -242,7 +242,6 @@ describe('cached decorator', () => {
                 callCount = 0
 
                 @cached<string>()
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 getValue(obj: any): string {
                     this.callCount++
                     return `value-${obj.id}`
@@ -250,7 +249,6 @@ describe('cached decorator', () => {
             }
 
             const instance = new TestClass()
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const circularObj: any = { id: '123' }
             circularObj.self = circularObj
 
@@ -278,11 +276,11 @@ describe('cached decorator', () => {
             expect(instance.callCount).toBe(2)
         })
 
-        it('should cache rejected promises (known limitation)', async () => {
+        it('should not cache rejected promises by default', async () => {
             class TestClass {
                 callCount = 0
 
-                @cached<Promise<string>>()
+                @cached<string>()
                 async getValue(id: string): Promise<string> {
                     this.callCount++
                     if (id === 'error') {
@@ -294,12 +292,183 @@ describe('cached decorator', () => {
 
             const instance = new TestClass()
 
-            // Note: The decorator caches the Promise (which is rejected)
-            // This is expected behavior - the rejected promise gets cached
             await expect(instance.getValue('error')).rejects.toThrow('Async error')
             await expect(instance.getValue('error')).rejects.toThrow('Async error')
-            // The rejected promise is cached, so only 1 call
+            expect(instance.callCount).toBe(2)
+        })
+
+        it('should retry after an async rejection and cache a later success', async () => {
+            class TestClass {
+                callCount = 0
+
+                @cached<string>()
+                async getValue(): Promise<string> {
+                    this.callCount++
+                    if (this.callCount === 1) {
+                        throw new Error('First failure')
+                    }
+                    return 'success'
+                }
+            }
+
+            const instance = new TestClass()
+
+            await expect(instance.getValue()).rejects.toThrow('First failure')
+
+            await expect(instance.getValue()).resolves.toBe('success')
+            await expect(instance.getValue()).resolves.toBe('success')
+            expect(instance.callCount).toBe(2)
+        })
+    })
+
+    describe('Async single-flight', () => {
+        it('should share concurrent async calls with the same key', async () => {
+            class TestClass {
+                callCount = 0
+
+                @cached<string>()
+                async getValue(id: string): Promise<string> {
+                    this.callCount++
+                    await new Promise((resolve) => setTimeout(resolve, 10))
+                    return `value-${id}`
+                }
+            }
+
+            const instance = new TestClass()
+
+            const results = await Promise.all([
+                instance.getValue('123'),
+                instance.getValue('123'),
+                instance.getValue('123')
+            ])
+
+            expect(results).toEqual(['value-123', 'value-123', 'value-123'])
             expect(instance.callCount).toBe(1)
+        })
+
+        it('should cache async success after the in-flight call settles', async () => {
+            class TestClass {
+                callCount = 0
+
+                @cached<string>()
+                async getValue(id: string): Promise<string> {
+                    this.callCount++
+                    return `value-${id}-${this.callCount}`
+                }
+            }
+
+            const instance = new TestClass()
+
+            await expect(instance.getValue('123')).resolves.toBe('value-123-1')
+            await expect(instance.getValue('123')).resolves.toBe('value-123-1')
+            expect(instance.callCount).toBe(1)
+        })
+
+        it('should propagate one async rejection to all concurrent callers without caching it', async () => {
+            class TestClass {
+                callCount = 0
+
+                @cached<string>()
+                async getValue(): Promise<string> {
+                    this.callCount++
+                    await new Promise((resolve) => setTimeout(resolve, 10))
+                    throw new Error('Shared failure')
+                }
+            }
+
+            const instance = new TestClass()
+
+            const results = await Promise.allSettled([
+                instance.getValue(),
+                instance.getValue(),
+                instance.getValue()
+            ])
+
+            expect(instance.callCount).toBe(1)
+            expect(results.every((result) => result.status === 'rejected')).toBe(true)
+
+            await expect(instance.getValue()).rejects.toThrow('Shared failure')
+            expect(instance.callCount).toBe(2)
+        })
+
+        it('should respect TTL for resolved async values', async () => {
+            vi.useFakeTimers()
+
+            class TestClass {
+                callCount = 0
+
+                @cached<string>({ ttl: 100 })
+                async getValue(id: string): Promise<string> {
+                    this.callCount++
+                    return `value-${id}-${this.callCount}`
+                }
+            }
+
+            const instance = new TestClass()
+
+            await expect(instance.getValue('123')).resolves.toBe('value-123-1')
+            await expect(instance.getValue('123')).resolves.toBe('value-123-1')
+
+            vi.advanceTimersByTime(101)
+
+            await expect(instance.getValue('123')).resolves.toBe('value-123-2')
+            expect(instance.callCount).toBe(2)
+
+            vi.useRealTimers()
+        })
+
+        it('should clear async metadata when a resolved async entry expires', async () => {
+            vi.useFakeTimers()
+
+            class TestClass {
+                callCount = 0
+
+                @cached<string | Promise<string>>({ ttl: 100 })
+                getValue(): string | Promise<string> {
+                    this.callCount++
+                    return this.callCount === 1 ? Promise.resolve('async-value') : 'sync-value'
+                }
+            }
+
+            const instance = new TestClass()
+
+            await expect(instance.getValue()).resolves.toBe('async-value')
+
+            vi.advanceTimersByTime(101)
+
+            expect(instance.getValue()).toBe('sync-value')
+            expect(instance.callCount).toBe(2)
+
+            vi.useRealTimers()
+        })
+
+        it('should cache resolved undefined and null values from async methods', async () => {
+            class TestClass {
+                undefinedCount = 0
+                nullCount = 0
+
+                @cached<string | undefined>()
+                async getUndefined(): Promise<string | undefined> {
+                    this.undefinedCount++
+                    return undefined
+                }
+
+                @cached<string | null>()
+                async getNull(): Promise<string | null> {
+                    this.nullCount++
+                    return null
+                }
+            }
+
+            const instance = new TestClass()
+
+            await expect(instance.getUndefined()).resolves.toBeUndefined()
+            await expect(instance.getUndefined()).resolves.toBeUndefined()
+            await expect(instance.getNull()).resolves.toBeNull()
+            await expect(instance.getNull()).resolves.toBeNull()
+
+            expect(instance.undefinedCount).toBe(1)
+            expect(instance.nullCount).toBe(1)
         })
     })
 

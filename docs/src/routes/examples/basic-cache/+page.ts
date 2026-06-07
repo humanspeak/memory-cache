@@ -1,5 +1,5 @@
 export const load = () => ({
     title: 'Basic Cache | Examples | Memory Cache',
     description:
-        'Learn to create and use a basic in-memory cache with get, set, and delete operations. Interactive demo of Memory Cache fundamentals.'
+        'Create and use a basic in-memory cache with get, set, and delete operations in an interactive @humanspeak/memory-cache demo for TypeScript apps.'
 })

@@ -1,6 +1,6 @@
 ---
 title: Service Class Pattern
-description: Full service class example using the decorator
+description: Build a cache-backed service class with @cached method memoization, multiple cached methods, hooks monitoring, and clean TypeScript app design.
 ---
 
 <script>
@@ -8,7 +8,7 @@ description: Full service class example using the decorator
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Service Class Pattern - Memory Cache'
-      seo.description = 'Complete service class example using the @cached decorator for automatic method-level memoization. Covers multiple methods and hooks monitoring with @humanspeak/memory-cache.'
+      seo.description = 'Build a cache-backed service class with @cached method memoization, multiple cached methods, hooks monitoring, and clean TypeScript app design.'
       seo.ogTitle = 'Service Class Pattern'
       seo.ogTagline = 'Full service class example with @cached.'
       seo.ogFeatures = ['@cached Decorator', 'Multiple Methods', 'Hooks Monitoring', 'Type Safety']
@@ -123,5 +123,3 @@ class ProductService {
 - **Max Size**: Limit based on expected unique argument combinations
 - **Write Operations**: Don't cache write operations
 - **Cache Invalidation**: Consider how updates affect cached data
-
-

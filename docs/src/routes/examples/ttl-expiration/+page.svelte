@@ -25,8 +25,9 @@
     }
     if (seo) {
         seo.title = 'TTL Expiration | Examples | Memory Cache'
+        seo.h1 = { title: 'TTL Expiration' }
         seo.description =
-            'Watch cache entries expire in real-time with countdown timers. Explore how TTL-based expiration works in @humanspeak/memory-cache with this interactive demo.'
+            'See TTL expiration in @humanspeak/memory-cache with configurable time-to-live per entry and an interactive automatic cleanup demo for TypeScript apps.'
         seo.ogTitle = 'TTL Expiration'
         seo.ogTagline = 'Watch cache entries expire in real time'
         seo.ogFeatures = ['TTL', 'Countdowns', 'Expiration', 'Cleanup']

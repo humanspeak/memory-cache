@@ -25,8 +25,9 @@
     }
     if (seo) {
         seo.title = 'Basic Cache | Examples | Memory Cache'
+        seo.h1 = { title: 'Basic Cache' }
         seo.description =
-            'Interactive demo of basic memory cache operations in TypeScript. Try get, set, and delete with a live visual cache state powered by @humanspeak/memory-cache.'
+            'Create and use a basic in-memory cache with get, set, and delete operations in an interactive @humanspeak/memory-cache demo for TypeScript apps.'
         seo.ogTitle = 'Basic Cache'
         seo.ogTagline = 'Try get, set, and delete with a live cache state'
         seo.ogFeatures = ['Set Values', 'Get Values', 'Delete Keys', 'Live State']

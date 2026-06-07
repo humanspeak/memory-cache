@@ -1,6 +1,6 @@
 ---
 title: Rate Limiting
-description: Simple rate limiting using cache
+description: Implement rate limiting with @humanspeak/memory-cache TTL windows to protect API endpoints without Redis or external dependencies in production.
 ---
 
 <script>
@@ -8,7 +8,7 @@ description: Simple rate limiting using cache
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Rate Limiting - Memory Cache'
-      seo.description = 'Implement simple rate limiting using cache TTL with @humanspeak/memory-cache. Includes Express middleware, configurable thresholds, and monitoring for API endpoint protection.'
+      seo.description = 'Implement rate limiting with @humanspeak/memory-cache TTL windows to protect API endpoints without Redis or external dependencies in production.'
       seo.ogTitle = 'Rate Limiting'
       seo.ogTagline = 'Simple rate limiting using cache TTL.'
       seo.ogFeatures = ['TTL-Based', 'Express Middleware', 'Monitoring', 'Configurable']
@@ -143,5 +143,3 @@ function checkRateLimit(clientId: string, limit: number): boolean {
 - **TTL**: Determines the rate limit window
 - **Client ID**: Use a reliable identifier (API key, IP, user ID)
 - **Distributed Systems**: This pattern is per-instance; use Redis for distributed rate limiting
-
-

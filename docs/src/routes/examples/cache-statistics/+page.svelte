@@ -25,8 +25,9 @@
     }
     if (seo) {
         seo.title = 'Cache Statistics | Examples | Memory Cache'
+        seo.h1 = { title: 'Cache Statistics' }
         seo.description =
-            'Monitor cache hit rate, miss rate, and overall performance in real-time. Interactive demo of built-in statistics tracking in @humanspeak/memory-cache.'
+            'Monitor @humanspeak/memory-cache performance with built-in statistics for hits, misses, and evictions in a real-time interactive TypeScript demo app.'
         seo.ogTitle = 'Cache Statistics'
         seo.ogTagline = 'Monitor cache hit rate, miss rate, and performance'
         seo.ogFeatures = ['Hit Rate', 'Miss Rate', 'Evictions', 'Live Metrics']

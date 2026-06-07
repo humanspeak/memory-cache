@@ -244,6 +244,15 @@ const CACHED_UNDEFINED = Symbol('CACHED_UNDEFINED')
  */
 const CACHED_NULL = Symbol('CACHED_NULL')
 
+function isPromiseLike<T>(value: T | PromiseLike<T>): value is PromiseLike<T> {
+    return (
+        typeof value === 'object' &&
+        value !== null &&
+        'then' in value &&
+        typeof value.then === 'function'
+    )
+}
+
 /**
  * Generic in-memory cache implementation with TTL and LRU (Least Recently Used) eviction.
  * Provides efficient caching for any type of data with automatic cleanup
@@ -977,7 +986,30 @@ function fnv1aHash(str: string): string {
  */
 export function cached<T>(options: CachedDecoratorOptions<T> = {}) {
     const { keyGenerator, hashKeys, ...cacheOptions } = options
-    const cache = new MemoryCache<T>(cacheOptions)
+    const inFlight = new Map<string, Promise<Awaited<T>>>()
+    const asyncKeys = new Set<string>()
+    const userHooks = cacheOptions.hooks as CacheHooks<Awaited<T>> | undefined
+    const cache = new MemoryCache<Awaited<T>>({
+        ...(cacheOptions as CacheOptions<Awaited<T>>),
+        hooks: {
+            ...userHooks,
+            onEvict: (ctx) => {
+                asyncKeys.delete(ctx.key)
+                inFlight.delete(ctx.key)
+                userHooks?.onEvict?.(ctx)
+            },
+            onExpire: (ctx) => {
+                asyncKeys.delete(ctx.key)
+                inFlight.delete(ctx.key)
+                userHooks?.onExpire?.(ctx)
+            },
+            onDelete: (ctx) => {
+                asyncKeys.delete(ctx.key)
+                inFlight.delete(ctx.key)
+                userHooks?.onDelete?.(ctx)
+            }
+        }
+    })
 
     // trunk-ignore(eslint/@typescript-eslint/no-explicit-any)
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -997,10 +1029,34 @@ export function cached<T>(options: CachedDecoratorOptions<T> = {}) {
 
             const cached = cache['read'](key, 'get', true)
             if (cached.found) {
+                if (asyncKeys.has(key)) {
+                    return Promise.resolve(cached.value)
+                }
                 return cached.value
             }
 
+            const existing = inFlight.get(key)
+            if (existing) {
+                return existing
+            }
+
             const result = originalMethod.apply(this, args)
+
+            if (isPromiseLike(result)) {
+                const promise = Promise.resolve(result)
+                    .then((value) => {
+                        asyncKeys.add(key)
+                        cache.set(key, value)
+                        return value
+                    })
+                    .finally(() => {
+                        inFlight.delete(key)
+                    })
+
+                inFlight.set(key, promise)
+                return promise
+            }
+
             cache.set(key, result)
             return result
         }

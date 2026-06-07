@@ -1,6 +1,6 @@
 ---
 title: "@cached Decorator"
-description: API reference for the @cached method decorator
+description: API reference for the @cached decorator with sync and async method caching, TTL, LRU eviction, custom key generators, and hashed key support.
 ---
 
 <script>
@@ -8,10 +8,10 @@ description: API reference for the @cached method decorator
   const seo = getSeoContext()
   if (seo) {
       seo.title = '@cached Decorator - Memory Cache'
-      seo.description = 'API reference for the @cached method decorator — automatic method-level caching with TTL, LRU eviction, custom key generators, and hashed keys'
+      seo.description = 'API reference for the @cached decorator with sync and async method caching, TTL, LRU eviction, custom key generators, and hashed key support.'
       seo.ogTitle = '@cached Decorator'
       seo.ogTagline = 'Automatic method-level caching with a simple decorator.'
-      seo.ogFeatures = ['Method Caching', 'Custom Keys', 'TTL Support', 'Hashed Keys']
+      seo.ogFeatures = ['Method Caching', 'Async Single-Flight', 'TTL Support', 'Hashed Keys']
       seo.ogSlug = 'api-cached-decorator'
   }
 </script>
@@ -112,7 +112,7 @@ await service.search('typescript', { limit: 10 })
 
 ## Async Methods
 
-The decorator works seamlessly with async methods:
+The decorator works seamlessly with async methods. Concurrent calls with the same arguments share one in-flight method execution, resolved values are cached, and rejected promises are not cached by default.
 
 ```typescript
 class DataService {
@@ -120,6 +120,20 @@ class DataService {
     async loadData(id: string): Promise<Data> {
         return await expensiveOperation(id)
     }
+}
+
+const service = new DataService()
+
+const [first, second] = await Promise.all([
+    service.loadData('popular'),
+    service.loadData('popular')
+])
+// expensiveOperation ran once
+
+try {
+    await service.loadData('temporary-error')
+} catch {
+    // Rejections are not cached, so a later call can retry.
 }
 ```
 
@@ -278,6 +292,3 @@ Make sure you have `experimentalDecorators: true` in your `tsconfig.json`:
     }
 }
 ```
-
-
-
