@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: Get started with @humanspeak/memory-cache
+description: Install and configure @humanspeak/memory-cache for TypeScript apps, covering basic usage, TTL expiration, LRU eviction, and decorators quickly.
 ---
 
 <script>
@@ -8,7 +8,7 @@ description: Get started with @humanspeak/memory-cache
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Getting Started - Memory Cache'
-      seo.description = 'Get started with @humanspeak/memory-cache — installation, basic usage, TTL expiration, LRU eviction, and the @cached decorator'
+      seo.description = 'Install and configure @humanspeak/memory-cache for TypeScript apps, covering basic usage, TTL expiration, LRU eviction, and decorators quickly.'
       seo.ogTitle = 'Getting Started'
       seo.ogTagline = 'Install and start caching in minutes.'
       seo.ogFeatures = ['Zero Dependencies', 'TypeScript First', 'TTL + LRU', 'Decorator Support']
@@ -126,6 +126,5 @@ const user = await cache.getOrSet('user:123', async () => {
 - Learn about the [MemoryCache API](/docs/api/memory-cache)
 - Explore the [@cached decorator](/docs/api/cached-decorator)
 - See [usage examples](/docs/examples)
-
 
 

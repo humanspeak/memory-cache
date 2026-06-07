@@ -25,8 +25,9 @@
     }
     if (seo) {
         seo.title = 'LRU Eviction | Examples | Memory Cache'
+        seo.h1 = { title: 'LRU Eviction' }
         seo.description =
-            'See how least recently used items are evicted when the cache reaches capacity, and how expired entries are pruned first. Interactive demo of LRU eviction in @humanspeak/memory-cache for TypeScript.'
+            'Explore LRU eviction policies in @humanspeak/memory-cache with an interactive demo showing max-size behavior and expired-entry pruning in apps.'
         seo.ogTitle = 'LRU Eviction'
         seo.ogTagline = 'Watch least recently used entries leave the cache'
         seo.ogFeatures = ['Max Size', 'Access Order', 'TTL Pruning', 'Live State']

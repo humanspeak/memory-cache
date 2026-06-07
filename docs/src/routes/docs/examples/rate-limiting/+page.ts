@@ -1,5 +1,5 @@
 export const load = () => ({
     title: 'Rate Limiting | Examples | Memory Cache',
     description:
-        'Implement rate limiting using Memory Cache with TTL-based sliding windows. Protect API endpoints from abuse without Redis or external dependencies.'
+        'Implement rate limiting with @humanspeak/memory-cache TTL windows to protect API endpoints without Redis or external dependencies in production.'
 })

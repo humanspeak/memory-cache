@@ -28,6 +28,6 @@ const EXAMPLES: Record<string, ExampleEntry> = {
 export const load: PageLoad = () => ({
     title: 'Interactive Examples | Memory Cache',
     description:
-        'Try interactive examples demonstrating Memory Cache features including TTL, LRU eviction, and cache statistics.',
+        'Try interactive @humanspeak/memory-cache demos for basic operations, TTL expiration, LRU eviction, and live cache statistics in TypeScript apps.',
     examples: EXAMPLES
 })

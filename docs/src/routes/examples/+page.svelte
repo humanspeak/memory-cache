@@ -20,7 +20,7 @@
     if (seo) {
         seo.title = 'Interactive Examples | Memory Cache'
         seo.description =
-            'Explore interactive examples of @humanspeak/memory-cache featuring live demos of cache operations, TTL expiration, LRU eviction, and performance stats.'
+            'Try interactive @humanspeak/memory-cache demos for basic operations, TTL expiration, LRU eviction, and live cache statistics in TypeScript apps.'
         seo.ogTitle = 'Examples'
         seo.ogTagline = 'Interactive cache examples built with Memory Cache'
         seo.ogFeatures = ['Basic Cache', 'TTL Expiration', 'LRU Eviction', 'Cache Statistics']

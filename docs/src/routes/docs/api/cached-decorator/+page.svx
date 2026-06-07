@@ -1,6 +1,6 @@
 ---
 title: "@cached Decorator"
-description: API reference for the @cached method decorator
+description: API reference for the @cached decorator with sync and async method caching, TTL, LRU eviction, custom key generators, and hashed key support.
 ---
 
 <script>
@@ -8,7 +8,7 @@ description: API reference for the @cached method decorator
   const seo = getSeoContext()
   if (seo) {
       seo.title = '@cached Decorator - Memory Cache'
-      seo.description = 'API reference for the @cached decorator with async single-flight caching, TTL, LRU eviction, custom key generators, and hashed keys.'
+      seo.description = 'API reference for the @cached decorator with sync and async method caching, TTL, LRU eviction, custom key generators, and hashed key support.'
       seo.ogTitle = '@cached Decorator'
       seo.ogTagline = 'Automatic method-level caching with a simple decorator.'
       seo.ogFeatures = ['Method Caching', 'Async Single-Flight', 'TTL Support', 'Hashed Keys']

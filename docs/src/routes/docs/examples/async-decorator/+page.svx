@@ -1,6 +1,6 @@
 ---
 title: Async Decorator
-description: Async method memoization with @cached
+description: Use @cached with async methods for single-flight request deduplication, retry-safe errors, TTL caching, and nullish result handling in apps.
 ---
 
 <script>
@@ -8,7 +8,7 @@ description: Async method memoization with @cached
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Async Decorator - Memory Cache'
-      seo.description = 'Use the @cached decorator with async methods for single-flight request deduplication, retry-safe errors, TTL caching, and nullish results.'
+      seo.description = 'Use @cached with async methods for single-flight request deduplication, retry-safe errors, TTL caching, and nullish result handling in apps.'
       seo.ogTitle = 'Async Decorator'
       seo.ogTagline = 'Deduplicate concurrent async method calls.'
       seo.ogFeatures = ['@cached Decorator', 'Single-Flight', 'Retry-Safe Errors', 'TTL Support']

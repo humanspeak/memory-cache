@@ -1,6 +1,6 @@
 ---
 title: Multi-Tenant Cache Invalidation
-description: Use prefix and wildcard deletion for multi-tenant applications
+description: Implement per-tenant cache isolation with namespaced keys in @humanspeak/memory-cache, using prefix and wildcard deletion for scoped cleanup.
 ---
 
 <script>
@@ -8,7 +8,7 @@ description: Use prefix and wildcard deletion for multi-tenant applications
   const seo = getSeoContext()
   if (seo) {
       seo.title = 'Multi-Tenant Cache Invalidation - Memory Cache'
-      seo.description = 'Use prefix and wildcard deletion for multi-tenant cache invalidation. Isolate tenant data with hierarchical keys and scoped cleanup.'
+      seo.description = 'Implement per-tenant cache isolation with namespaced keys in @humanspeak/memory-cache, using prefix and wildcard deletion for scoped cleanup.'
       seo.ogTitle = 'Multi-Tenant Invalidation'
       seo.ogTagline = 'Prefix and wildcard deletion for multi-tenant apps.'
       seo.ogFeatures = ['Prefix Deletion', 'Wildcard Patterns', 'Hierarchical Keys', 'Hooks']
@@ -101,4 +101,3 @@ const cache = new MemoryCache<unknown>({
 - **Key Pattern**: Use consistent, hierarchical patterns
 - **Prefix vs Wildcard**: Prefix is faster; use wildcards for complex patterns
 - **Batch Size**: Large deletions may briefly block; consider chunking
-
