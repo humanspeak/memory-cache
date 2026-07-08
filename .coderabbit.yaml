@@ -16,9 +16,12 @@ reviews:
     # Collapse walkthrough when files > threshold
     collapse_walkthrough: true
 
-    # Auto-review on push
+    # Label-gated reviews: add the `coderabbit` label (or comment
+    # `@coderabbitai review`) to trigger — no automatic or per-push reviews.
     auto_review:
-        enabled: true
+        enabled: false
+        auto_incremental_review: false
+        labels: ['coderabbit']
         drafts: false
 
     # Path filters - ignore generated/config files
