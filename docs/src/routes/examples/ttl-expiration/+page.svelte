@@ -2,8 +2,10 @@
     import {
         CodeReferenceV2,
         ExampleV2,
+        formatSheetLabel,
         getBreadcrumbContext,
-        getSeoContext
+        getSeoContext,
+        type ExampleSection
     } from '@humanspeak/docs-kit'
     import Clock from '@lucide/svelte/icons/clock'
     import Hourglass from '@lucide/svelte/icons/hourglass'
@@ -33,7 +35,26 @@
         seo.ogFeatures = ['TTL', 'Countdowns', 'Expiration', 'Cleanup']
         seo.ogSlug = 'examples-ttl-expiration'
     }
+
+    const sections: ExampleSection[] = [
+        {
+            figId: 'FIG-001',
+            tag: 'EXPIRATION-WINDOW',
+            title: { prefix: 'watch ttl ', accent: 'countdown', end: '.' },
+            description:
+                'Create short-lived entries in a `MemoryCache` and watch each key disappear when its time-to-live window closes.',
+            snippet: ttlDemo,
+            codeSnippet: defaultCode,
+            notes: ttlNotes,
+            barCells: [{ k: 'pattern', v: 'time to live' }],
+            sourceUrl: `${SOURCE_URL}ttl-expiration/demos/Default.svelte`
+        }
+    ]
 </script>
+
+{#snippet ttlDemo()}
+    <TtlExpiration />
+{/snippet}
 
 {#snippet defaultCode()}
     <CodeReferenceV2
@@ -81,17 +102,20 @@
     </ul>
 {/snippet}
 
-<ExampleV2
-    figId="FIG-001"
-    tag="EXPIRATION-WINDOW"
-    title={{ prefix: 'watch ttl ', accent: 'countdown', end: '.' }}
-    description="Create short-lived entries in a `MemoryCache` and watch each key disappear when its time-to-live window closes."
-    sheetLabel="SHEET 01 / 01"
-    barCells={[{ k: 'pattern', v: 'time to live' }]}
-    sourceUrl={`${SOURCE_URL}ttl-expiration/demos/Default.svelte`}
-    codeSnippet={defaultCode}
-    codeLabel="show code"
-    notes={ttlNotes}
->
-    <TtlExpiration />
-</ExampleV2>
+{#each sections as section, i (section.figId)}
+    <ExampleV2
+        figId={section.figId}
+        tag={section.tag}
+        title={section.title}
+        description={section.description}
+        mode={section.mode ?? 'live'}
+        sheetLabel={formatSheetLabel(i, sections.length)}
+        barCells={section.barCells}
+        sourceUrl={section.sourceUrl}
+        codeSnippet={section.codeSnippet}
+        codeLabel="show code"
+        notes={section.notes}
+    >
+        {@render section.snippet()}
+    </ExampleV2>
+{/each}

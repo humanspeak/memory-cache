@@ -16,9 +16,9 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v6 # zizmor: ignore[unpinned-uses]
+              uses: actions/checkout@v7 # zizmor: ignore[unpinned-uses]
               with:
                   persist-credentials: false
 
             - name: Trunk Code Quality
-              uses: trunk-io/trunk-action@v1 # zizmor: ignore[unpinned-uses]
+              uses: trunk-io/trunk-action@v2.0.0 # zizmor: ignore[unpinned-uses]

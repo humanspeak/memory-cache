@@ -1,0 +1,65 @@
+{
+    "_slack_channel_comment": "#claude-reports in human-speak.slack.com via the shared webhook in common.env — same channel as the other OSS digests.",
+    "ahrefs_project_id": 9271512,
+    "category": "Zero-dependency in-memory cache for TypeScript/JavaScript — TTL expiration, LRU eviction, wildcard pattern deletion, and a @cached method-memoization decorator",
+
+    "competitors": [
+        {
+            "npm": "node-cache",
+            "repo": "node-cache/node-cache",
+            "note": "The default 'simple in-memory cache with TTL' people reach for; huge downloads, no decorator, no wildcard delete"
+        },
+        {
+            "npm": "lru-cache",
+            "repo": "isaacs/node-lru-cache",
+            "note": "The canonical LRU implementation; extremely popular, LRU-focused, lower-level API"
+        },
+        {
+            "npm": "keyv",
+            "repo": "jaredwray/keyv",
+            "note": "Multi-backend key-value store (memory + Redis/SQLite/etc.); broader scope, but overlaps on 'simple cache' searches"
+        }
+    ],
+
+    "github_handle": "jaysin586",
+    "non_goals": [
+        "A distributed / multi-process cache (Redis-style) — this is in-process memory only",
+        "Persistence across restarts — it's ephemeral by design",
+        "A pluggable multi-backend store layer (that's keyv's niche)"
+    ],
+
+    "project": "@humanspeak/memory-cache",
+    "repo_triage": {
+        "enabled": true,
+        "_comment": "Public repo — GITHUB_TOKEN raises rate limits; public-read fallback works without it. Surfaces open PRs/issues NOT opened by github_handle, and threads awaiting your reply since the previous last_run."
+    },
+
+    "self_features": [
+        "Zero runtime dependencies; works in Node and the browser, TypeScript-first",
+        "TTL expiration per entry",
+        "LRU eviction with a max-size bound",
+        "Wildcard pattern deletion (invalidate many keys at once)",
+        "@cached decorator for method-level memoization",
+        "Aimed at API-response caching, session storage, and hot-path memoization"
+    ],
+
+    "self_npm": "@humanspeak/memory-cache",
+    "self_repo": "humanspeak/memory-cache",
+
+    "seo": {
+        "enabled": true,
+        "docs_domain": "memory.svelte.page",
+        "gsc_dir": ".competitive-intel/gsc",
+        "gsc_staleness_days": 14,
+        "_comment": "1 keyword in Ahrefs rank tracker (project 9271512) — early. Target terms: 'in-memory cache typescript', 'node ttl cache', 'lru cache decorator', 'javascript cache library', 'memoize decorator typescript'. Not a Svelte package despite the svelte.page docs host. No /compare pages yet."
+    },
+
+    "slack_channel": "C0BP5BF1UTX",
+    "watchlist": [
+        {
+            "npm": "quick-lru",
+            "repo": "sindresorhus/quick-lru",
+            "note": "Tiny fast LRU by sindresorhus; watch for feature/perf moves in the minimalist niche"
+        }
+    ]
+}

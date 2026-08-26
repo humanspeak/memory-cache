@@ -2,8 +2,10 @@
     import {
         CodeReferenceV2,
         ExampleV2,
+        formatSheetLabel,
         getBreadcrumbContext,
-        getSeoContext
+        getSeoContext,
+        type ExampleSection
     } from '@humanspeak/docs-kit'
     import ArrowLeftRight from '@lucide/svelte/icons/arrow-left-right'
     import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
@@ -33,7 +35,26 @@
         seo.ogFeatures = ['Set Values', 'Get Values', 'Delete Keys', 'Live State']
         seo.ogSlug = 'examples-basic-cache'
     }
+
+    const sections: ExampleSection[] = [
+        {
+            figId: 'FIG-001',
+            tag: 'CACHE-BASICS',
+            title: { prefix: 'set + get with ', accent: 'memorycache', end: '.' },
+            description:
+                'Create a `MemoryCache` and drive the core `set`, `get`, and `delete` methods against live state.',
+            snippet: cacheDemo,
+            codeSnippet: defaultCode,
+            notes: cacheNotes,
+            barCells: [{ k: 'pattern', v: 'basic operations' }],
+            sourceUrl: `${SOURCE_URL}basic-cache/demos/Default.svelte`
+        }
+    ]
 </script>
+
+{#snippet cacheDemo()}
+    <BasicCache />
+{/snippet}
 
 {#snippet defaultCode()}
     <CodeReferenceV2
@@ -77,17 +98,20 @@
     </ul>
 {/snippet}
 
-<ExampleV2
-    figId="FIG-001"
-    tag="CACHE-BASICS"
-    title={{ prefix: 'set + get with ', accent: 'memorycache', end: '.' }}
-    description="Create a `MemoryCache` and drive the core `set`, `get`, and `delete` methods against live state."
-    sheetLabel="SHEET 01 / 01"
-    barCells={[{ k: 'pattern', v: 'basic operations' }]}
-    sourceUrl={`${SOURCE_URL}basic-cache/demos/Default.svelte`}
-    codeSnippet={defaultCode}
-    codeLabel="show code"
-    notes={cacheNotes}
->
-    <BasicCache />
-</ExampleV2>
+{#each sections as section, i (section.figId)}
+    <ExampleV2
+        figId={section.figId}
+        tag={section.tag}
+        title={section.title}
+        description={section.description}
+        mode={section.mode ?? 'live'}
+        sheetLabel={formatSheetLabel(i, sections.length)}
+        barCells={section.barCells}
+        sourceUrl={section.sourceUrl}
+        codeSnippet={section.codeSnippet}
+        codeLabel="show code"
+        notes={section.notes}
+    >
+        {@render section.snippet()}
+    </ExampleV2>
+{/each}

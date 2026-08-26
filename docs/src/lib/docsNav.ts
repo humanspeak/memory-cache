@@ -1,20 +1,17 @@
 import type { NavSection } from '@humanspeak/docs-kit'
 import AtSign from '@lucide/svelte/icons/at-sign'
 import BarChart3 from '@lucide/svelte/icons/bar-chart-3'
-import Box from '@lucide/svelte/icons/box'
 import Building from '@lucide/svelte/icons/building'
 import Calculator from '@lucide/svelte/icons/calculator'
-import Clock from '@lucide/svelte/icons/clock'
 import Cloud from '@lucide/svelte/icons/cloud'
 import Code from '@lucide/svelte/icons/code'
 import Database from '@lucide/svelte/icons/database'
 import Gauge from '@lucide/svelte/icons/gauge'
-import Layers from '@lucide/svelte/icons/layers'
 import Package from '@lucide/svelte/icons/package'
-import Play from '@lucide/svelte/icons/play'
 import RefreshCw from '@lucide/svelte/icons/refresh-cw'
 import Rocket from '@lucide/svelte/icons/rocket'
 import Sliders from '@lucide/svelte/icons/sliders'
+import Swords from '@lucide/svelte/icons/swords'
 import Timer from '@lucide/svelte/icons/timer'
 
 export const docsSections: NavSection[] = [
@@ -27,17 +24,6 @@ export const docsSections: NavSection[] = [
                 href: '/docs/getting-started',
                 icon: Rocket
             }
-        ]
-    },
-    {
-        title: 'Interactive Demos',
-        icon: Play,
-        items: [
-            { title: 'All Examples', href: '/examples', icon: Play, exact: true },
-            { title: 'Basic Cache', href: '/examples/basic-cache', icon: Box },
-            { title: 'TTL Expiration', href: '/examples/ttl-expiration', icon: Clock },
-            { title: 'LRU Eviction', href: '/examples/lru-eviction', icon: Layers },
-            { title: 'Cache Statistics', href: '/examples/cache-statistics', icon: BarChart3 }
         ]
     },
     {
@@ -64,6 +50,16 @@ export const docsSections: NavSection[] = [
             { title: 'Rate Limiting', href: '/docs/examples/rate-limiting', icon: Gauge },
             { title: 'Service Class', href: '/docs/examples/service-class', icon: Package },
             { title: 'Sessions', href: '/docs/examples/sessions', icon: Timer }
+        ]
+    },
+    {
+        title: 'Compare',
+        icon: Swords,
+        items: [
+            { title: 'All Comparisons', href: '/compare', icon: Swords, exact: true },
+            { title: 'vs node-cache', href: '/compare/vs-node-cache', icon: Swords },
+            { title: 'vs lru-cache', href: '/compare/vs-lru-cache', icon: Swords },
+            { title: 'vs Keyv', href: '/compare/vs-keyv', icon: Swords }
         ]
     }
 ]
