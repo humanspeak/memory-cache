@@ -1,17 +1,13 @@
 import type { NavSection } from '@humanspeak/docs-kit'
 import AtSign from '@lucide/svelte/icons/at-sign'
 import BarChart3 from '@lucide/svelte/icons/bar-chart-3'
-import Box from '@lucide/svelte/icons/box'
 import Building from '@lucide/svelte/icons/building'
 import Calculator from '@lucide/svelte/icons/calculator'
-import Clock from '@lucide/svelte/icons/clock'
 import Cloud from '@lucide/svelte/icons/cloud'
 import Code from '@lucide/svelte/icons/code'
 import Database from '@lucide/svelte/icons/database'
 import Gauge from '@lucide/svelte/icons/gauge'
-import Layers from '@lucide/svelte/icons/layers'
 import Package from '@lucide/svelte/icons/package'
-import Play from '@lucide/svelte/icons/play'
 import RefreshCw from '@lucide/svelte/icons/refresh-cw'
 import Rocket from '@lucide/svelte/icons/rocket'
 import Sliders from '@lucide/svelte/icons/sliders'
@@ -28,17 +24,6 @@ export const docsSections: NavSection[] = [
                 href: '/docs/getting-started',
                 icon: Rocket
             }
-        ]
-    },
-    {
-        title: 'Interactive Demos',
-        icon: Play,
-        items: [
-            { title: 'All Examples', href: '/examples', icon: Play, exact: true },
-            { title: 'Basic Cache', href: '/examples/basic-cache', icon: Box },
-            { title: 'TTL Expiration', href: '/examples/ttl-expiration', icon: Clock },
-            { title: 'LRU Eviction', href: '/examples/lru-eviction', icon: Layers },
-            { title: 'Cache Statistics', href: '/examples/cache-statistics', icon: BarChart3 }
         ]
     },
     {
