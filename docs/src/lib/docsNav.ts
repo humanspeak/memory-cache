@@ -15,6 +15,7 @@ import Play from '@lucide/svelte/icons/play'
 import RefreshCw from '@lucide/svelte/icons/refresh-cw'
 import Rocket from '@lucide/svelte/icons/rocket'
 import Sliders from '@lucide/svelte/icons/sliders'
+import Swords from '@lucide/svelte/icons/swords'
 import Timer from '@lucide/svelte/icons/timer'
 
 export const docsSections: NavSection[] = [
@@ -64,6 +65,16 @@ export const docsSections: NavSection[] = [
             { title: 'Rate Limiting', href: '/docs/examples/rate-limiting', icon: Gauge },
             { title: 'Service Class', href: '/docs/examples/service-class', icon: Package },
             { title: 'Sessions', href: '/docs/examples/sessions', icon: Timer }
+        ]
+    },
+    {
+        title: 'Compare',
+        icon: Swords,
+        items: [
+            { title: 'All Comparisons', href: '/compare', icon: Swords, exact: true },
+            { title: 'vs node-cache', href: '/compare/vs-node-cache', icon: Swords },
+            { title: 'vs lru-cache', href: '/compare/vs-lru-cache', icon: Swords },
+            { title: 'vs Keyv', href: '/compare/vs-keyv', icon: Swords }
         ]
     }
 ]

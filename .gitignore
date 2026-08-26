@@ -25,6 +25,7 @@ junit-vitest.xml
 /docs/static/social-cards
 docs/static/og-default.png
 docs/static/twitter-default.png
+docs/static/compare/
 docs/static/docs/
 docs/static/examples.md
 docs/static/examples/
