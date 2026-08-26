@@ -2,7 +2,10 @@ packages:
     - .
     - docs
 allowBuilds:
-    '@humanspeak/docs-kit': true
+    # pnpm ≥11.23 requires git-hosted deps to be allowlisted by their
+    # commit-free repo key — a bare package name only matches registry
+    # packages. This one entry covers every docs-kit tag.
+    '@humanspeak/docs-kit@git+https://github.com/humanspeak/docs-kit.git': true
     esbuild: true
     sharp: true
     workerd: true
