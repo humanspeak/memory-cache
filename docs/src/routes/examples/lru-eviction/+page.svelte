@@ -2,8 +2,10 @@
     import {
         CodeReferenceV2,
         ExampleV2,
+        formatSheetLabel,
         getBreadcrumbContext,
-        getSeoContext
+        getSeoContext,
+        type ExampleSection
     } from '@humanspeak/docs-kit'
     import Clock from '@lucide/svelte/icons/clock'
     import Lightbulb from '@lucide/svelte/icons/lightbulb'
@@ -33,7 +35,26 @@
         seo.ogFeatures = ['Max Size', 'Access Order', 'TTL Pruning', 'Live State']
         seo.ogSlug = 'examples-lru-eviction'
     }
+
+    const sections: ExampleSection[] = [
+        {
+            figId: 'FIG-001',
+            tag: 'EVICTION-POLICY',
+            title: { prefix: 'trace lru ', accent: 'eviction', end: '.' },
+            description:
+                'Fill a bounded `MemoryCache`, access entries, and watch how expired entries are reclaimed before least recently used valid keys leave.',
+            snippet: lruDemo,
+            codeSnippet: defaultCode,
+            notes: lruNotes,
+            barCells: [{ k: 'pattern', v: 'least recently used' }],
+            sourceUrl: `${SOURCE_URL}lru-eviction/demos/Default.svelte`
+        }
+    ]
 </script>
+
+{#snippet lruDemo()}
+    <LruEviction />
+{/snippet}
 
 {#snippet defaultCode()}
     <CodeReferenceV2
@@ -88,17 +109,20 @@
     </ul>
 {/snippet}
 
-<ExampleV2
-    figId="FIG-001"
-    tag="EVICTION-POLICY"
-    title={{ prefix: 'trace lru ', accent: 'eviction', end: '.' }}
-    description="Fill a bounded `MemoryCache`, access entries, and watch how expired entries are reclaimed before least recently used valid keys leave."
-    sheetLabel="SHEET 01 / 01"
-    barCells={[{ k: 'pattern', v: 'least recently used' }]}
-    sourceUrl={`${SOURCE_URL}lru-eviction/demos/Default.svelte`}
-    codeSnippet={defaultCode}
-    codeLabel="show code"
-    notes={lruNotes}
->
-    <LruEviction />
-</ExampleV2>
+{#each sections as section, i (section.figId)}
+    <ExampleV2
+        figId={section.figId}
+        tag={section.tag}
+        title={section.title}
+        description={section.description}
+        mode={section.mode ?? 'live'}
+        sheetLabel={formatSheetLabel(i, sections.length)}
+        barCells={section.barCells}
+        sourceUrl={section.sourceUrl}
+        codeSnippet={section.codeSnippet}
+        codeLabel="show code"
+        notes={section.notes}
+    >
+        {@render section.snippet()}
+    </ExampleV2>
+{/each}

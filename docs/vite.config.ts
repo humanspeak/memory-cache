@@ -1,6 +1,7 @@
 import {
     demoManifestPlugin,
     docMirrorsPlugin,
+    exampleMirrorsPlugin,
     llmsFullPlugin,
     llmsPlugin,
     sitemapManifestPlugin
@@ -17,6 +18,10 @@ export default defineConfig({
         sitemapManifestPlugin({ blogDir: false }),
         demoManifestPlugin({ split: true }),
         docMirrorsPlugin({ siteUrl: docsConfig.url }),
+        exampleMirrorsPlugin({
+            siteUrl: docsConfig.url,
+            sourceBaseUrl: 'https://github.com/humanspeak/memory-cache/blob/main/docs'
+        }),
         llmsFullPlugin({
             siteUrl: docsConfig.url,
             pkgName: docsConfig.npmPackage

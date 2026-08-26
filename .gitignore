@@ -26,6 +26,8 @@ junit-vitest.xml
 docs/static/og-default.png
 docs/static/twitter-default.png
 docs/static/docs/
+docs/static/examples.md
+docs/static/examples/
 docs/static/llms-full.txt
 docs/static/llms.txt
 mprocs.log
