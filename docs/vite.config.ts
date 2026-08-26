@@ -5,7 +5,8 @@ import {
     indexNowPlugin,
     llmsFullPlugin,
     llmsPlugin,
-    sitemapManifestPlugin
+    sitemapManifestPlugin,
+    socialCardsPlugin
 } from '@humanspeak/docs-kit/vite'
 import { svelteMotionOptimize } from '@humanspeak/svelte-motion/vite'
 import { sveltekit } from '@sveltejs/kit/vite'
@@ -37,6 +38,16 @@ export default defineConfig({
             description: docsConfig.description,
             prepend: 'static/llms-prepend.md',
             append: 'static/llms-append.md'
+        }),
+        // Renders static/og-default.png, twitter-default.png, and per-page
+        // cards into static/social-cards/ at build time (dev skips it), with
+        // dedupe across Vite's client/SSR build environments — replaces the
+        // old standalone `tsx scripts/generate-social-cards.ts` step.
+        socialCardsPlugin({
+            npmPackage: docsConfig.npmPackage,
+            defaultTitle: docsConfig.name,
+            defaultDescription: docsConfig.description,
+            defaultFeatures: docsConfig.defaultFeatures
         }),
         // Pings IndexNow with every sitemap URL after a production build, but
         // only in `--mode indexnow` (the deploy path) so plain `vite build`
