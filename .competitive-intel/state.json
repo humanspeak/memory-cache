@@ -2,195 +2,197 @@
     "compare_validation": {},
     "competitors": [
         {
+            "archived": false,
+            "error": null,
+            "last_release": "2019-12-08",
+            "latest_version": "5.1.2",
             "npm": "node-cache",
             "repo": "node-cache/node-cache",
-            "latest_version": "5.1.2",
-            "last_release": "2019-12-08",
-            "weekly_downloads": 5187423,
             "stars": 2372,
-            "archived": false,
-            "error": null
+            "weekly_downloads": 5298803
         },
         {
+            "archived": false,
+            "error": null,
+            "last_release": null,
+            "latest_version": "11.5.2",
             "npm": "lru-cache",
             "repo": "isaacs/node-lru-cache",
-            "latest_version": "11.5.2",
-            "last_release": null,
-            "weekly_downloads": 544804901,
-            "stars": 5909,
-            "archived": false,
-            "error": null
+            "stars": 5910,
+            "weekly_downloads": 557156119
         },
         {
+            "archived": false,
+            "error": null,
+            "last_release": "2026-08-03",
+            "latest_version": "5.6.0",
             "npm": "keyv",
             "repo": "jaredwray/keyv",
-            "latest_version": "5.6.0",
-            "last_release": "2026-08-03",
-            "weekly_downloads": 161602025,
             "stars": 3187,
-            "archived": false,
-            "error": null
+            "weekly_downloads": 163264038
         }
     ],
     "dismissed_as_non_goals": [
-        "keyv adapters / persistence / encryption / Cloudflare KV \u2014 distributed cache, persistence and pluggable backends are documented non-goals",
-        "node-cache event API \u2014 covered by our lifecycle hooks",
-        "keyv v6 stats/telemetry overhaul \u2014 covered by our introspection + metrics (v1.0.2)"
+        "keyv adapters / persistence / encryption / Cloudflare KV — distributed cache, persistence and pluggable backends are documented non-goals",
+        "node-cache event API — covered by our lifecycle hooks",
+        "keyv v6 stats/telemetry overhaul — covered by our introspection + metrics (v1.0.2)"
     ],
-    "fetched_at": "2026-08-23T10:30:25Z",
-    "last_run": "2026-08-23",
+    "fetched_at": "2026-08-27T10:30:18Z",
+    "last_run": "2026-08-27",
     "notes": {
-        "keyv": "npm stable 5.6.0; GitHub v6.0.0-rc.1 (2026-08-03) is a major rewrite in RC \u2014 watch for the 6.0.0 stable promotion on npm.",
-        "node-cache": "Dormant since 2019-12-08 but still ~5.2M weekly downloads.",
-        "discovery": "@isaacs/ttlcache v2.1.5 (2026-05-21, ~14.8M weekly DL) surfaced as a strong untracked candidate \u2014 recommended for config. lru-ttl-cache checked and dismissed (9.1K/wk, dormant since 2023-12-28)."
+        "discovery": "@isaacs/ttlcache v2.1.5 (~14.8M weekly DL) still NOT added to config — standing recommendation to promote to tracked competitor. 2026-08-27 discovery pass found no new entrants (fast-ttl-cache negligible).",
+        "keyv": "npm stable 5.6.0 unchanged; GitHub v6.0.0-rc.1 (2026-08-03) still in RC — watch for the 6.0.0 stable promotion on npm.",
+        "node-cache": "Dormant since 2019-12-08 but still ~5.3M weekly downloads.",
+        "quiet_run": "2026-08-27: zero version bumps across all tracked packages; download drift 1-2.4% w/w, all sub-threshold."
     },
     "open_gaps": [
         {
-            "id": "memory-weighted-eviction",
+            "first_seen": "2026-08-23",
             "gap": "Memory-weighted eviction: lru-cache v11.5.2 ships maxSize + sizeCalculation; our maxSize bounds entry count only.",
-            "why_it_matters": "For API-response caching (a stated use case), a bounded entry count does not bound actual memory when value sizes vary.",
-            "worth_doing": "Yes \u2014 in scope (in-process, ephemeral); no non-goal conflict.",
+            "id": "memory-weighted-eviction",
             "source": "lru-cache 11.5.2 type definitions, verified 2026-08-23",
-            "first_seen": "2026-08-23"
+            "why_it_matters": "For API-response caching (a stated use case), a bounded entry count does not bound actual memory when value sizes vary.",
+            "worth_doing": "Yes — in scope (in-process, ephemeral); no non-goal conflict."
         },
         {
-            "id": "stale-while-revalidate",
+            "first_seen": "2026-08-23",
             "gap": "Stale-while-revalidate: lru-cache exposes allowStale / noDeleteOnStaleGet; we expire hard.",
-            "why_it_matters": "Natural extension of existing getOrSet single-flight; turns a TTL expiry from a latency spike into one background refresh.",
-            "worth_doing": "Yes \u2014 in scope.",
+            "id": "stale-while-revalidate",
             "source": "lru-cache 11.5.2 type definitions, verified 2026-08-23",
-            "first_seen": "2026-08-23"
+            "why_it_matters": "Natural extension of existing getOrSet single-flight; turns a TTL expiry from a latency spike into one background refresh.",
+            "worth_doing": "Yes — in scope."
         }
     ],
     "project": "@humanspeak/memory-cache",
     "rank_tracker": {
+        "date": "2026-08-27",
+        "date_compared": "2026-08-20",
         "project_id": 9271512,
-        "date": "2026-08-23",
-        "date_compared": "2026-08-16",
-        "summary": {
-            "tracked": 1,
-            "ranked": 1,
-            "top3": 0,
-            "top10": 1,
-            "top100": 1,
-            "improved": 1,
-            "declined": 0,
-            "avg_position": 9.0
-        },
         "rows": [
             {
+                "kd": 2,
                 "keyword": "svelte memory cache",
-                "volume": 10,
-                "position": 9,
-                "position_diff": -1,
-                "position_prev": 10,
+                "position": 10,
+                "position_diff": 1,
+                "position_prev": 9,
                 "url": "https://memory.svelte.page/",
-                "kd": 3
+                "volume": 0
             }
-        ]
-    },
-    "repo_triage": {
-        "since": "2026-07-24",
-        "new_external_prs": 0,
-        "new_external_issues": 0,
-        "awaiting_your_reply": 0,
-        "bots": {
-            "prs": 1,
-            "issues": 0
+        ],
+        "summary": {
+            "avg_position": 10.0,
+            "declined": 1,
+            "improved": 0,
+            "ranked": 1,
+            "top10": 1,
+            "top100": 1,
+            "top3": 0,
+            "tracked": 1
         }
     },
-    "run_type": "baseline",
+    "repo_triage": {
+        "awaiting_your_reply": 0,
+        "bots": {
+            "issues": 0,
+            "prs": 0
+        },
+        "new_external_issues": 0,
+        "new_external_prs": 0,
+        "since": "2026-08-23"
+    },
+    "run_type": "delta",
     "self": {
+        "archived": false,
+        "error": null,
+        "last_release": "2026-06-25",
+        "latest_version": "1.1.2",
         "npm": "@humanspeak/memory-cache",
         "repo": "humanspeak/memory-cache",
-        "latest_version": "1.1.2",
-        "last_release": "2026-06-25",
-        "weekly_downloads": 27603,
         "stars": 2,
-        "archived": false,
-        "error": null
+        "weekly_downloads": 26816
     },
     "seo": {
+        "ahrefs_enrichment": "unavailable (headless run — MCP absent); volume/KD pending an interactive pass",
         "export_date": "2026-08-22",
-        "striking_distance": [
-            {
-                "query": "svelte memory cache",
-                "impressions": 23.0,
-                "position": 17.13
-            }
-        ],
-        "zero_click": [
-            {
-                "query": "memory cache",
-                "impressions": 127.0,
-                "position": 45.98
-            },
-            {
-                "query": "in-memory caching",
-                "impressions": 103.0,
-                "position": 42.12
-            },
-            {
-                "query": "in memory caching",
-                "impressions": 86.0,
-                "position": 43.48
-            },
-            {
-                "query": "memory caching",
-                "impressions": 58.0,
-                "position": 36.76
-            },
-            {
-                "query": "what is in-memory cache",
-                "impressions": 46.0,
-                "position": 45.54
-            },
-            {
-                "query": "cacheable memory",
-                "impressions": 31.0,
-                "position": 37.68
-            },
-            {
-                "query": "in memory cache",
-                "impressions": 26.0,
-                "position": 33.5
-            },
-            {
-                "query": "svelte memory cache",
-                "impressions": 23.0,
-                "position": 17.13
-            }
-        ],
-        "underperforming_pages": [
-            {
-                "page": "https://memory.svelte.page/",
-                "impressions": 1261.0,
-                "position": 27.73,
-                "ctr": 0.16
-            }
-        ],
+        "note": "export_date unchanged from 2026-08-23 run — no new GSC data this cycle.",
         "recommendations_open": [
             "build concept hub page for definitional cluster (what is in-memory cache / in-memory caching)",
             "rewrite homepage title/meta to lead with 'in-memory cache for TypeScript & Node'",
-            "expand site beyond 3 pages \u2014 no landing surface for most of the query set",
+            "expand site beyond 3 pages — no landing surface for most of the query set",
             "add 6 GSC-demand keywords to Ahrefs rank tracker",
             "blog: what is an in-memory cache",
             "blog: TTL vs LRU eviction strategy",
             "blog: memoizing class methods with @cached",
             "blog: migrating off node-cache in 2026"
         ],
-        "ahrefs_enrichment": "unavailable (headless run \u2014 MCP absent); volume/KD pending an interactive pass"
+        "striking_distance": [
+            {
+                "impressions": 23.0,
+                "position": 17.13,
+                "query": "svelte memory cache"
+            }
+        ],
+        "underperforming_pages": [
+            {
+                "ctr": 0.16,
+                "impressions": 1261.0,
+                "page": "https://memory.svelte.page/",
+                "position": 27.73
+            }
+        ],
+        "zero_click": [
+            {
+                "impressions": 127.0,
+                "position": 45.98,
+                "query": "memory cache"
+            },
+            {
+                "impressions": 103.0,
+                "position": 42.12,
+                "query": "in-memory caching"
+            },
+            {
+                "impressions": 86.0,
+                "position": 43.48,
+                "query": "in memory caching"
+            },
+            {
+                "impressions": 58.0,
+                "position": 36.76,
+                "query": "memory caching"
+            },
+            {
+                "impressions": 46.0,
+                "position": 45.54,
+                "query": "what is in-memory cache"
+            },
+            {
+                "impressions": 31.0,
+                "position": 37.68,
+                "query": "cacheable memory"
+            },
+            {
+                "impressions": 26.0,
+                "position": 33.5,
+                "query": "in memory cache"
+            },
+            {
+                "impressions": 23.0,
+                "position": 17.13,
+                "query": "svelte memory cache"
+            }
+        ]
     },
     "watchlist": [
         {
+            "archived": false,
+            "error": null,
+            "last_release": "2025-10-10",
+            "latest_version": "7.3.0",
             "npm": "quick-lru",
             "repo": "sindresorhus/quick-lru",
-            "latest_version": "7.3.0",
-            "last_release": "2025-10-10",
-            "weekly_downloads": 44572957,
-            "stars": 765,
-            "archived": false,
-            "error": null
+            "stars": 766,
+            "weekly_downloads": 45656273
         }
     ]
 }
