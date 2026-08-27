@@ -27,6 +27,7 @@ Visit the [documentation](https://memory.svelte.page/) for detailed API referenc
 - **Zero Dependencies** - Lightweight and fast
 - **TTL Expiration** - Automatic cache entry expiration
 - **LRU Eviction** - Least recently used entries are evicted when cache is full
+- **Weighted Eviction** - Bound aggregate user-defined cost, including serialized bytes
 - **Wildcard Deletion** - Delete entries by prefix or wildcard patterns
 - **Full TypeScript Support** - Complete type definitions included
 - **Method Decorator** - `@cached` decorator for automatic memoization
@@ -187,11 +188,13 @@ await Promise.all(promises) // fetchExpensiveData called only once
 
 #### Constructor Options
 
-| Option    | Type         | Default  | Description                                      |
-| --------- | ------------ | -------- | ------------------------------------------------ |
-| `maxSize` | `number`     | `100`    | Maximum entries before eviction (0 = unlimited)  |
-| `ttl`     | `number`     | `300000` | Time-to-live in milliseconds (0 = no expiration) |
-| `hooks`   | `CacheHooks` | `{}`     | Lifecycle hooks for observing cache events       |
+| Option            | Type                                | Default  | Description                                      |
+| ----------------- | ----------------------------------- | -------- | ------------------------------------------------ |
+| `maxSize`         | `number`                            | `100`    | Maximum entries before eviction (0 = unlimited)  |
+| `maxWeight`       | `number`                            | `0`      | Maximum aggregate weight (0 = disabled)          |
+| `sizeCalculation` | `(value: T, key: string) => number` | —        | Returns each entry's finite, non-negative weight |
+| `ttl`             | `number`                            | `300000` | Time-to-live in milliseconds (0 = no expiration) |
+| `hooks`           | `CacheHooks`                        | `{}`     | Lifecycle hooks for observing cache events       |
 
 #### Methods
 
@@ -227,8 +230,15 @@ methodName(args): ReturnType { ... }
 
 ```typescript
 // High-traffic API cache
-const apiCache = new MemoryCache<Response>({
-    maxSize: 10000,
+interface ApiResponse {
+    data: unknown
+    cachedAt: number
+}
+
+const apiCache = new MemoryCache<ApiResponse>({
+    maxSize: 0, // Disable the default 100-entry limit for weight-only operation
+    maxWeight: 10 * 1024 * 1024, // 10 MiB of serialized response data
+    sizeCalculation: (response) => new TextEncoder().encode(JSON.stringify(response)).byteLength,
     ttl: 5 * 60 * 1000 // 5 minutes
 })
 
@@ -251,6 +261,18 @@ const unlimitedCache = new MemoryCache<Data>({
 })
 ```
 
+`maxWeight` is a deterministic aggregate limit in units chosen by
+`sizeCalculation(value, key)`; it is not automatic JavaScript heap measurement.
+Because `maxSize` still defaults to `100`, set `maxSize: 0` when weight should be
+the only capacity limit. Both limits can also be active together, in which case
+LRU entries are evicted until both constraints hold.
+
+The calculator runs once before each `set`. It must return a finite,
+non-negative number; invalid results throw `RangeError` without changing the
+cache. A value heavier than `maxWeight` is returned normally by `getOrSet` or a
+decorated method but is not cached. Replacing an existing key with an oversized
+value removes the old cached value so stale data cannot be returned.
+
 ## Cache Statistics
 
 Track cache performance with built-in statistics:
@@ -263,7 +285,7 @@ cache.get('key') // hit
 cache.get('missing') // miss
 
 const stats = cache.getStats()
-// { hits: 1, misses: 1, evictions: 0, expirations: 0, size: 1 }
+// { hits: 1, misses: 1, evictions: 0, expirations: 0, size: 1, weight: 0 }
 
 // Reset statistics
 cache.resetStats()
@@ -310,14 +332,14 @@ const cache = new MemoryCache<string>({
 
 ### Hook Events
 
-| Hook       | When Called                         | Context                                     |
-| ---------- | ----------------------------------- | ------------------------------------------- |
-| `onHit`    | Successful cache retrieval          | `{ key, value }`                            |
-| `onMiss`   | Cache miss (not found or expired)   | `{ key, reason: 'not_found' \| 'expired' }` |
-| `onSet`    | Value stored in cache               | `{ key, value, isUpdate }`                  |
-| `onEvict`  | Entry evicted due to size limit     | `{ key, value }`                            |
-| `onExpire` | Entry removed due to TTL expiration | `{ key, value, source }`                    |
-| `onDelete` | Entry explicitly deleted            | `{ key, value, source }`                    |
+| Hook       | When Called                                       | Context                                     |
+| ---------- | ------------------------------------------------- | ------------------------------------------- |
+| `onHit`    | Successful cache retrieval                        | `{ key, value }`                            |
+| `onMiss`   | Cache miss (not found or expired)                 | `{ key, reason: 'not_found' \| 'expired' }` |
+| `onSet`    | Value stored in cache                             | `{ key, value, isUpdate }`                  |
+| `onEvict`  | Entry evicted due to entry-count or weight limits | `{ key, value }`                            |
+| `onExpire` | Entry removed due to TTL expiration               | `{ key, value, source }`                    |
+| `onDelete` | Entry explicitly deleted                          | `{ key, value, source }`                    |
 
 Hooks are synchronous and errors are silently caught to prevent cache corruption.
 
@@ -331,18 +353,18 @@ For complete documentation, examples, and API reference, visit [memory.svelte.pa
 
 Part of the [Humanspeak](https://humanspeak.com) family of runes-native Svelte 5 packages:
 
-| Package | Description |
-| --- | --- |
-| [@humanspeak/svelte-markdown](https://markdown.svelte.page) | Runtime markdown renderer for Svelte |
-| [@humanspeak/svelte-virtual-list](https://virtuallist.svelte.page) | Virtual scrolling for Svelte |
-| [@humanspeak/svelte-motion](https://motion.svelte.page) | Framer Motion for Svelte 5 |
-| [@humanspeak/svelte-headless-table](https://table.svelte.page) | Headless data tables for Svelte |
-| [@humanspeak/svelte-diff-match-patch](https://diff.svelte.page) | Diff comparison for Svelte |
-| [@humanspeak/svelte-purify](https://purify.svelte.page) | HTML sanitisation for Svelte |
-| [@humanspeak/svelte-virtual-chat](https://virtualchat.svelte.page) | Virtual chat viewport for Svelte 5 |
-| **[@humanspeak/memory-cache](https://memory.svelte.page)** — _this package_ | In-memory cache for TypeScript |
-| [@humanspeak/svelte-json-view-lite](https://jsonview.svelte.page) | JSON tree viewer for Svelte 5 |
-| [@humanspeak/svelte-scoped-props](https://scoped.svelte.page) | Scoped class props for Svelte |
+| Package                                                                     | Description                          |
+| --------------------------------------------------------------------------- | ------------------------------------ |
+| [@humanspeak/svelte-markdown](https://markdown.svelte.page)                 | Runtime markdown renderer for Svelte |
+| [@humanspeak/svelte-virtual-list](https://virtuallist.svelte.page)          | Virtual scrolling for Svelte         |
+| [@humanspeak/svelte-motion](https://motion.svelte.page)                     | Framer Motion for Svelte 5           |
+| [@humanspeak/svelte-headless-table](https://table.svelte.page)              | Headless data tables for Svelte      |
+| [@humanspeak/svelte-diff-match-patch](https://diff.svelte.page)             | Diff comparison for Svelte           |
+| [@humanspeak/svelte-purify](https://purify.svelte.page)                     | HTML sanitisation for Svelte         |
+| [@humanspeak/svelte-virtual-chat](https://virtualchat.svelte.page)          | Virtual chat viewport for Svelte 5   |
+| **[@humanspeak/memory-cache](https://memory.svelte.page)** — _this package_ | In-memory cache for TypeScript       |
+| [@humanspeak/svelte-json-view-lite](https://jsonview.svelte.page)           | JSON tree viewer for Svelte 5        |
+| [@humanspeak/svelte-scoped-props](https://scoped.svelte.page)               | Scoped class props for Svelte        |
 
 ## License
 

@@ -32,7 +32,7 @@ export type OnSetContext<T> = { key: string; value: T; isUpdate: boolean }
 
 /**
  * Context passed to the {@link CacheHooks.onEvict} callback when the
- * least-recently-used entry is removed to make room for a new one.
+ * least-recently-used entry is removed to stay within entry-count or weight limits.
  *
  * @template T - The type of values stored in the cache.
  * @property {string} key - The cache key of the evicted entry.
@@ -82,7 +82,8 @@ export type OnDeleteContext<T> = {
  * @property {function} [onHit] - Called after a successful cache read.
  * @property {function} [onMiss] - Called when a key is not found or has expired.
  * @property {function} [onSet] - Called after a value is written (insert or update).
- * @property {function} [onEvict] - Called when an LRU entry is removed to stay within `maxSize`.
+ * @property {function} [onEvict] - Called when an LRU entry is removed to stay within
+ *   the entry-count or aggregate-weight limits.
  * @property {function} [onExpire] - Called when a TTL-expired entry is removed.
  * @property {function} [onDelete] - Called when an entry is explicitly deleted by the caller.
  */
@@ -102,6 +103,12 @@ export type CacheHooks<T> = {
  * @property {number} [maxSize=100] - Maximum number of entries the cache can
  *   hold. When exceeded, the least-recently-used entry is evicted.
  *   Set to `0` to disable the size limit.
+ * @property {number} [maxWeight=0] - Maximum aggregate user-defined weight.
+ *   Set to `0` to disable weighted eviction. A positive value requires
+ *   `sizeCalculation`.
+ * @property {function} [sizeCalculation] - Returns the finite, non-negative
+ *   weight for a value and key. Units are application-defined and must be
+ *   consistent within the cache.
  * @property {number} [ttl=300000] - Time-to-live in milliseconds for cache
  *   entries. After this duration, entries are considered expired and removed
  *   lazily on access or proactively via {@link MemoryCache.prune}.
@@ -112,7 +119,9 @@ export type CacheHooks<T> = {
  * @example
  * ```typescript
  * const options: CacheOptions<string> = {
- *     maxSize: 500,
+ *     maxSize: 0,
+ *     maxWeight: 10_000,
+ *     sizeCalculation: (value) => value.length,
  *     ttl: 60_000, // 1 minute
  *     hooks: { onEvict: (ctx) => console.log(`Evicted ${ctx.key}`) }
  * }
@@ -121,6 +130,9 @@ export type CacheHooks<T> = {
  */
 export type CacheOptions<T = unknown> = {
     maxSize?: number
+    maxWeight?: number
+    // trunk-ignore(eslint/no-unused-vars)
+    sizeCalculation?: (value: T, key: string) => number
     ttl?: number // milliseconds
     hooks?: CacheHooks<T>
 }
@@ -163,9 +175,10 @@ export type CachedDecoratorOptions<T = unknown> = CacheOptions<T> & {
  *
  * @property {number} hits - Number of successful cache retrievals.
  * @property {number} misses - Number of cache misses (key not found or expired).
- * @property {number} evictions - Number of entries removed due to `maxSize` limits.
+ * @property {number} evictions - Number of entries removed due to entry-count or weight limits.
  * @property {number} expirations - Number of entries removed due to TTL expiration.
  * @property {number} size - Current number of non-expired entries in the cache.
+ * @property {number} weight - Current aggregate weight of non-expired entries.
  *
  * @example
  * ```typescript
@@ -175,7 +188,8 @@ export type CachedDecoratorOptions<T = unknown> = CacheOptions<T> & {
  *     misses: 7,
  *     evictions: 3,
  *     expirations: 12,
- *     size: 85
+ *     size: 85,
+ *     weight: 8192
  * }
  * ```
  */
@@ -185,6 +199,7 @@ export type CacheStats = {
     evictions: number
     expirations: number
     size: number
+    weight: number
 }
 
 /**
@@ -220,10 +235,12 @@ export class CacheConfigError extends Error {
  * @template T - The type of value being cached
  * @property {T} value - The actual cached value
  * @property {number} timestamp - Unix timestamp when the entry was created
+ * @property {number} weight - User-defined entry weight, or `0` when weighted mode is disabled
  */
 type CacheEntry<T> = {
     value: T
     timestamp: number
+    weight: number
 }
 
 type CacheReadSource = 'get' | 'has'
@@ -256,8 +273,8 @@ function isPromiseLike<T>(value: T | PromiseLike<T>): value is PromiseLike<T> {
 /**
  * Generic in-memory cache implementation with TTL and LRU (Least Recently Used) eviction.
  * Provides efficient caching for any type of data with automatic cleanup
- * of expired or excess entries. When the cache reaches maxSize, the least
- * recently accessed entry is evicted to make room for new entries.
+ * of expired or excess entries. When the cache reaches its entry-count or
+ * aggregate-weight limit, least recently accessed entries are evicted to make room.
  *
  * @class MemoryCache
  * @template T - The type of values being cached
@@ -286,6 +303,16 @@ export class MemoryCache<T> {
     /** Maximum number of entries before LRU eviction kicks in. `0` means unlimited. */
     private maxSize: number
 
+    /** Maximum aggregate user-defined weight. `0` means weighted eviction is disabled. */
+    private maxWeight: number
+
+    /** Calculates a value's application-defined weight when weighted mode is enabled. */
+    // trunk-ignore(eslint/no-unused-vars)
+    private sizeCalculation?: (value: T, key: string) => number
+
+    /** Current aggregate weight of all cached entries. */
+    private totalWeight = 0
+
     /** Time-to-live in milliseconds. `0` means entries never expire. */
     private ttl: number
 
@@ -293,7 +320,7 @@ export class MemoryCache<T> {
     private hooks: CacheHooks<T>
 
     /** Running counters for cache performance metrics. */
-    private stats: Omit<CacheStats, 'size'> = {
+    private stats: Omit<CacheStats, 'size' | 'weight'> = {
         hits: 0,
         misses: 0,
         evictions: 0,
@@ -311,9 +338,11 @@ export class MemoryCache<T> {
      *
      * @param {CacheOptions<T>} options - Configuration options for the cache.
      * @param {number} [options.maxSize=100] - Maximum number of entries (default: 100).
+     * @param {number} [options.maxWeight=0] - Maximum aggregate user-defined weight.
+     * @param {function} [options.sizeCalculation] - Calculates each entry's weight.
      * @param {number} [options.ttl=300000] - Time-to-live in milliseconds (default: 5 minutes).
      * @param {CacheHooks<T>} [options.hooks] - Optional lifecycle hooks.
-     * @throws {CacheConfigError} If `maxSize` is negative or `ttl` is negative.
+     * @throws {CacheConfigError} If an option is invalid or weighted mode has no calculator.
      *
      * @example
      * ```typescript
@@ -323,6 +352,7 @@ export class MemoryCache<T> {
      */
     constructor(options: CacheOptions<T> = {}) {
         const maxSize = options.maxSize ?? 100
+        const maxWeight = options.maxWeight ?? 0
         const ttl = options.ttl ?? 5 * 60 * 1000 // 5 minutes default
 
         if (maxSize < 0) {
@@ -331,8 +361,18 @@ export class MemoryCache<T> {
         if (ttl < 0) {
             throw new CacheConfigError('ttl must be a non-negative number')
         }
+        if (maxWeight < 0 || Number.isNaN(maxWeight)) {
+            throw new CacheConfigError('maxWeight must be a non-negative number')
+        }
+        if (maxWeight > 0 && !options.sizeCalculation) {
+            throw new CacheConfigError(
+                'sizeCalculation is required when maxWeight is greater than 0'
+            )
+        }
 
         this.maxSize = maxSize
+        this.maxWeight = maxWeight
+        this.sizeCalculation = options.sizeCalculation
         this.ttl = ttl
         this.hooks = options.hooks ?? {}
     }
@@ -375,6 +415,44 @@ export class MemoryCache<T> {
     }
 
     /**
+     * Removes an entry and updates aggregate weight without emitting hooks or
+     * statistics. Every internal removal path must use this primitive so weight
+     * accounting cannot drift.
+     */
+    private removeEntry(
+        key: string
+    ): CacheEntry<T | typeof CACHED_UNDEFINED | typeof CACHED_NULL> | undefined {
+        const entry = this.cache.get(key)
+        if (!entry || !this.cache.delete(key)) return undefined
+
+        this.totalWeight -= entry.weight
+        if (this.cache.size === 0) {
+            this.totalWeight = 0
+        }
+        return entry
+    }
+
+    /** Removes one entry as a normal capacity eviction. */
+    private evictEntry(key: string): boolean {
+        const entry = this.removeEntry(key)
+        if (!entry) return false
+
+        this.stats.evictions++
+        this.callHook(this.hooks.onEvict, { key, value: this.unwrapValue(entry.value) })
+        return true
+    }
+
+    /** Returns whether inserting or replacing an entry would exceed an active limit. */
+    private exceedsCapacity(candidateWeight: number, existingWeight?: number): boolean {
+        const projectedSize = this.cache.size + (existingWeight === undefined ? 1 : 0)
+        const projectedWeight = this.totalWeight - (existingWeight ?? 0) + candidateWeight
+        return (
+            (this.maxSize > 0 && projectedSize > this.maxSize) ||
+            (this.maxWeight > 0 && projectedWeight > this.maxWeight)
+        )
+    }
+
+    /**
      * Internal cache read primitive used by public lookup APIs. It handles
      * sentinel unwrapping, lazy expiration cleanup, optional LRU promotion,
      * and optional stats/hook emission from a single Map lookup.
@@ -391,7 +469,7 @@ export class MemoryCache<T> {
 
         if (this.ttl > 0 && Date.now() - entry.timestamp > this.ttl) {
             const expiredValue = this.unwrapValue(entry.value)
-            this.cache.delete(key)
+            this.removeEntry(key)
             this.stats.expirations++
             this.callHook(this.hooks.onExpire, { key, value: expiredValue, source })
             if (trackAccess) {
@@ -515,10 +593,10 @@ export class MemoryCache<T> {
     }
 
     /**
-     * Stores a value in the cache. If the cache is full and this is a new key,
-     * expired entries are pruned before the least recently used entry is evicted
-     * to make room. Setting a value (new or update) moves the entry to the
-     * most-recently-used position.
+     * Stores a value in the cache. The configured calculator runs once before
+     * mutation. Expired entries are pruned and LRU entries are evicted until
+     * both entry-count and aggregate-weight limits can accept the value. Setting
+     * a value (new or update) moves the entry to the most-recently-used position.
      *
      * @param {string} key - The key under which to store the value
      * @param {T} value - The value to cache
@@ -530,28 +608,43 @@ export class MemoryCache<T> {
      * ```
      */
     set(key: string, value: T): void {
-        const isNewKey = !this.cache.has(key)
-
-        if (isNewKey && this.maxSize > 0 && this.cache.size >= this.maxSize) {
-            this.prune()
-        }
-
-        // Remove LRU entry if cache is still full and this is a new key (skip if maxSize is 0)
-        if (isNewKey && this.maxSize > 0 && this.cache.size >= this.maxSize) {
-            const oldestKey = this.cache.keys().next().value
-            if (oldestKey) {
-                const evictedEntry = this.cache.get(oldestKey)
-                const evictedValue = evictedEntry ? this.unwrapValue(evictedEntry.value) : undefined
-                this.cache.delete(oldestKey)
-                this.stats.evictions++
-                this.callHook(this.hooks.onEvict, { key: oldestKey, value: evictedValue })
+        let candidateWeight = 0
+        if (this.maxWeight > 0) {
+            candidateWeight = this.sizeCalculation!(value, key)
+            if (!Number.isFinite(candidateWeight) || candidateWeight < 0) {
+                throw new RangeError('sizeCalculation must return a finite, non-negative number')
             }
         }
 
-        // For existing keys, delete first to move to end (MRU position)
-        // Map.set() on existing key doesn't change position in iteration order
-        if (!isNewKey) {
-            this.cache.delete(key)
+        const entryAtStart = this.cache.get(key)
+
+        // Values heavier than the whole cache are returned by callers such as
+        // getOrSet, but are never cached. Replacements remove stale old data.
+        if (this.maxWeight > 0 && candidateWeight > this.maxWeight) {
+            if (entryAtStart) this.evictEntry(key)
+            return
+        }
+
+        if (this.exceedsCapacity(candidateWeight, entryAtStart?.weight)) {
+            this.prune()
+        }
+
+        let existingEntry = this.cache.get(key)
+        while (this.exceedsCapacity(candidateWeight, existingEntry?.weight)) {
+            let evictionKey: string | undefined
+            for (const currentKey of this.cache.keys()) {
+                if (currentKey !== key) {
+                    evictionKey = currentKey
+                    break
+                }
+            }
+            if (evictionKey === undefined || !this.evictEntry(evictionKey)) break
+            existingEntry = this.cache.get(key)
+        }
+
+        const isUpdate = existingEntry !== undefined
+        if (isUpdate) {
+            this.removeEntry(key)
         }
 
         // Store undefined/null values as sentinels to distinguish from cache misses
@@ -567,8 +660,10 @@ export class MemoryCache<T> {
         const timestamp = Date.now()
         this.cache.set(key, {
             value: valueToStore,
-            timestamp
+            timestamp,
+            weight: candidateWeight
         })
+        this.totalWeight += candidateWeight
 
         // Append to expiration queue (skip if TTL is disabled)
         // Coalesce with tail entry if same key — avoids duplicate entries on consecutive overwrites
@@ -582,7 +677,7 @@ export class MemoryCache<T> {
             }
         }
 
-        this.callHook(this.hooks.onSet, { key, value, isUpdate: !isNewKey })
+        this.callHook(this.hooks.onSet, { key, value, isUpdate })
     }
 
     /**
@@ -600,13 +695,12 @@ export class MemoryCache<T> {
      * ```
      */
     delete(key: string): boolean {
-        const entry = this.cache.get(key)
-        const deleted = this.cache.delete(key)
-        if (deleted && entry) {
+        const entry = this.removeEntry(key)
+        if (entry) {
             const value = this.unwrapValue(entry.value)
             this.callHook(this.hooks.onDelete, { key, value, source: 'delete' })
         }
-        return deleted
+        return entry !== undefined
     }
 
     /**
@@ -623,13 +717,12 @@ export class MemoryCache<T> {
      * ```
      */
     async deleteAsync(key: string): Promise<boolean> {
-        const entry = this.cache.get(key)
-        const deleted = this.cache.delete(key)
-        if (deleted && entry) {
+        const entry = this.removeEntry(key)
+        if (entry) {
             const value = this.unwrapValue(entry.value)
             this.callHook(this.hooks.onDelete, { key, value, source: 'deleteAsync' })
         }
-        return Promise.resolve(deleted)
+        return Promise.resolve(entry !== undefined)
     }
 
     /**
@@ -647,9 +740,9 @@ export class MemoryCache<T> {
         // Call onDelete for each entry before clearing
         for (const [key, entry] of this.cache.entries()) {
             const value = this.unwrapValue(entry.value)
+            this.removeEntry(key)
             this.callHook(this.hooks.onDelete, { key, value, source: 'clear' })
         }
-        this.cache.clear()
         this.expirationQueue = []
         this.compactionScheduled = false
     }
@@ -675,7 +768,7 @@ export class MemoryCache<T> {
         for (const [key, entry] of this.cache.entries()) {
             if (key.startsWith(prefix)) {
                 const value = this.unwrapValue(entry.value)
-                this.cache.delete(key)
+                this.removeEntry(key)
                 this.callHook(this.hooks.onDelete, { key, value, source: 'deleteByPrefix' })
                 count++
             }
@@ -716,7 +809,7 @@ export class MemoryCache<T> {
         for (const [key, entry] of this.cache.entries()) {
             if (regex.test(key)) {
                 const value = this.unwrapValue(entry.value)
-                this.cache.delete(key)
+                this.removeEntry(key)
                 this.callHook(this.hooks.onDelete, { key, value, source: 'deleteByMagicString' })
                 count++
             }
@@ -835,16 +928,18 @@ export class MemoryCache<T> {
      * cache.get('key');     // hit
      * cache.get('missing'); // miss
      * const stats = cache.getStats();
-     * console.log(stats); // { hits: 1, misses: 1, evictions: 0, expirations: 0, size: 1 }
+     * console.log(stats); // { hits: 1, misses: 1, evictions: 0, expirations: 0, size: 1, weight: 0 }
      * ```
      */
     getStats(): CacheStats {
+        this.prune()
         return {
             hits: this.stats.hits,
             misses: this.stats.misses,
             evictions: this.stats.evictions,
             expirations: this.stats.expirations,
-            size: this.size()
+            size: this.cache.size,
+            weight: this.totalWeight
         }
     }
 
@@ -903,7 +998,7 @@ export class MemoryCache<T> {
             const entry = this.cache.get(key)
             if (entry && entry.timestamp === timestamp) {
                 const value = this.unwrapValue(entry.value)
-                this.cache.delete(key)
+                this.removeEntry(key)
                 this.stats.expirations++
                 this.callHook(this.hooks.onExpire, { key, value, source: 'prune' })
                 count++

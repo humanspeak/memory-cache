@@ -29,10 +29,13 @@ import { MemoryCache } from '@humanspeak/memory-cache'
 interface ApiResponse<T> {
     data: T
     cachedAt: number
+    byteLength: number
 }
 
 const apiCache = new MemoryCache<ApiResponse<unknown>>({
-    maxSize: 500,
+    maxSize: 0,
+    maxWeight: 10 * 1024 * 1024, // 10 MiB aggregate serialized payload weight
+    sizeCalculation: (value) => value.byteLength,
     ttl: 5 * 60 * 1000  // 5 minutes
 })
 
@@ -48,10 +51,12 @@ async function fetchWithCache<T>(url: string): Promise<T> {
     console.log('Cache miss:', url)
     const response = await fetch(url)
     const data = await response.json()
+    const byteLength = new TextEncoder().encode(JSON.stringify(data)).byteLength
 
     apiCache.set(url, {
         data,
-        cachedAt: Date.now()
+        cachedAt: Date.now(),
+        byteLength
     })
 
     return data
@@ -68,7 +73,9 @@ const user = await fetchWithCache<User>('/api/users/123')
 import { MemoryCache } from '@humanspeak/memory-cache'
 
 const apiCache = new MemoryCache<ApiResponse<unknown>>({
-    maxSize: 500,
+    maxSize: 0,
+    maxWeight: 10 * 1024 * 1024,
+    sizeCalculation: (value) => value.byteLength,
     ttl: 5 * 60 * 1000,
     hooks: {
         onHit: ({ key }) => {
@@ -89,6 +96,7 @@ const apiCache = new MemoryCache<ApiResponse<unknown>>({
 ## Key Considerations
 
 - **TTL**: Choose based on how often data changes (1-5 minutes typical)
-- **Max Size**: Consider memory constraints and number of unique endpoints
+- **Weighted Eviction**: Use one deterministic unit, such as UTF-8 serialized payload bytes; this is not exact retained heap memory
+- **Entry Count**: `maxSize` still defaults to 100, so set `maxSize: 0` for weight-only operation or configure both limits intentionally
 - **Cache Key**: Use the full URL including query parameters
 - **Error Handling**: Don't cache error responses

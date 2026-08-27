@@ -18,7 +18,7 @@ description: Install and configure @humanspeak/memory-cache for TypeScript apps,
 
 # Getting Started
 
-@humanspeak/memory-cache is a lightweight, zero-dependency in-memory cache for TypeScript and JavaScript. It provides TTL expiration, true LRU (Least Recently Used) eviction, wildcard pattern deletion, and a powerful `@cached` decorator for method-level memoization.
+@humanspeak/memory-cache is a lightweight, zero-dependency in-memory cache for TypeScript and JavaScript. It provides TTL expiration, true LRU (Least Recently Used) and weighted eviction, wildcard pattern deletion, and a powerful `@cached` decorator for method-level memoization.
 
 ## Installation
 
@@ -108,14 +108,30 @@ const user = await cache.getOrSet('user:123', async () => {
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `maxSize` | `number` | `100` | Maximum number of entries before eviction. Set to `0` for unlimited. |
+| `maxWeight` | `number` | `0` | Maximum aggregate weight. Set to `0` to disable weighted eviction. |
+| `sizeCalculation` | `(value: T, key: string) => number` | — | Returns each value's finite, non-negative application-defined weight. |
 | `ttl` | `number` | `300000` | Time-to-live in milliseconds. Set to `0` for no expiration. |
-| `hooks` | `object` | — | Lifecycle hooks (`onEvict`, `onExpire`, `onSet`, `onDelete`, `onClear`) for reacting to cache events. |
+| `hooks` | `object` | — | Lifecycle hooks (`onHit`, `onMiss`, `onSet`, `onEvict`, `onExpire`, `onDelete`) for reacting to cache events. |
+
+For a weight-only cache, explicitly disable the default entry-count limit:
+
+```typescript
+const responseCache = new MemoryCache<string>({
+    maxSize: 0,
+    maxWeight: 50_000,
+    sizeCalculation: (value) => new TextEncoder().encode(value).byteLength
+})
+```
+
+Weight units come from your calculator; the cache does not estimate retained
+JavaScript heap size.
 
 ## Features
 
 - **Zero Dependencies** - No external dependencies, keeping your bundle small
 - **TTL Expiration** - Entries automatically expire after a configurable time
 - **LRU Eviction** - Least recently used entries are evicted when the cache is full
+- **Weighted Eviction** - Limit aggregate application-defined cost while retaining LRU policy
 - **Wildcard Deletion** - Delete entries by prefix or wildcard patterns
 - **Full TypeScript Support** - Complete type definitions included
 - **Method Decorator** - `@cached` decorator for automatic memoization
@@ -126,5 +142,3 @@ const user = await cache.getOrSet('user:123', async () => {
 - Learn about the [MemoryCache API](/docs/api/memory-cache)
 - Explore the [@cached decorator](/docs/api/cached-decorator)
 - See [usage examples](/docs/examples)
-
-

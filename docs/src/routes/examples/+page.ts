@@ -19,6 +19,11 @@ const EXAMPLES: Record<string, ExampleEntry> = {
         description:
             'See how expired entries are pruned before least recently used items are evicted.'
     },
+    'memory-weighted-eviction': {
+        title: 'Memory-Weighted Eviction',
+        description:
+            'Bound aggregate user-defined weight while preserving LRU order and multi-eviction.'
+    },
     'cache-statistics': {
         title: 'Cache Statistics',
         description: 'Monitor hit rate, miss rate, and cache performance in real time.'
@@ -28,6 +33,6 @@ const EXAMPLES: Record<string, ExampleEntry> = {
 export const load: PageLoad = () => ({
     title: 'Interactive Examples | Memory Cache',
     description:
-        'Try interactive @humanspeak/memory-cache demos for basic operations, TTL expiration, LRU eviction, and live cache statistics in TypeScript apps.',
+        'Try interactive @humanspeak/memory-cache demos for basic operations, TTL expiration, LRU and weighted eviction, and live cache statistics in TypeScript apps.',
     examples: EXAMPLES
 })

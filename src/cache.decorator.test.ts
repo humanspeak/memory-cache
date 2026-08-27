@@ -176,6 +176,60 @@ describe('cached decorator', () => {
                 instance.getValue('3')
                 expect(instance.callCount).toBe(6)
             })
+
+            it('should apply weighted eviction and skip oversized synchronous results', () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({
+                        maxSize: 0,
+                        maxWeight: 5,
+                        sizeCalculation: (value) => value.length
+                    })
+                    getValue(value: string): string {
+                        this.callCount++
+                        return value
+                    }
+                }
+
+                const instance = new TestClass()
+                expect(instance.getValue('aa')).toBe('aa')
+                expect(instance.getValue('bbb')).toBe('bbb')
+                expect(instance.getValue('cccc')).toBe('cccc')
+                expect(instance.getValue('aa')).toBe('aa')
+                expect(instance.callCount).toBe(4)
+
+                expect(instance.getValue('oversized')).toBe('oversized')
+                expect(instance.getValue('oversized')).toBe('oversized')
+                expect(instance.callCount).toBe(6)
+            })
+
+            it('should apply weighted eviction and skip oversized asynchronous results', async () => {
+                class TestClass {
+                    callCount = 0
+
+                    @cached<string>({
+                        maxSize: 0,
+                        maxWeight: 5,
+                        sizeCalculation: (value) => value.length
+                    })
+                    async getValue(value: string): Promise<string> {
+                        this.callCount++
+                        return value
+                    }
+                }
+
+                const instance = new TestClass()
+                await expect(instance.getValue('aa')).resolves.toBe('aa')
+                await expect(instance.getValue('bbb')).resolves.toBe('bbb')
+                await expect(instance.getValue('cccc')).resolves.toBe('cccc')
+                await expect(instance.getValue('aa')).resolves.toBe('aa')
+                expect(instance.callCount).toBe(4)
+
+                await expect(instance.getValue('oversized')).resolves.toBe('oversized')
+                await expect(instance.getValue('oversized')).resolves.toBe('oversized')
+                expect(instance.callCount).toBe(6)
+            })
         })
 
         describe('Multiple instances', () => {

@@ -40,7 +40,10 @@ The decorator accepts the same options as `MemoryCache`, plus decorator-specific
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `maxSize` | `number` | `100` | Maximum cached results before eviction |
+| `maxWeight` | `number` | `0` | Maximum aggregate weight (0 disables weighted eviction) |
+| `sizeCalculation` | `(value: T, key: string) => number` | — | Calculates each result's finite, non-negative weight |
 | `ttl` | `number` | `300000` | Cache duration in milliseconds |
+| `hooks` | `CacheHooks<T>` | `{}` | Lifecycle hooks inherited from `MemoryCache` |
 | `keyGenerator` | `(args: any[]) => string` | — | Custom function to generate cache keys from method arguments |
 | `hashKeys` | `boolean` | `false` | Use FNV-1a hashing on serialized arguments for shorter, fixed-length keys |
 
@@ -174,6 +177,31 @@ class ProductService {
 // After caching 100 different products,
 // the least recently used ones are evicted to make room for new ones
 ```
+
+## Weighted Eviction
+
+Decorated methods inherit `maxWeight` and `sizeCalculation(value, key)`. Set
+`maxSize: 0` when aggregate weight should be the only capacity constraint:
+
+```typescript
+class ReportService {
+    @cached<Report>({
+        maxSize: 0,
+        maxWeight: 2_000_000,
+        sizeCalculation: (report) =>
+            new TextEncoder().encode(JSON.stringify(report)).byteLength
+    })
+    async buildReport(id: string): Promise<Report> {
+        return await generateReport(id)
+    }
+}
+```
+
+Weights are application-defined rather than exact heap measurements. Eviction
+still chooses the least recently used result, not the physically largest one.
+If a returned result alone exceeds `maxWeight`, the caller still receives it,
+but it is not memoized and the next call runs the method again. An oversized
+replacement removes the old cached result.
 
 ## Handling Undefined and Null
 

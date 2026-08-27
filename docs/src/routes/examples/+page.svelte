@@ -20,10 +20,10 @@
     if (seo) {
         seo.title = 'Interactive Examples | Memory Cache'
         seo.description =
-            'Try interactive @humanspeak/memory-cache demos for basic operations, TTL expiration, LRU eviction, and live cache statistics in TypeScript apps.'
+            'Try interactive @humanspeak/memory-cache demos for basic operations, TTL expiration, LRU and weighted eviction, and live cache statistics in TypeScript apps.'
         seo.ogTitle = 'Examples'
         seo.ogTagline = 'Interactive cache examples built with Memory Cache'
-        seo.ogFeatures = ['Basic Cache', 'TTL Expiration', 'LRU Eviction', 'Cache Statistics']
+        seo.ogFeatures = ['Basic Cache', 'TTL Expiration', 'Weighted LRU', 'Cache Statistics']
         seo.ogSlug = 'examples'
     }
 
@@ -74,7 +74,7 @@
         kicker: '// examples / live demos',
         title: { accent: 'examples', end: '.' },
         subHtml:
-            'Interactive cache demos built with <b>@humanspeak/memory-cache</b> — basic operations, TTL expiration, LRU eviction, and live cache statistics. Pick a card, inspect behavior, ship.',
+            'Interactive cache demos built with <b>@humanspeak/memory-cache</b> — basic operations, TTL expiration, weighted LRU eviction, and live cache statistics. Pick a card, inspect behavior, ship.',
         ctas: [
             {
                 label: 'browse basic-cache ↗',

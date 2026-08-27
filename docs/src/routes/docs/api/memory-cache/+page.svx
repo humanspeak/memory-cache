@@ -18,7 +18,7 @@ description: Complete MemoryCache API reference covering constructor options, ge
 
 # MemoryCache API
 
-The `MemoryCache` class is a generic in-memory cache with TTL expiration and LRU (Least Recently Used) eviction.
+The `MemoryCache` class is a generic in-memory cache with TTL expiration and entry-count or weighted LRU (Least Recently Used) eviction.
 
 ## Constructor
 
@@ -31,6 +31,8 @@ new MemoryCache<T>(options?: CacheOptions)
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `maxSize` | `number` | `100` | Maximum entries before eviction (0 = unlimited) |
+| `maxWeight` | `number` | `0` | Maximum aggregate weight (0 = weighted eviction disabled) |
+| `sizeCalculation` | `(value: T, key: string) => number` | — | Calculates each entry's finite, non-negative weight |
 | `ttl` | `number` | `300000` | Time-to-live in milliseconds (0 = no expiration) |
 | `hooks` | `CacheHooks<T>` | `{}` | Lifecycle hooks for observing cache events |
 
@@ -53,7 +55,21 @@ const unlimitedCache = new MemoryCache<Data>({
     maxSize: 0,  // No size limit
     ttl: 0       // No expiration
 })
+
+// Weight-only cache: units are serialized UTF-8 bytes
+const weightedCache = new MemoryCache<ApiResponse>({
+    maxSize: 0,
+    maxWeight: 10 * 1024 * 1024,
+    sizeCalculation: (value) =>
+        new TextEncoder().encode(JSON.stringify(value)).byteLength
+})
 ```
+
+`maxWeight` limits aggregate weight, not exact retained heap memory. The
+application defines the unit through `sizeCalculation(value, key)` and should
+use one consistent unit for the cache. `maxSize` and `maxWeight` are independent:
+when both are active, LRU entries are evicted until both constraints hold.
+Because `maxSize` still defaults to `100`, set it to `0` for weight-only limits.
 
 ### Validation
 
@@ -134,7 +150,11 @@ await Promise.all(promises) // fetchExpensiveData called only once
 
 ### set(key, value)
 
-Stores a value in the cache. If the cache is full and this is a new key, expired entries are pruned before the least recently used entry is evicted. Setting a value (new or update) moves the entry to the most-recently-used position.
+Stores a value in the cache. Before mutation, weighted caches calculate and
+validate the candidate weight exactly once. If either active limit would be
+exceeded, expired entries are pruned and then LRU entries are evicted until the
+new value fits. One insertion may therefore cause multiple evictions. Setting a
+value (new or update) moves the entry to the most-recently-used position.
 
 ```typescript
 set(key: string, value: T): void
@@ -167,6 +187,15 @@ cache.set('b', 'valid')
 
 cache.set('c', 'new') // removes expired a instead of evicting valid b
 ```
+
+For an update, the old weight is removed from the projected aggregate and the
+updated key is protected while other LRU entries make room. A value whose weight
+exceeds `maxWeight` is not cached. If it replaces an existing key, that old entry
+is removed as one eviction so a later `get` cannot return stale data.
+
+If `sizeCalculation` throws, its error is propagated. A negative, `NaN`, or
+infinite result throws `RangeError`. In either case the cache, LRU order,
+statistics, aggregate weight, expiration queue, and hooks remain unchanged.
 
 ### has(key)
 
@@ -407,12 +436,13 @@ cache.get('missing')   // miss
 
 const stats = cache.getStats()
 console.log(stats)
-// { hits: 1, misses: 1, evictions: 0, expirations: 0, size: 1 }
+// { hits: 1, misses: 1, evictions: 0, expirations: 0, size: 1, weight: 0 }
 ```
 
 ### resetStats()
 
-Resets all statistics counters to zero. Does not affect cached data.
+Resets all statistics counters to zero. Does not affect cached data or the
+current `weight` gauge.
 
 ```typescript
 resetStats(): void
@@ -463,8 +493,13 @@ type CacheStats = {
     evictions: number
     expirations: number
     size: number
+    weight: number
 }
 ```
+
+`weight` is the current aggregate after expired entries are pruned. It is `0`
+when weighted mode is disabled or the cache is empty, and is not reset by
+`resetStats()`.
 
 ### CacheConfigError
 
@@ -480,6 +515,8 @@ class CacheConfigError extends Error {
 
 Thrown when:
 - `maxSize` is negative
+- `maxWeight` is negative or `NaN`
+- `maxWeight` is positive without `sizeCalculation`
 - `ttl` is negative
 
 ## Type Safety
@@ -544,7 +581,7 @@ type CacheHooks<T> = {
 | `onHit` | Successful `get()` retrieval | `{ key: string, value: T \| undefined }` |
 | `onMiss` | `get()` returns undefined | `{ key: string, reason: 'not_found' \| 'expired' }` |
 | `onSet` | Value stored via `set()` | `{ key: string, value: T, isUpdate: boolean }` |
-| `onEvict` | Entry evicted due to `maxSize` | `{ key: string, value: T \| undefined }` |
+| `onEvict` | Entry evicted due to entry-count or weight limits | `{ key: string, value: T \| undefined }` |
 | `onExpire` | Entry expired due to TTL | `{ key: string, value: T \| undefined, source: 'get' \| 'has' \| 'prune' }` |
 | `onDelete` | Entry explicitly deleted | `{ key: string, value: T \| undefined, source: 'delete' \| 'deleteAsync' \| 'deleteByPrefix' \| 'deleteByMagicString' \| 'clear' }` |
 

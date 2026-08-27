@@ -158,8 +158,9 @@ export const competitors: Competitor[] = [
             },
             {
                 name: 'Size-Aware Eviction',
-                us: 'Entry count (maxSize)',
-                them: 'Entry count + computed byte size (maxSize + sizeCalculation)'
+                us: 'Entry count + computed weight (maxSize + maxWeight / sizeCalculation)',
+                them: 'Entry count + computed size (max + maxSize / sizeCalculation)',
+                note: 'Both accept a user-supplied calculator. Memory Cache exposes aggregate weight in getStats(); lru-cache has broader size and disposal tuning.'
             },
             {
                 name: 'Wildcard / Prefix Deletion',
@@ -196,7 +197,7 @@ export const competitors: Competitor[] = [
         ...shared,
         prosThem: [
             'The canonical LRU — extremely optimized and battle-tested at npm scale',
-            'Byte-size-aware eviction via maxSize + sizeCalculation',
+            'Broader size-calculation, disposal, and tuning controls',
             'Stale-while-revalidate patterns with allowStale and async fetch()',
             'Rich low-level controls (peek, dispose, updateAgeOnGet, per-entry TTL)'
         ],
@@ -207,7 +208,7 @@ export const competitors: Competitor[] = [
             'No aggregate hit/miss statistics or lifecycle hook set out of the box'
         ],
         verdict:
-            'If your bottleneck is raw LRU throughput or you need byte-accurate memory bounds and stale-while-revalidate, lru-cache is the right default — it is the reference implementation for a reason. Memory Cache trades some of that low-level tuning for ergonomics: a @cached decorator, wildcard invalidation, lifecycle hooks, and stats that work without wiring. Pick lru-cache for infrastructure-grade caching primitives; pick Memory Cache when you want application-level caching that reads like TypeScript.',
+            'Both libraries can enforce application-defined computed-weight bounds; neither automatically measures retained JavaScript heap. If your bottleneck is raw LRU throughput or you need stale-while-revalidate and extensive low-level tuning, lru-cache remains the reference implementation. Memory Cache adds a @cached decorator, wildcard invalidation, lifecycle hooks, and aggregate stats with a smaller API surface. Pick lru-cache for infrastructure-grade controls; pick Memory Cache when you want application-level caching that reads like TypeScript.',
         keywords: [
             'lru-cache alternative',
             'lru-cache vs memory-cache',

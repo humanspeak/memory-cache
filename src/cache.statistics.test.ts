@@ -19,7 +19,8 @@ describe('MemoryCache Statistics', () => {
                 misses: 0,
                 evictions: 0,
                 expirations: 0,
-                size: 0
+                size: 0,
+                weight: 0
             })
         })
 
@@ -141,6 +142,23 @@ describe('MemoryCache Statistics', () => {
 
             expect(cache.size()).toBe(2)
             expect(cache.getStats().size).toBe(2)
+        })
+
+        it('should preserve aggregate weight as a live gauge until entries are cleared', () => {
+            const weightedCache = new MemoryCache<string>({
+                maxSize: 0,
+                maxWeight: 20,
+                sizeCalculation: (value) => value.length
+            })
+            weightedCache.set('a', 'four')
+            weightedCache.set('b', 'sixsix')
+
+            expect(weightedCache.getStats().weight).toBe(10)
+            weightedCache.resetStats()
+            expect(weightedCache.getStats().weight).toBe(10)
+
+            weightedCache.clear()
+            expect(weightedCache.getStats().weight).toBe(0)
         })
 
         it('should allow stats to accumulate again after reset', () => {
