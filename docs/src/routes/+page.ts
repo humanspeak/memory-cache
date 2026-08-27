@@ -2,7 +2,7 @@ import type { PageLoad } from './$types'
 
 export const load: PageLoad = ({ data }) => ({
     ...data,
-    title: 'Memory Cache - Lightweight TypeScript In-Memory Caching Library',
+    title: 'In-Memory Cache for TypeScript & Node | Memory Cache',
     description:
-        'A zero-dependency TypeScript in-memory cache with TTL expiration, true LRU eviction, wildcard deletion, hooks, and @cached method decorators.'
+        'In-memory cache for TypeScript & Node with zero dependencies, TTL expiration, true LRU eviction, wildcard deletion, hooks, and @cached method decorators.'
 })
