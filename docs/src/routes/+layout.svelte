@@ -64,7 +64,7 @@
     {@html softwareAppJsonLd}
 </svelte:head>
 <SeoContextProvider {seo}>
-    <SeoHead {seo} config={docsConfig} favicon="/logo.svg" />
+    <SeoHead {seo} config={docsConfig} favicon="/favicon.png" />
     <BreadcrumbContextProvider>
         <BreadcrumbJsonLd config={docsConfig} />
         <MotionConfig transition={{ duration: 0.5 }}>
