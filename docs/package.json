@@ -19,7 +19,7 @@
         "generate:favicon": "node ./scripts/check-favicon.mjs --generate"
     },
     "dependencies": {
-        "@humanspeak/docs-kit": "github:humanspeak/docs-kit#2026.9.3",
+        "@humanspeak/docs-kit": "github:humanspeak/docs-kit#2026.9.8",
         "@humanspeak/memory-cache": "workspace:*",
         "@humanspeak/svelte-markdown": "^1.5.4",
         "github-slugger": "^2.0.0",
