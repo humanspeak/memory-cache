@@ -1,3 +1,4 @@
+import { rehypeKeepCase } from '@humanspeak/docs-kit/mdsvex'
 import adapter from '@sveltejs/adapter-cloudflare'
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte'
 import { mdsvex } from 'mdsvex'
@@ -14,6 +15,7 @@ const config = {
     preprocess: [
         vitePreprocess(),
         mdsvex({
+            rehypePlugins: [rehypeKeepCase],
             extensions: ['.md', '.svx'],
             highlight: {
                 highlighter: async (code, lang = 'text') => {
