@@ -18,3 +18,5 @@ onlyBuiltDependencies:
 minimumReleaseAge: 2880
 minimumReleaseAgeExclude:
     - '@humanspeak/*'
+overrides:
+    cookie: '>=0.7.0'
