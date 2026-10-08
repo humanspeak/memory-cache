@@ -50,13 +50,13 @@ const config = {
                 'script-src': [
                     'self',
                     'https://analytics.ahrefs.com',
-                    'https://t.svelte.page',
+                    'https://j.svelte.page',
                     'unsafe-inline'
                 ],
                 'style-src': ['self', 'unsafe-inline'],
                 'img-src': ['self', 'data:'],
                 'font-src': ['self'],
-                'connect-src': ['self', 'https://analytics.ahrefs.com', 'https://t.svelte.page'],
+                'connect-src': ['self', 'https://analytics.ahrefs.com', 'https://j.svelte.page'],
                 'object-src': ['none'],
                 'base-uri': ['self'],
                 'form-action': ['self'],
