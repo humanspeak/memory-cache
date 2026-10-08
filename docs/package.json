@@ -23,15 +23,16 @@
         "@humanspeak/memory-cache": "workspace:*",
         "@humanspeak/svelte-markdown": "^1.5.4",
         "github-slugger": "^2.0.0",
+        "posthog-js": "^1.438.1",
         "runed": "^0.37.1"
     },
     "devDependencies": {
-        "@cloudflare/workers-types": "^4.20260531.1",
+        "@cloudflare/workers-types": "^5.20261006.1",
         "@eslint/compat": "^2.1.0",
         "@eslint/js": "^10.0.1",
         "@humanspeak/svelte-motion": "^0.6.2",
         "@lucide/svelte": "^1.17.0",
-        "@sveltejs/adapter-cloudflare": "^7.2.8",
+        "@sveltejs/adapter-cloudflare": "^7.2.9",
         "@sveltejs/kit": "^2.61.1",
         "@sveltejs/vite-plugin-svelte": "^7.1.2",
         "@tailwindcss/postcss": "^4.3.0",
@@ -60,7 +61,7 @@
         "typescript": "^6.0.3",
         "typescript-eslint": "^8.60.0",
         "vite": "^8.0.14",
-        "wrangler": "^4.95.0"
+        "wrangler": "^4.148.0"
     },
     "volta": {
         "node": "24.15.0"

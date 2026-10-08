@@ -6,6 +6,8 @@ allowBuilds:
     # commit-free repo key — a bare package name only matches registry
     # packages. This one entry covers every docs-kit tag.
     '@humanspeak/docs-kit@git+https://github.com/humanspeak/docs-kit.git': true
+    # core-js (via posthog-js) only runs a funding banner on postinstall.
+    core-js: false
     esbuild: true
     sharp: true
     workerd: true
