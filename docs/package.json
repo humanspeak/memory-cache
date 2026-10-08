@@ -23,6 +23,7 @@
         "@humanspeak/memory-cache": "workspace:*",
         "@humanspeak/svelte-markdown": "^1.5.4",
         "github-slugger": "^2.0.0",
+        "posthog-js": "^1.438.1",
         "runed": "^0.37.1"
     },
     "devDependencies": {
