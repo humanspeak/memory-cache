@@ -11,8 +11,8 @@
     import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
     import SearchX from '@lucide/svelte/icons/search-x'
     import Sparkles from '@lucide/svelte/icons/sparkles'
-    import { demoCodeSample } from '$lib/demo-loaders'
-    import BasicCache from '$lib/examples/basic-cache/demos/Default.svelte'
+    import { demoCodeSample } from '#lib/demo-loaders.js'
+    import BasicCache from '#lib/examples/basic-cache/demos/Default.svelte'
 
     const SOURCE_URL =
         'https://github.com/humanspeak/memory-cache/blob/main/docs/src/lib/examples/'

@@ -1,6 +1,6 @@
 <script lang="ts">
-    import Header from '$lib/components/general/Header.svelte'
-    import Footer from '$lib/components/general/Footer.svelte'
+    import Header from '#lib/components/general/Header.svelte'
+    import Footer from '#lib/components/general/Footer.svelte'
     import { getBreadcrumbContext } from '@humanspeak/docs-kit'
     import { MemoryCache } from '@humanspeak/memory-cache'
     import {

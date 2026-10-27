@@ -11,8 +11,8 @@
     import Gauge from '@lucide/svelte/icons/gauge'
     import ListRestart from '@lucide/svelte/icons/list-restart'
     import Zap from '@lucide/svelte/icons/zap'
-    import { demoCodeSample } from '$lib/demo-loaders'
-    import CacheStatistics from '$lib/examples/cache-statistics/demos/Default.svelte'
+    import { demoCodeSample } from '#lib/demo-loaders.js'
+    import CacheStatistics from '#lib/examples/cache-statistics/demos/Default.svelte'
 
     const SOURCE_URL =
         'https://github.com/humanspeak/memory-cache/blob/main/docs/src/lib/examples/'

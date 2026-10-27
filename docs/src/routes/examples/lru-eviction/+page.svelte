@@ -12,8 +12,8 @@
     import MousePointer from '@lucide/svelte/icons/mouse-pointer'
     import Plus from '@lucide/svelte/icons/plus'
     import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
-    import { demoCodeSample } from '$lib/demo-loaders'
-    import LruEviction from '$lib/examples/lru-eviction/demos/Default.svelte'
+    import { demoCodeSample } from '#lib/demo-loaders.js'
+    import LruEviction from '#lib/examples/lru-eviction/demos/Default.svelte'
 
     const SOURCE_URL = 'https://github.com/humanspeak/memory-cache/blob/main/docs/src/lib/examples/'
 

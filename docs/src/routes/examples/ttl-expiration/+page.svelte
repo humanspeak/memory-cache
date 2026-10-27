@@ -11,8 +11,8 @@
     import Hourglass from '@lucide/svelte/icons/hourglass'
     import RotateCcw from '@lucide/svelte/icons/rotate-ccw'
     import TimerOff from '@lucide/svelte/icons/timer-off'
-    import { demoCodeSample } from '$lib/demo-loaders'
-    import TtlExpiration from '$lib/examples/ttl-expiration/demos/Default.svelte'
+    import { demoCodeSample } from '#lib/demo-loaders.js'
+    import TtlExpiration from '#lib/examples/ttl-expiration/demos/Default.svelte'
 
     const SOURCE_URL =
         'https://github.com/humanspeak/memory-cache/blob/main/docs/src/lib/examples/'

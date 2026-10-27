@@ -1,4 +1,4 @@
-import { competitors } from '$lib/compare-data'
+import { competitors } from '#lib/compare-data.js'
 import { createCompareSlugLoad } from '@humanspeak/docs-kit'
 
 // No `prerender = true` here: app.html carries %sveltekit.nonce% for CSP,

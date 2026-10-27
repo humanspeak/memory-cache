@@ -1,3 +1,4 @@
+import { rehypeKeepCase } from '@humanspeak/docs-kit/mdsvex'
 import {
     demoManifestPlugin,
     docMirrorsPlugin,
@@ -9,8 +10,12 @@ import {
     socialCardsPlugin
 } from '@humanspeak/docs-kit/vite'
 import { svelteMotionOptimize } from '@humanspeak/svelte-motion/vite'
+import adapter from '@sveltejs/adapter-cloudflare'
 import { sveltekit } from '@sveltejs/kit/vite'
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte'
 import tailwindcss from '@tailwindcss/vite'
+import { mdsvex } from 'mdsvex'
+import { createHighlighter } from 'shiki'
 import { defineConfig } from 'vite'
 
 import { competitors, ours } from './src/lib/compare-data'
@@ -19,6 +24,12 @@ import { docsConfig } from './src/lib/docs-config'
 // IndexNow key for memory.svelte.page — must match the key file at
 // docs/static/<key>.txt so search engines can verify ownership.
 const indexNowKey = 'cbe16057-131f-41ee-ae1c-15bdf06578c8'
+
+// Create highlighter instance
+const highlighter = await createHighlighter({
+    themes: ['github-light', 'one-dark-pro'],
+    langs: ['javascript', 'typescript', 'html', 'css', 'json', 'bash', 'shell']
+})
 
 export default defineConfig({
     plugins: [
@@ -101,7 +112,63 @@ export default defineConfig({
         }),
         svelteMotionOptimize(),
         tailwindcss(),
-        sveltekit()
+        sveltekit({
+            preprocess: [
+                vitePreprocess(),
+                mdsvex({
+                    rehypePlugins: [rehypeKeepCase],
+                    extensions: ['.md', '.svx'],
+                    highlight: {
+                        highlighter: async (code, lang) => {
+                            lang ??= 'text'
+                            const lightHtml = highlighter.codeToHtml(code, {
+                                lang,
+                                theme: 'github-light'
+                            })
+                            const darkHtml = highlighter.codeToHtml(code, {
+                                lang,
+                                theme: 'one-dark-pro'
+                            })
+
+                            const combinedHtml = `
+                        <div class="shiki-container">
+                            <div class="shiki-light">${lightHtml}</div>
+                            <div class="shiki-dark">${darkHtml}</div>
+                        </div>
+                    `
+
+                            return `{@html ${JSON.stringify(combinedHtml)}}`
+                        }
+                    }
+                })
+            ],
+            extensions: ['.svelte', '.svx'],
+            adapter: adapter(),
+            csp: {
+                mode: 'hash',
+                directives: {
+                    'default-src': ['self'],
+                    'script-src': [
+                        'self',
+                        'https://analytics.ahrefs.com',
+                        'https://j.svelte.page',
+                        'unsafe-inline'
+                    ],
+                    'style-src': ['self', 'unsafe-inline'],
+                    'img-src': ['self', 'data:'],
+                    'font-src': ['self'],
+                    'connect-src': [
+                        'self',
+                        'https://analytics.ahrefs.com',
+                        'https://j.svelte.page'
+                    ],
+                    'object-src': ['none'],
+                    'base-uri': ['self'],
+                    'form-action': ['self'],
+                    'frame-ancestors': ['none']
+                }
+            }
+        })
     ],
     optimizeDeps: {
         exclude: [
@@ -112,16 +179,6 @@ export default defineConfig({
             'satori',
             'satori-html'
         ]
-    },
-    build: {
-        rollupOptions: {
-            output: {
-                manualChunks(id) {
-                    if (id.includes('@humanspeak/svelte-motion')) return 'svelte-motion'
-                    if (id.includes('mode-watcher')) return 'mode-watcher'
-                }
-            }
-        }
     },
     server: {
         port: 8288

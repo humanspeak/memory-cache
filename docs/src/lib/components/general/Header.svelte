@@ -1,7 +1,7 @@
 <script lang="ts">
     import { HeaderV2 } from '@humanspeak/docs-kit'
-    import { docsConfig } from '$lib/docs-config'
-    import favicon from '$lib/assets/logo.svg'
+    import { docsConfig } from '#lib/docs-config.js'
+    import favicon from '#lib/assets/logo.svg'
     import rootPkg from '../../../../../package.json'
 
     const PKG_VERSION = rootPkg.version

@@ -11,8 +11,8 @@
     import Layers from '@lucide/svelte/icons/layers'
     import Lightbulb from '@lucide/svelte/icons/lightbulb'
     import MousePointer from '@lucide/svelte/icons/mouse-pointer'
-    import { demoCodeSample } from '$lib/demo-loaders'
-    import WeightedEviction from '$lib/examples/memory-weighted-eviction/demos/Default.svelte'
+    import { demoCodeSample } from '#lib/demo-loaders.js'
+    import WeightedEviction from '#lib/examples/memory-weighted-eviction/demos/Default.svelte'
 
     const SOURCE_URL = 'https://github.com/humanspeak/memory-cache/blob/main/docs/src/lib/examples/'
 
