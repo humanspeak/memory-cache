@@ -12,10 +12,10 @@
         getBreadcrumbContext,
         type TocHeading
     } from '@humanspeak/docs-kit'
-    import favicon from '$lib/assets/logo.svg'
-    import { docsConfig } from '$lib/docs-config'
-    import { docsSections } from '$lib/docsNav'
-    import sitemapManifest from '$lib/sitemap-manifest.json'
+    import favicon from '#lib/assets/logo.svg'
+    import { docsConfig } from '#lib/docs-config.js'
+    import { docsSections } from '#lib/docsNav.js'
+    import sitemapManifest from '#lib/sitemap-manifest.json'
     import rootPkg from '../../../../package.json'
 
     const BASE_URL = 'https://memory.svelte.page'
@@ -80,7 +80,8 @@
         if (contentElement) refreshHeadings()
     })
 
-    afterNavigate(() => {
+    afterNavigate(({ shallow, type }) => {
+        if (shallow && type === 'goto') return
         requestAnimationFrame(refreshHeadings)
     })
 </script>

@@ -9,8 +9,8 @@
         SeoHead,
         type SeoContext
     } from '@humanspeak/docs-kit'
-    import { docsConfig } from '$lib/docs-config'
-    import githubStats from '$lib/github-stats.json'
+    import { docsConfig } from '#lib/docs-config.js'
+    import githubStats from '#lib/github-stats.json'
 
     const { children } = $props()
 

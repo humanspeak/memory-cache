@@ -4,9 +4,9 @@
         CompareLayoutV2,
         enhanceCodeBlocks
     } from '@humanspeak/docs-kit'
-    import favicon from '$lib/assets/logo.svg'
-    import { getCompetitor } from '$lib/compare-data'
-    import { docsConfig } from '$lib/docs-config'
+    import favicon from '#lib/assets/logo.svg'
+    import { getCompetitor } from '#lib/compare-data.js'
+    import { docsConfig } from '#lib/docs-config.js'
     import rootPkg from '../../../../package.json'
 
     const { children } = $props()

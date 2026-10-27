@@ -8,7 +8,7 @@
 -->
 <script lang="ts">
     import { PagerV2 } from '@humanspeak/docs-kit'
-    import sitemapManifest from '$lib/sitemap-manifest.json'
+    import sitemapManifest from '#lib/sitemap-manifest.json'
 
     const items = Object.keys(sitemapManifest)
         .filter((route) => route.startsWith('/examples/') && route !== '/examples')
